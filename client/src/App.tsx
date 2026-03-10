@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import HomesteadAIChat from "./components/HomesteadAIChat";
 import Home from "./pages/Home";
 import SkillsHub from "./pages/SkillsHub";
 import SkillDetail from "./pages/SkillDetail";
@@ -11,8 +12,8 @@ import Community from "./pages/Community";
 import BarterTrade from "./pages/BarterTrade";
 import LandAccess from "./pages/LandAccess";
 import MapExplorer from "./pages/MapExplorer";
-
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path="/" component={Home} />
@@ -35,6 +36,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <HomesteadAIChat />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
