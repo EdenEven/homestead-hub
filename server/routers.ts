@@ -263,6 +263,141 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
         )
         .map((r) => r.value);
     }),
+
+    // DOW + NASDAQ indices
+    getIndices: publicProcedure.query(async () => {
+      const indices = [
+        { symbol: "^DJI", name: "DOW" },
+        { symbol: "^IXIC", name: "NASDAQ" },
+        { symbol: "^GSPC", name: "S&P 500" },
+        { symbol: "^RUT", name: "Russell 2000" },
+      ];
+
+      const results = await Promise.allSettled(
+        indices.map(async (item) => {
+          try {
+            const res = await callDataApi("YahooFinance/get_stock_chart", {
+              query: {
+                symbol: item.symbol,
+                region: "US",
+                interval: "1d",
+                range: "2d",
+                includeAdjustedClose: false,
+              },
+            });
+            const data = res as any;
+            const meta = data?.chart?.result?.[0]?.meta;
+            if (!meta) return null;
+            const price: number = meta.regularMarketPrice ?? 0;
+            const prevClose: number = meta.chartPreviousClose ?? meta.previousClose ?? price;
+            const change = price - prevClose;
+            const changePercent = prevClose !== 0 ? (change / prevClose) * 100 : 0;
+            return { symbol: item.symbol, name: item.name, price, change, changePercent };
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      type IndexResult = { symbol: string; name: string; price: number; change: number; changePercent: number };
+      return results
+        .filter((r): r is PromiseFulfilledResult<IndexResult> =>
+          r.status === "fulfilled" && r.value !== null
+        )
+        .map((r) => r.value);
+    }),
+  }),
+
+  // ---- Weather (NOAA — no API key required) ----
+  weather: router({
+    // Get NOAA grid point from lat/lon
+    getGridPoint: publicProcedure
+      .input(z.object({ lat: z.number(), lon: z.number() }))
+      .query(async ({ input }) => {
+        const res = await fetch(
+          `https://api.weather.gov/points/${input.lat.toFixed(4)},${input.lon.toFixed(4)}`,
+          { headers: { "User-Agent": "A1HomesteadHub/1.0 (a1homesteadhub.com)" } }
+        );
+        if (!res.ok) throw new Error("NOAA grid point lookup failed");
+        const data = await res.json() as any;
+        const props = data.properties;
+        return {
+          forecastUrl: props.forecast as string,
+          hourlyUrl: props.forecastHourly as string,
+          countyZone: props.county as string,
+          city: props.relativeLocation?.properties?.city as string,
+          state: props.relativeLocation?.properties?.state as string,
+        };
+      }),
+
+    // Get 7-day forecast from NOAA forecast URL
+    getForecast: publicProcedure
+      .input(z.object({ forecastUrl: z.string().url() }))
+      .query(async ({ input }) => {
+        const res = await fetch(input.forecastUrl, {
+          headers: { "User-Agent": "A1HomesteadHub/1.0 (a1homesteadhub.com)" },
+        });
+        if (!res.ok) throw new Error("NOAA forecast fetch failed");
+        const data = await res.json() as any;
+        const periods = data.properties?.periods ?? [];
+        return periods.slice(0, 14).map((p: any) => ({
+          name: p.name as string,
+          temperature: p.temperature as number,
+          temperatureUnit: p.temperatureUnit as string,
+          shortForecast: p.shortForecast as string,
+          detailedForecast: p.detailedForecast as string,
+          windSpeed: p.windSpeed as string,
+          windDirection: p.windDirection as string,
+          icon: p.icon as string,
+          isDaytime: p.isDaytime as boolean,
+          probabilityOfPrecipitation: p.probabilityOfPrecipitation?.value as number | null,
+        }));
+      }),
+
+    // Get active weather alerts for a county zone
+    getAlerts: publicProcedure
+      .input(z.object({ lat: z.number(), lon: z.number() }))
+      .query(async ({ input }) => {
+        const res = await fetch(
+          `https://api.weather.gov/alerts/active?point=${input.lat.toFixed(4)},${input.lon.toFixed(4)}&status=actual`,
+          { headers: { "User-Agent": "A1HomesteadHub/1.0 (a1homesteadhub.com)" } }
+        );
+        if (!res.ok) return [];
+        const data = await res.json() as any;
+        const features = data.features ?? [];
+        return features.slice(0, 20).map((f: any) => ({
+          id: f.id as string,
+          event: f.properties.event as string,
+          headline: f.properties.headline as string,
+          severity: f.properties.severity as string,
+          urgency: f.properties.urgency as string,
+          description: f.properties.description as string,
+          instruction: f.properties.instruction as string,
+          effective: f.properties.effective as string,
+          expires: f.properties.expires as string,
+          areaDesc: f.properties.areaDesc as string,
+        }));
+      }),
+
+    // Get nationwide active alerts (for the alert ticker)
+    getNationwideAlerts: publicProcedure.query(async () => {
+      const res = await fetch(
+        "https://api.weather.gov/alerts/active?status=actual&message_type=alert,update&limit=50",
+        { headers: { "User-Agent": "A1HomesteadHub/1.0 (a1homesteadhub.com)" } }
+      );
+      if (!res.ok) return [];
+      const data = await res.json() as any;
+      const features = data.features ?? [];
+      return features.slice(0, 50).map((f: any) => ({
+        id: f.id as string,
+        event: f.properties.event as string,
+        headline: f.properties.headline as string,
+        severity: f.properties.severity as string,
+        areaDesc: f.properties.areaDesc as string,
+        effective: f.properties.effective as string,
+        expires: f.properties.expires as string,
+      }));
+    }),
   }),
 });
 

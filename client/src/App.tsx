@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import HomesteadAIChat from "./components/HomesteadAIChat";
 import WelcomeModal from "./components/WelcomeModal";
 import CommoditiesTicker from "./components/CommoditiesTicker";
+import WeatherAlertTicker from "./components/WeatherAlertTicker";
 import Home from "./pages/Home";
 import SkillsHub from "./pages/SkillsHub";
 import SkillDetail from "./pages/SkillDetail";
@@ -44,6 +45,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <CommoditiesTicker />
+          <WeatherAlertTicker />
           <Router />
           <HomesteadAIChat />
           <WelcomeModal />
