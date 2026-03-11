@@ -15,6 +15,7 @@ import {
   deleteBarterListing,
   getUserById,
 } from "./db";
+import { callDataApi } from "./_core/dataApi";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2026-02-25.clover",
@@ -202,6 +203,66 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
         await deleteBarterListing(input.id, ctx.user.id);
         return { success: true };
       }),
+  }),
+
+  // ---- Commodities Ticker ----
+  commodities: router({
+    getPrices: publicProcedure.query(async () => {
+      const symbols = [
+        { symbol: "ZC=F", name: "Corn", unit: "/bu" },
+        { symbol: "ZW=F", name: "Wheat", unit: "/bu" },
+        { symbol: "ZS=F", name: "Soybeans", unit: "/bu" },
+        { symbol: "LE=F", name: "Live Cattle", unit: "/cwt" },
+        { symbol: "HE=F", name: "Lean Hogs", unit: "/cwt" },
+        { symbol: "LBS=F", name: "Lumber", unit: "/mbf" },
+        { symbol: "GC=F", name: "Gold", unit: "/oz" },
+        { symbol: "SI=F", name: "Silver", unit: "/oz" },
+        { symbol: "CL=F", name: "Crude Oil", unit: "/bbl" },
+        { symbol: "NG=F", name: "Nat Gas", unit: "/mmbtu" },
+        { symbol: "KC=F", name: "Coffee", unit: "/lb" },
+        { symbol: "SB=F", name: "Sugar", unit: "/lb" },
+      ];
+
+      const results = await Promise.allSettled(
+        symbols.map(async (item) => {
+          try {
+            const res = await callDataApi("YahooFinance/get_stock_chart", {
+              query: {
+                symbol: item.symbol,
+                region: "US",
+                interval: "1d",
+                range: "2d",
+                includeAdjustedClose: false,
+              },
+            });
+            const data = res as any;
+            const meta = data?.chart?.result?.[0]?.meta;
+            if (!meta) return null;
+            const price: number = meta.regularMarketPrice ?? 0;
+            const prevClose: number = meta.chartPreviousClose ?? meta.previousClose ?? price;
+            const change = price - prevClose;
+            const changePercent = prevClose !== 0 ? (change / prevClose) * 100 : 0;
+            return {
+              symbol: item.symbol,
+              name: item.name,
+              price,
+              change,
+              changePercent,
+              unit: item.unit,
+            };
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      type CommodityResult = { symbol: string; name: string; price: number; change: number; changePercent: number; unit: string };
+      return results
+        .filter((r): r is PromiseFulfilledResult<CommodityResult> =>
+          r.status === "fulfilled" && r.value !== null
+        )
+        .map((r) => r.value);
+    }),
   }),
 });
 

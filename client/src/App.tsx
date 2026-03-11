@@ -5,6 +5,8 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import HomesteadAIChat from "./components/HomesteadAIChat";
+import WelcomeModal from "./components/WelcomeModal";
+import CommoditiesTicker from "./components/CommoditiesTicker";
 import Home from "./pages/Home";
 import SkillsHub from "./pages/SkillsHub";
 import SkillDetail from "./pages/SkillDetail";
@@ -41,8 +43,10 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <CommoditiesTicker />
           <Router />
           <HomesteadAIChat />
+          <WelcomeModal />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
