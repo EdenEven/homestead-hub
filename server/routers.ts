@@ -2,35 +2,45 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { invokeLLM } from "./_core/llm";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import Stripe from "stripe";
+import {
+  updateUserStripe,
+  getProfileByUserId,
+  upsertProfile,
+  getAllPublicProfiles,
+  getBarterListings,
+  createBarterListing,
+  deleteBarterListing,
+  getUserById,
+} from "./db";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+  apiVersion: "2026-02-25.clover",
+});
 
 export const appRouter = router({
-    // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
+
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      return { success: true } as const;
     }),
   }),
 
+  // ---- AI Chat ----
   ai: router({
     chat: publicProcedure
-      .input(
-        z.object({
-          messages: z.array(
-            z.object({
-              role: z.enum(["user", "assistant"]),
-              content: z.string(),
-            })
-          ),
-        })
-      )
+      .input(z.object({
+        messages: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })),
+      }))
       .mutation(async ({ input }) => {
         const systemPrompt = `You are the Homestead Hub AI Assistant — a knowledgeable, friendly, and practical guide for self-reliant living and homesteading. You help people with:
 
@@ -47,7 +57,7 @@ export const appRouter = router({
 - Barter and trade in resilient local economies
 - Community building and connecting with other homesteaders
 
-You give practical, no-nonsense advice grounded in real homesteading experience. You are encouraging, clear, and never condescending. When safety is important (like foraging or butchering), you always mention it. Keep answers focused and actionable. If someone is a beginner, start simple and build up. You speak like a trusted neighbor who has been homesteading for 20 years.`;
+You give practical, no-nonsense advice grounded in real homesteading experience. You are encouraging, clear, and never condescending. When safety is important (like foraging or butchering), you always mention it. Keep answers focused and actionable. You speak like a trusted neighbor who has been homesteading for 20 years.`;
 
         const result = await invokeLLM({
           messages: [
@@ -57,9 +67,140 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
         });
 
         const content = result.choices[0]?.message?.content;
-        const text = typeof content === "string" ? content : Array.isArray(content) ? content.map((c) => ("text" in c ? c.text : "")).join("") : "";
+        const text = typeof content === "string"
+          ? content
+          : Array.isArray(content)
+          ? content.map((c) => ("text" in c ? c.text : "")).join("")
+          : "";
 
         return { reply: text };
+      }),
+  }),
+
+  // ---- Subscriptions / Stripe ----
+  subscription: router({
+    createCheckout: protectedProcedure
+      .input(z.object({
+        interval: z.enum(["month", "year"]).default("month"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const origin = ctx.req.headers.origin as string || "https://www.a1homesteadhub.com";
+        const priceAmount = input.interval === "month" ? 700 : 6000; // cents
+
+        const session = await stripe.checkout.sessions.create({
+          mode: "subscription",
+          payment_method_types: ["card"],
+          customer_email: ctx.user.email || undefined,
+          line_items: [{
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: "The Homesteader — A1 Homestead Hub",
+                description: "Full access: unlimited AI assistant, barter board, skill guides, community, hunting calendar & more.",
+              },
+              unit_amount: priceAmount,
+              recurring: { interval: input.interval },
+            },
+            quantity: 1,
+          }],
+          client_reference_id: ctx.user.id.toString(),
+          metadata: {
+            user_id: ctx.user.id.toString(),
+            customer_email: ctx.user.email || "",
+            customer_name: ctx.user.name || "",
+          },
+          allow_promotion_codes: true,
+          success_url: `${origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/pricing`,
+        });
+
+        return { checkoutUrl: session.url };
+      }),
+
+    getStatus: protectedProcedure.query(async ({ ctx }) => {
+      const user = await getUserById(ctx.user.id);
+      return {
+        status: user?.subscriptionStatus || "none",
+        isActive: user?.subscriptionStatus === "active" || user?.subscriptionStatus === "trialing",
+        stripeCustomerId: user?.stripeCustomerId,
+      };
+    }),
+
+    cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
+      const user = await getUserById(ctx.user.id);
+      if (!user?.stripeSubscriptionId) throw new Error("No active subscription found");
+
+      await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+
+      return { success: true, message: "Subscription will cancel at end of billing period." };
+    }),
+  }),
+
+  // ---- Profiles ----
+  profile: router({
+    get: protectedProcedure.query(async ({ ctx }) => {
+      return getProfileByUserId(ctx.user.id);
+    }),
+
+    getPublic: publicProcedure.query(async () => {
+      return getAllPublicProfiles();
+    }),
+
+    save: protectedProcedure
+      .input(z.object({
+        displayName: z.string().max(100).optional(),
+        bio: z.string().max(1000).optional(),
+        location: z.string().max(200).optional(),
+        state: z.string().max(50).optional(),
+        skills: z.string().optional(),
+        websiteUrl: z.string().url().optional().or(z.literal("")),
+        isPublic: z.boolean().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await upsertProfile({
+          userId: ctx.user.id,
+          ...input,
+        });
+        return { success: true };
+      }),
+  }),
+
+  // ---- Barter & Trade ----
+  barter: router({
+    list: publicProcedure
+      .input(z.object({ category: z.string().optional() }))
+      .query(async ({ input }) => {
+        return getBarterListings(input.category);
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        title: z.string().min(3).max(200),
+        description: z.string().min(10).max(2000),
+        category: z.enum([
+          "food-produce", "skills-labor", "animals-livestock",
+          "seeds-plants", "tools-equipment", "goods-crafts", "land-space", "other"
+        ]),
+        offeringType: z.enum(["offer", "request"]).default("offer"),
+        location: z.string().max(200).optional(),
+        state: z.string().max(50).optional(),
+        contactMethod: z.string().max(200).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await createBarterListing({
+          userId: ctx.user.id,
+          ...input,
+        });
+        return { success: true };
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteBarterListing(input.id, ctx.user.id);
+        return { success: true };
       }),
   }),
 });

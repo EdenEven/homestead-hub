@@ -8,6 +8,13 @@
       "when": 1773166458547,
       "tag": "0000_whole_forgotten_one",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1773193431109,
+      "tag": "0001_bizarre_spectrum",
+      "breakpoints": true
     }
   ]
 }
