@@ -24,6 +24,9 @@
 - [ ] Moltbook agent bold persona + social posting strategy
 - [ ] Scheduled Moltbook posts
 
+## Bugs
+- [x] Fix stock/commodities ticker not functioning
+
 ## Planned
 - [ ] Add Pricing link to main navigation
 - [ ] Blog / From the Field section

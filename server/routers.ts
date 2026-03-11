@@ -232,11 +232,11 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
                 region: "US",
                 interval: "1d",
                 range: "2d",
-                includeAdjustedClose: false,
               },
             });
             const data = res as any;
-            const meta = data?.chart?.result?.[0]?.meta;
+            const raw = typeof data?.jsonData === 'string' ? JSON.parse(data.jsonData) : data;
+            const meta = raw?.chart?.result?.[0]?.meta;
             if (!meta) return null;
             const price: number = meta.regularMarketPrice ?? 0;
             const prevClose: number = meta.chartPreviousClose ?? meta.previousClose ?? price;
@@ -282,11 +282,11 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
                 region: "US",
                 interval: "1d",
                 range: "2d",
-                includeAdjustedClose: false,
               },
             });
             const data = res as any;
-            const meta = data?.chart?.result?.[0]?.meta;
+            const raw = typeof data?.jsonData === 'string' ? JSON.parse(data.jsonData) : data;
+            const meta = raw?.chart?.result?.[0]?.meta;
             if (!meta) return null;
             const price: number = meta.regularMarketPrice ?? 0;
             const prevClose: number = meta.chartPreviousClose ?? meta.previousClose ?? price;
