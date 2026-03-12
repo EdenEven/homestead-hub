@@ -36,3 +36,4 @@
 - [x] Build Blog / From the Field section with free and gated posts
 - [x] Publish first blog post: Traditional Appalachian Hog Butchering with infographic, audio, and PDF
 - [x] Add Blog link to main navigation ("From the Field")
+- [x] Add "From the Field" teaser section to homepage showing recent blog posts

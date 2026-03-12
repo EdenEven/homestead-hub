@@ -8,7 +8,8 @@ import { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowRight, MapPin, Repeat2, TreePine, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Calendar, Headphones, FileText, MapPin, Repeat2, TreePine, Users } from "lucide-react";
+import { trpc } from "@/lib/trpc";
 
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/hero-homestead-LxdjGSkwEZ2SSqHyG2V4jA.webp";
 const SKILLS_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/skills-collage-KwZPrPQKyyFRcZtTBfbfuA.webp";
@@ -78,6 +79,124 @@ function useFadeIn() {
     return () => observer.disconnect();
   }, []);
   return ref;
+}
+
+function FromTheFieldTeaser() {
+  const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 3 });
+
+  return (
+    <section className="py-20" style={{ backgroundColor: "oklch(0.96 0.025 85)" }}>
+      <div className="container">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <BookOpen className="w-5 h-5" style={{ color: "oklch(0.55 0.10 145)" }} />
+              <p className="section-label">The Homestead Journal</p>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.18 0.06 145)" }}>
+              From the Field
+            </h2>
+            <p className="mt-3 text-lg max-w-xl" style={{ color: "oklch(0.35 0.03 65)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+              Real knowledge from real homesteaders. Heritage skills, honest stories, and practical wisdom — straight from the land.
+            </p>
+          </div>
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 px-6 py-3 font-bold rounded-sm transition-all hover:opacity-90 whitespace-nowrap"
+            style={{ backgroundColor: "oklch(0.22 0.06 145)", color: "oklch(0.96 0.025 85)", fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Read All Posts <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Post cards */}
+        {isLoading ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="rounded-sm overflow-hidden animate-pulse" style={{ background: "oklch(0.90 0.02 80)", height: 320 }} />
+            ))}
+          </div>
+        ) : !posts || posts.length === 0 ? (
+          <div className="text-center py-12 rounded-sm" style={{ background: "oklch(0.93 0.02 80)" }}>
+            <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "oklch(0.40 0.08 145)" }} />
+            <p className="font-semibold" style={{ color: "oklch(0.45 0.04 80)" }}>First posts coming soon — check back shortly.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {posts.map((post) => (
+              <Link key={post.id} href={`/blog/${post.slug}`}>
+                <article
+                  className="group rounded-sm overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1"
+                  style={{ background: "white", border: "1px solid oklch(0.88 0.03 80)", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}
+                >
+                  {/* Hero image */}
+                  {post.heroImageUrl ? (
+                    <div className="h-44 overflow-hidden">
+                      <img
+                        src={post.heroImageUrl}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="h-44 flex items-center justify-center" style={{ background: "oklch(0.25 0.07 145)" }}>
+                      <BookOpen className="w-10 h-10 opacity-30" style={{ color: "oklch(0.75 0.12 80)" }} />
+                    </div>
+                  )}
+
+                  <div className="p-5">
+                    {/* Category */}
+                    {post.category && (
+                      <span className="text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded-full inline-block mb-2"
+                        style={{ background: "oklch(0.92 0.04 145)", color: "oklch(0.30 0.08 145)" }}>
+                        {post.category}
+                      </span>
+                    )}
+
+                    <h3 className="text-lg font-bold mb-2 leading-snug group-hover:underline"
+                      style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.22 0.06 50)" }}>
+                      {post.title}
+                    </h3>
+
+                    {post.excerpt && (
+                      <p className="text-sm mb-3 line-clamp-2" style={{ color: "oklch(0.45 0.04 80)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+                        {post.excerpt}
+                      </p>
+                    )}
+
+                    {/* Media badges */}
+                    <div className="flex items-center gap-3 mb-3">
+                      {post.audioUrl && (
+                        <span className="flex items-center gap-1 text-xs" style={{ color: "oklch(0.45 0.08 220)" }}>
+                          <Headphones className="w-3 h-3" /> Podcast
+                        </span>
+                      )}
+                      {post.pdfUrl && (
+                        <span className="flex items-center gap-1 text-xs" style={{ color: "oklch(0.45 0.08 25)" }}>
+                          <FileText className="w-3 h-3" /> PDF Guide
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Author + date */}
+                    <div className="flex items-center gap-2 pt-3 border-t text-xs" style={{ borderColor: "oklch(0.90 0.02 80)", color: "oklch(0.55 0.04 80)" }}>
+                      <span>{post.author}</span>
+                      <span>·</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(post.publishedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default function Home() {
@@ -295,6 +414,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── FROM THE FIELD TEASER ── */}
+      <FromTheFieldTeaser />
 
       {/* ── FINAL CTA ── */}
       <section className="py-20" style={{ backgroundColor: "oklch(0.22 0.06 145)" }}>
