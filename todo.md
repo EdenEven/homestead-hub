@@ -37,3 +37,6 @@
 - [x] Publish first blog post: Traditional Appalachian Hog Butchering with infographic, audio, and PDF
 - [x] Add Blog link to main navigation ("From the Field")
 - [x] Add "From the Field" teaser section to homepage showing recent blog posts
+- [x] Add Pricing link to main navigation bar (amber highlight)
+- [x] Add Featured Post hero banner to the blog journal page
+- [x] Add members-only gating example (second blog post marked as subscriber-only)

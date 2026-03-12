@@ -8,13 +8,14 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X, Leaf } from "lucide-react";
 
-const navLinks = [
+const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "Skills Hub", href: "/skills" },
   { label: "From the Field", href: "/blog" },
   { label: "Community", href: "/community" },
   { label: "Barter & Trade", href: "/barter" },
   { label: "Land Access", href: "/land-access" },
   { label: "Map Explorer", href: "/map" },
+  { label: "Pricing", href: "/pricing", highlight: true },
 ];
 
 export default function Navigation() {
@@ -50,9 +51,10 @@ export default function Navigation() {
                 className="nav-link px-3 py-2 rounded-sm text-sm transition-all"
                 style={{
                   fontFamily: "'Playfair Display', Georgia, serif",
-                  color: isActive ? "oklch(0.68 0.12 65)" : "oklch(0.82 0.02 85)",
-                  backgroundColor: isActive ? "oklch(0.25 0.07 145)" : "transparent",
-                  fontWeight: isActive ? "700" : "600",
+                  color: link.highlight && !isActive ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.82 0.02 85)",
+                  backgroundColor: isActive ? "oklch(0.25 0.07 145)" : link.highlight ? "oklch(0.25 0.08 65 / 0.25)" : "transparent",
+                  fontWeight: isActive || link.highlight ? "700" : "600",
+                  border: link.highlight && !isActive ? "1px solid oklch(0.68 0.12 65 / 0.4)" : "1px solid transparent",
                 }}
               >
                 {link.label}
