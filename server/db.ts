@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -151,4 +151,30 @@ export async function deleteBarterListing(id: number, userId: number) {
   await db.update(barterListings)
     .set({ isActive: false })
     .where(eq(barterListings.id, id));
+}
+
+// ---- Blog post helpers ----
+
+export async function getBlogPosts(limit = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(blogPosts)
+    .where(eq(blogPosts.isPublished, true))
+    .orderBy(blogPosts.publishedAt)
+    .limit(limit);
+}
+
+export async function getBlogPostBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(blogPosts)
+    .where(eq(blogPosts.slug, slug))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createBlogPost(data: InsertBlogPost) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(blogPosts).values(data);
 }

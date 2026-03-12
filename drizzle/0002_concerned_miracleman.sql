@@ -1,0 +1,22 @@
+CREATE TABLE `blogPosts` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`slug` varchar(200) NOT NULL,
+	`title` varchar(300) NOT NULL,
+	`subtitle` varchar(400),
+	`author` varchar(100) NOT NULL DEFAULT 'Nikki Russell',
+	`category` varchar(100),
+	`content` text NOT NULL,
+	`excerpt` text,
+	`heroImageUrl` text,
+	`audioUrl` text,
+	`pdfUrl` text,
+	`pdfTitle` varchar(200),
+	`tags` text,
+	`isFree` boolean NOT NULL DEFAULT true,
+	`isPublished` boolean NOT NULL DEFAULT true,
+	`publishedAt` timestamp NOT NULL DEFAULT (now()),
+	`createdAt` timestamp NOT NULL DEFAULT (now()),
+	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `blogPosts_id` PRIMARY KEY(`id`),
+	CONSTRAINT `blogPosts_slug_unique` UNIQUE(`slug`)
+);

@@ -72,3 +72,30 @@ export const barterListings = mysqlTable("barterListings", {
 
 export type BarterListing = typeof barterListings.$inferSelect;
 export type InsertBarterListing = typeof barterListings.$inferInsert;
+
+/**
+ * Blog posts — From the Field
+ */
+export const blogPosts = mysqlTable("blogPosts", {
+  id: int("id").autoincrement().primaryKey(),
+  slug: varchar("slug", { length: 200 }).notNull().unique(),
+  title: varchar("title", { length: 300 }).notNull(),
+  subtitle: varchar("subtitle", { length: 400 }),
+  author: varchar("author", { length: 100 }).default("Nikki Russell").notNull(),
+  category: varchar("category", { length: 100 }),
+  content: text("content").notNull(),
+  excerpt: text("excerpt"),
+  heroImageUrl: text("heroImageUrl"),
+  audioUrl: text("audioUrl"),
+  pdfUrl: text("pdfUrl"),
+  pdfTitle: varchar("pdfTitle", { length: 200 }),
+  tags: text("tags"), // comma-separated
+  isFree: boolean("isFree").default(true).notNull(),
+  isPublished: boolean("isPublished").default(true).notNull(),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type InsertBlogPost = typeof blogPosts.$inferInsert;

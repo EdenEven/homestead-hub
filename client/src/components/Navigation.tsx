@@ -10,6 +10,7 @@ import { Menu, X, Leaf } from "lucide-react";
 
 const navLinks = [
   { label: "Skills Hub", href: "/skills" },
+  { label: "From the Field", href: "/blog" },
   { label: "Community", href: "/community" },
   { label: "Barter & Trade", href: "/barter" },
   { label: "Land Access", href: "/land-access" },

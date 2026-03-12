@@ -14,6 +14,9 @@ import {
   createBarterListing,
   deleteBarterListing,
   getUserById,
+  getBlogPosts,
+  getBlogPostBySlug,
+  createBlogPost,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 
@@ -306,6 +309,46 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
         )
         .map((r) => r.value);
     }),
+  }),
+
+  // ---- Blog / From the Field ----
+  blog: router({
+    list: publicProcedure
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return getBlogPosts(input.limit ?? 20);
+      }),
+
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const post = await getBlogPostBySlug(input.slug);
+        if (!post) throw new Error("Post not found");
+        return post;
+      }),
+
+    create: protectedProcedure
+      .input(z.object({
+        slug: z.string().min(3).max(200),
+        title: z.string().min(3).max(300),
+        subtitle: z.string().max(400).optional(),
+        author: z.string().max(100).optional(),
+        category: z.string().max(100).optional(),
+        content: z.string().min(10),
+        excerpt: z.string().max(500).optional(),
+        heroImageUrl: z.string().optional(),
+        audioUrl: z.string().optional(),
+        pdfUrl: z.string().optional(),
+        pdfTitle: z.string().max(200).optional(),
+        tags: z.string().optional(),
+        isFree: z.boolean().default(true),
+        isPublished: z.boolean().default(true),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin only");
+        await createBlogPost(input);
+        return { success: true };
+      }),
   }),
 
   // ---- Weather (NOAA — no API key required) ----

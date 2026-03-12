@@ -29,7 +29,10 @@
 
 ## Planned
 - [ ] Add Pricing link to main navigation
-- [ ] Blog / From the Field section
+- [x] Blog / From the Field section
 - [ ] State-by-state hunting season calendar
 - [ ] User account real community profiles
 - [ ] Moltbook heartbeat auto-posting
+- [x] Build Blog / From the Field section with free and gated posts
+- [x] Publish first blog post: Traditional Appalachian Hog Butchering with infographic, audio, and PDF
+- [x] Add Blog link to main navigation ("From the Field")

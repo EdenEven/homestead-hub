@@ -15,6 +15,13 @@
       "when": 1773193431109,
       "tag": "0001_bizarre_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1773339064861,
+      "tag": "0002_concerned_miracleman",
+      "breakpoints": true
     }
   ]
 }
