@@ -208,49 +208,50 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
       }),
   }),
 
-  // ---- Commodities Ticker ----
+  // ---- Commodities Ticker (Stooq — free, no API key required) ----
   commodities: router({
+    // Helper: fetch one symbol from Stooq CSV
     getPrices: publicProcedure.query(async () => {
       const symbols = [
-        { symbol: "ZC=F", name: "Corn", unit: "/bu" },
-        { symbol: "ZW=F", name: "Wheat", unit: "/bu" },
-        { symbol: "ZS=F", name: "Soybeans", unit: "/bu" },
-        { symbol: "LE=F", name: "Live Cattle", unit: "/cwt" },
-        { symbol: "HE=F", name: "Lean Hogs", unit: "/cwt" },
-        { symbol: "LBS=F", name: "Lumber", unit: "/mbf" },
-        { symbol: "GC=F", name: "Gold", unit: "/oz" },
-        { symbol: "SI=F", name: "Silver", unit: "/oz" },
-        { symbol: "CL=F", name: "Crude Oil", unit: "/bbl" },
-        { symbol: "NG=F", name: "Nat Gas", unit: "/mmbtu" },
-        { symbol: "KC=F", name: "Coffee", unit: "/lb" },
-        { symbol: "SB=F", name: "Sugar", unit: "/lb" },
+        { symbol: "zc.f", name: "Corn", unit: "/bu" },
+        { symbol: "zw.f", name: "Wheat", unit: "/bu" },
+        { symbol: "zs.f", name: "Soybeans", unit: "/bu" },
+        { symbol: "le.f", name: "Live Cattle", unit: "/cwt" },
+        { symbol: "he.f", name: "Lean Hogs", unit: "/cwt" },
+        { symbol: "gc.f", name: "Gold", unit: "/oz" },
+        { symbol: "si.f", name: "Silver", unit: "/oz" },
+        { symbol: "cl.f", name: "Crude Oil", unit: "/bbl" },
+        { symbol: "ng.f", name: "Nat Gas", unit: "/mmbtu" },
       ];
+
+      const fetchStooq = async (sym: string) => {
+        const url = `https://stooq.com/q/l/?s=${sym}&f=sd2t2ohlcv&h&e=csv`;
+        const res = await fetch(url, { headers: { "User-Agent": "A1HomesteadHub/1.0" } });
+        if (!res.ok) return null;
+        const text = await res.text();
+        const lines = text.trim().split("\n");
+        if (lines.length < 2) return null;
+        const cols = lines[1].split(",");
+        // CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
+        const open = parseFloat(cols[3]);
+        const close = parseFloat(cols[6]);
+        if (isNaN(close) || close === 0) return null;
+        const change = close - open;
+        const changePercent = open !== 0 ? (change / open) * 100 : 0;
+        return { close, change, changePercent };
+      };
 
       const results = await Promise.allSettled(
         symbols.map(async (item) => {
           try {
-            const res = await callDataApi("YahooFinance/get_stock_chart", {
-              query: {
-                symbol: item.symbol,
-                region: "US",
-                interval: "1d",
-                range: "2d",
-              },
-            });
-            const data = res as any;
-            const raw = typeof data?.jsonData === 'string' ? JSON.parse(data.jsonData) : data;
-            const meta = raw?.chart?.result?.[0]?.meta;
-            if (!meta) return null;
-            const price: number = meta.regularMarketPrice ?? 0;
-            const prevClose: number = meta.chartPreviousClose ?? meta.previousClose ?? price;
-            const change = price - prevClose;
-            const changePercent = prevClose !== 0 ? (change / prevClose) * 100 : 0;
+            const data = await fetchStooq(item.symbol);
+            if (!data) return null;
             return {
-              symbol: item.symbol,
+              symbol: item.symbol.toUpperCase(),
               name: item.name,
-              price,
-              change,
-              changePercent,
+              price: data.close,
+              change: data.change,
+              changePercent: data.changePercent,
               unit: item.unit,
             };
           } catch {
@@ -267,35 +268,36 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
         .map((r) => r.value);
     }),
 
-    // DOW + NASDAQ indices
+    // DOW + NASDAQ + S&P 500 indices via Stooq
     getIndices: publicProcedure.query(async () => {
       const indices = [
-        { symbol: "^DJI", name: "DOW" },
-        { symbol: "^IXIC", name: "NASDAQ" },
-        { symbol: "^GSPC", name: "S&P 500" },
-        { symbol: "^RUT", name: "Russell 2000" },
+        { symbol: "^dji", name: "DOW" },
+        { symbol: "^ndx", name: "NASDAQ" },
+        { symbol: "^spx", name: "S&P 500" },
       ];
+
+      const fetchStooq = async (sym: string) => {
+        const url = `https://stooq.com/q/l/?s=${encodeURIComponent(sym)}&f=sd2t2ohlcv&h&e=csv`;
+        const res = await fetch(url, { headers: { "User-Agent": "A1HomesteadHub/1.0" } });
+        if (!res.ok) return null;
+        const text = await res.text();
+        const lines = text.trim().split("\n");
+        if (lines.length < 2) return null;
+        const cols = lines[1].split(",");
+        const open = parseFloat(cols[3]);
+        const close = parseFloat(cols[6]);
+        if (isNaN(close) || close === 0) return null;
+        const change = close - open;
+        const changePercent = open !== 0 ? (change / open) * 100 : 0;
+        return { close, change, changePercent };
+      };
 
       const results = await Promise.allSettled(
         indices.map(async (item) => {
           try {
-            const res = await callDataApi("YahooFinance/get_stock_chart", {
-              query: {
-                symbol: item.symbol,
-                region: "US",
-                interval: "1d",
-                range: "2d",
-              },
-            });
-            const data = res as any;
-            const raw = typeof data?.jsonData === 'string' ? JSON.parse(data.jsonData) : data;
-            const meta = raw?.chart?.result?.[0]?.meta;
-            if (!meta) return null;
-            const price: number = meta.regularMarketPrice ?? 0;
-            const prevClose: number = meta.chartPreviousClose ?? meta.previousClose ?? price;
-            const change = price - prevClose;
-            const changePercent = prevClose !== 0 ? (change / prevClose) * 100 : 0;
-            return { symbol: item.symbol, name: item.name, price, change, changePercent };
+            const data = await fetchStooq(item.symbol);
+            if (!data) return null;
+            return { symbol: item.symbol.toUpperCase(), name: item.name, price: data.close, change: data.change, changePercent: data.changePercent };
           } catch {
             return null;
           }
@@ -425,7 +427,7 @@ You give practical, no-nonsense advice grounded in real homesteading experience.
     // Get nationwide active alerts (for the alert ticker)
     getNationwideAlerts: publicProcedure.query(async () => {
       const res = await fetch(
-        "https://api.weather.gov/alerts/active?status=actual&message_type=alert,update&limit=50",
+        "https://api.weather.gov/alerts/active",
         { headers: { "User-Agent": "A1HomesteadHub/1.0 (a1homesteadhub.com)" } }
       );
       if (!res.ok) return [];

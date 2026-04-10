@@ -40,3 +40,4 @@
 - [x] Add Pricing link to main navigation bar (amber highlight)
 - [x] Add Featured Post hero banner to the blog journal page
 - [x] Add members-only gating example (second blog post marked as subscriber-only)
+- [x] Fix "Loading market data..." and weather alerts ticker bar — switched to Stooq free API, fixed NOAA URL
