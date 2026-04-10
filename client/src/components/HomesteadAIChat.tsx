@@ -5,7 +5,7 @@
  */
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Leaf, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Leaf, Loader2, ShieldAlert } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { Streamdown } from "streamdown";
 
@@ -17,7 +17,7 @@ type Message = {
 const WELCOME_MESSAGE: Message = {
   role: "assistant",
   content:
-    "Howdy! I'm your Homestead Hub AI Assistant — think of me as that neighbor who's been homesteading for 20 years and loves to share what works.\n\nAsk me anything: foraging, butchering, rainwater systems, solar setup, raising chickens, canning, hunting seasons — whatever you need. What's on your mind?",
+    "Howdy! I'm your Homestead Hub AI Assistant — think of me as that neighbor who's been homesteading for 20 years and loves to share what works.\n\nI can help with general homesteading topics: butchering technique, gardening, animal husbandry, water systems, solar, hunting, barter, and more.\n\n**Important safety note:** I will not identify specific wild plants or mushrooms — misidentification can be fatal. For food preservation safety (canning times, pressure levels), I always defer to the USDA Complete Guide and Ball Blue Book. These are firm limits, not suggestions.\n\nWhat's on your mind?",
 };
 
 export default function HomesteadAIChat() {
@@ -147,9 +147,34 @@ export default function HomesteadAIChat() {
                 className="text-xs"
                 style={{ color: "oklch(0.68 0.12 65)", fontFamily: "'Source Serif 4', Georgia, serif" }}
               >
-                Powered by Gemini · Always here to help
+                General guidance only · Not a substitute for expert advice
               </p>
             </div>
+          </div>
+
+          {/* Safety Disclaimer Banner */}
+          <div
+            className="flex-shrink-0 flex items-start gap-2 px-3 py-2 text-xs"
+            style={{
+              backgroundColor: "oklch(0.96 0.10 65 / 0.25)",
+              borderBottom: "1px solid oklch(0.78 0.10 65 / 0.4)",
+              color: "oklch(0.35 0.08 55)",
+              fontFamily: "'Source Serif 4', Georgia, serif",
+            }}
+          >
+            <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: "oklch(0.55 0.14 55)" }} />
+            <span>
+              <strong>Safety limits:</strong> This AI will not identify wild plants or mushrooms, and will not provide specific canning safety parameters. For those topics, consult a local expert or the{" "}
+              <a
+                href="https://nchfp.uga.edu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+                style={{ color: "oklch(0.40 0.10 220)" }}
+              >
+                USDA Complete Guide
+              </a>{" "}/ Ball Blue Book.
+            </span>
           </div>
 
           {/* Messages */}

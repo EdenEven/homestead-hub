@@ -41,3 +41,5 @@
 - [x] Add Featured Post hero banner to the blog journal page
 - [x] Add members-only gating example (second blog post marked as subscriber-only)
 - [x] Fix "Loading market data..." and weather alerts ticker bar — switched to Stooq free API, fixed NOAA URL
+- [x] Rewrite AI chatbot system prompt with hard safety refusals (no plant/mushroom ID, defer to USDA/Ball Blue Book on food safety)
+- [x] Add visible safety disclaimer banner in the chat UI
