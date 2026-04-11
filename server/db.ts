@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -177,4 +177,22 @@ export async function createBlogPost(data: InsertBlogPost) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.insert(blogPosts).values(data);
+}
+
+// ---- Email subscriber helpers ----
+
+export async function addEmailSubscriber(data: Pick<InsertEmailSubscriber, "email" | "firstName" | "source">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(emailSubscribers).values({
+    email: data.email,
+    firstName: data.firstName ?? null,
+    source: data.source ?? "welcome-popup",
+  });
+}
+
+export async function getAllEmailSubscribers() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(emailSubscribers).orderBy(emailSubscribers.createdAt).limit(1000);
 }

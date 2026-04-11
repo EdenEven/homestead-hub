@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { BookOpen, Headphones, FileText, Lock, Calendar, User, ArrowRight } from "lucide-react";
+import { BookOpen, Headphones, FileText, Calendar, User, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
@@ -89,14 +89,7 @@ export default function Blog() {
                       {featuredPost.category}
                     </span>
                   )}
-                  {!featuredPost.isFree && (
-                    <span
-                      className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full"
-                      style={{ background: "oklch(0.92 0.06 65 / 0.9)", color: "oklch(0.35 0.10 65)" }}
-                    >
-                      <Lock className="w-3 h-3" /> Members Only
-                    </span>
-                  )}
+
                 </div>
 
                 <h2
@@ -183,12 +176,7 @@ export default function Blog() {
                             {post.category}
                           </span>
                         )}
-                        {!post.isFree && (
-                          <span className="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full"
-                            style={{ background: "oklch(0.92 0.06 65)", color: "oklch(0.40 0.10 65)" }}>
-                            <Lock className="w-3 h-3" /> Members
-                          </span>
-                        )}
+
                       </div>
 
                       <h3 className="text-lg font-bold mb-2 leading-snug group-hover:underline"

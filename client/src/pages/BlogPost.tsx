@@ -1,10 +1,8 @@
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Headphones, FileText, Lock, Calendar, User, Tag } from "lucide-react";
+import { ArrowLeft, Headphones, FileText, Calendar, User, Tag } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { useAuth } from "@/_core/hooks/useAuth";
-import { getLoginUrl } from "@/const";
 
 function renderContent(content: string) {
   // Convert the plain text with markdown-style formatting into JSX sections
@@ -101,11 +99,7 @@ function renderContent(content: string) {
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
-  const { isAuthenticated, user } = useAuth();
   const { data: post, isLoading, error } = trpc.blog.getBySlug.useQuery({ slug: slug || "" }, { enabled: !!slug });
-
-  const isSubscriber = (user as any)?.subscriptionStatus === "active" || (user as any)?.subscriptionStatus === "trialing";
-  const canRead = post?.isFree || isSubscriber;
 
   if (isLoading) {
     return (
@@ -167,12 +161,7 @@ export default function BlogPost() {
               {post.category}
             </span>
           )}
-          {!post.isFree && (
-            <span className="flex items-center gap-1 text-xs font-semibold px-3 py-1 rounded-full"
-              style={{ background: "oklch(0.92 0.06 65)", color: "oklch(0.40 0.10 65)" }}>
-              <Lock className="w-3 h-3" /> Members Only
-            </span>
-          )}
+
         </div>
 
         {/* Title */}
@@ -215,38 +204,13 @@ export default function BlogPost() {
           </div>
         )}
 
-        {/* Content — gated if members only */}
-        {canRead ? (
-          <article className="prose-custom">
-            {renderContent(post.content)}
-          </article>
-        ) : (
-          <div className="text-center py-16 px-6 rounded-2xl" style={{ background: "oklch(0.93 0.03 80)", border: "2px dashed oklch(0.80 0.05 80)" }}>
-            <Lock className="w-12 h-12 mx-auto mb-4" style={{ color: "oklch(0.55 0.08 65)" }} />
-            <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.30 0.06 50)" }}>
-              Members Only Content
-            </h2>
-            <p className="mb-6" style={{ color: "oklch(0.45 0.04 80)" }}>
-              Subscribe for $7/month to read the full article, download guides, and access all premium content.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/pricing"
-                className="px-6 py-3 rounded-lg font-semibold text-white"
-                style={{ background: "oklch(0.40 0.10 145)" }}>
-                Subscribe — $7/month
-              </Link>
-              {!isAuthenticated && (
-                <a href={getLoginUrl()} className="px-6 py-3 rounded-lg font-semibold border"
-                  style={{ borderColor: "oklch(0.70 0.05 80)", color: "oklch(0.35 0.06 50)" }}>
-                  Sign In
-                </a>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Content */}
+        <article className="prose-custom">
+          {renderContent(post.content)}
+        </article>
 
         {/* PDF download */}
-        {post.pdfUrl && canRead && (
+        {post.pdfUrl && (
           <div className="mt-10 p-5 rounded-xl flex items-center gap-4"
             style={{ background: "oklch(0.95 0.04 25)", border: "1px solid oklch(0.85 0.06 25)" }}>
             <FileText className="w-8 h-8 flex-shrink-0" style={{ color: "oklch(0.50 0.10 25)" }} />

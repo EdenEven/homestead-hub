@@ -15,7 +15,6 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "Barter & Trade", href: "/barter" },
   { label: "Land Access", href: "/land-access" },
   { label: "Map Explorer", href: "/map" },
-  { label: "Pricing", href: "/pricing", highlight: true },
 ];
 
 export default function Navigation() {

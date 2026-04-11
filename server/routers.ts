@@ -4,9 +4,8 @@ import { invokeLLM } from "./_core/llm";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import Stripe from "stripe";
 import {
-  updateUserStripe,
+  addEmailSubscriber,
   getProfileByUserId,
   upsertProfile,
   getAllPublicProfiles,
@@ -19,10 +18,6 @@ import {
   createBlogPost,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2026-02-25.clover",
-});
 
 export const appRouter = router({
   system: systemRouter,
@@ -96,65 +91,30 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
       }),
   }),
 
-  // ---- Subscriptions / Stripe ----
-  subscription: router({
-    createCheckout: protectedProcedure
+  // ---- Email List / Community Signup ----
+  community: router({
+    subscribe: publicProcedure
       .input(z.object({
-        interval: z.enum(["month", "year"]).default("month"),
+        email: z.string().email(),
+        firstName: z.string().max(100).optional(),
+        source: z.string().max(100).optional(),
       }))
-      .mutation(async ({ ctx, input }) => {
-        const origin = ctx.req.headers.origin as string || "https://www.a1homesteadhub.com";
-        const priceAmount = input.interval === "month" ? 700 : 6000; // cents
-
-        const session = await stripe.checkout.sessions.create({
-          mode: "subscription",
-          payment_method_types: ["card"],
-          customer_email: ctx.user.email || undefined,
-          line_items: [{
-            price_data: {
-              currency: "usd",
-              product_data: {
-                name: "The Homesteader — A1 Homestead Hub",
-                description: "Full access: unlimited AI assistant, barter board, skill guides, community, hunting calendar & more.",
-              },
-              unit_amount: priceAmount,
-              recurring: { interval: input.interval },
-            },
-            quantity: 1,
-          }],
-          client_reference_id: ctx.user.id.toString(),
-          metadata: {
-            user_id: ctx.user.id.toString(),
-            customer_email: ctx.user.email || "",
-            customer_name: ctx.user.name || "",
-          },
-          allow_promotion_codes: true,
-          success_url: `${origin}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${origin}/pricing`,
-        });
-
-        return { checkoutUrl: session.url };
+      .mutation(async ({ input }) => {
+        try {
+          await addEmailSubscriber({
+            email: input.email.toLowerCase().trim(),
+            firstName: input.firstName?.trim(),
+            source: input.source || "welcome-popup",
+          });
+          return { success: true, message: "Welcome to the community!" };
+        } catch (err: any) {
+          // Duplicate email — treat as success so we don't leak info
+          if (err?.message?.includes("Duplicate") || err?.code === "ER_DUP_ENTRY") {
+            return { success: true, message: "You're already on the list!" };
+          }
+          throw err;
+        }
       }),
-
-    getStatus: protectedProcedure.query(async ({ ctx }) => {
-      const user = await getUserById(ctx.user.id);
-      return {
-        status: user?.subscriptionStatus || "none",
-        isActive: user?.subscriptionStatus === "active" || user?.subscriptionStatus === "trialing",
-        stripeCustomerId: user?.stripeCustomerId,
-      };
-    }),
-
-    cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
-      const user = await getUserById(ctx.user.id);
-      if (!user?.stripeSubscriptionId) throw new Error("No active subscription found");
-
-      await stripe.subscriptions.update(user.stripeSubscriptionId, {
-        cancel_at_period_end: true,
-      });
-
-      return { success: true, message: "Subscription will cancel at end of billing period." };
-    }),
   }),
 
   // ---- Profiles ----

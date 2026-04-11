@@ -15,9 +15,7 @@ import Community from "./pages/Community";
 import BarterTrade from "./pages/BarterTrade";
 import LandAccess from "./pages/LandAccess";
 import MapExplorer from "./pages/MapExplorer";
-import Pricing from "./pages/Pricing";
 import Profile from "./pages/Profile";
-import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 
@@ -31,9 +29,7 @@ function Router() {
       <Route path="/barter" component={BarterTrade} />
       <Route path="/land-access" component={LandAccess} />
       <Route path="/map" component={MapExplorer} />
-      <Route path="/pricing" component={Pricing} />
       <Route path="/profile" component={Profile} />
-      <Route path="/subscription/success" component={SubscriptionSuccess} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/404" component={NotFound} />

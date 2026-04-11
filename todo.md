@@ -43,3 +43,9 @@
 - [x] Fix "Loading market data..." and weather alerts ticker bar — switched to Stooq free API, fixed NOAA URL
 - [x] Rewrite AI chatbot system prompt with hard safety refusals (no plant/mushroom ID, defer to USDA/Ball Blue Book on food safety)
 - [x] Add visible safety disclaimer banner in the chat UI
+- [x] Add email_subscribers table to database schema
+- [x] Add email signup tRPC procedure (subscribe to list)
+- [x] Replace welcome popup with free email signup flow (no $7, no paywall)
+- [x] Remove Pricing page and Pricing nav link entirely
+- [x] Remove members-only gate from Foraging blog post (all content free)
+- [x] Update all CTAs to free community — no subscription required

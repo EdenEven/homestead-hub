@@ -45,9 +45,7 @@ export default function Profile() {
     enabled: isAuthenticated,
   });
 
-  const { data: subStatus } = trpc.subscription.getStatus.useQuery(undefined, {
-    enabled: isAuthenticated,
-  });
+
 
   useEffect(() => {
     if (profile) {
@@ -122,8 +120,6 @@ export default function Profile() {
     );
   }
 
-  const isSubscriber = subStatus?.isActive;
-
   return (
     <div className="min-h-screen" style={{ background: "oklch(0.97 0.02 80)" }}>
       <Navigation />
@@ -136,32 +132,12 @@ export default function Profile() {
               Your Homesteader Profile
             </h1>
             <p style={{ color: "oklch(0.50 0.04 50)" }}>
-              {isSubscriber
-                ? "Subscriber — your profile is visible to the community"
-                : "Free member — upgrade to The Homesteader to show your profile on the community map"}
+              Community member — your profile is visible to the community
             </p>
           </div>
         </div>
 
-        {!isSubscriber && (
-          <div className="rounded-xl p-5 mb-8 flex items-center justify-between gap-4"
-            style={{ background: "oklch(0.92 0.08 80)", border: "1px solid oklch(0.80 0.10 80)" }}>
-            <div>
-              <p className="font-semibold" style={{ color: "oklch(0.30 0.06 50)" }}>
-                🌾 Upgrade to The Homesteader ($7/month)
-              </p>
-              <p className="text-sm" style={{ color: "oklch(0.45 0.04 50)" }}>
-                Show your profile on the community map, post barter listings, and unlock everything.
-              </p>
-            </div>
-            <a href="/pricing">
-              <button className="px-5 py-2 rounded-lg font-bold text-white whitespace-nowrap"
-                style={{ background: "oklch(0.38 0.09 140)" }}>
-                Upgrade
-              </button>
-            </a>
-          </div>
-        )}
+
 
         <div className="rounded-2xl p-8 space-y-6" style={{ background: "white", border: "1px solid oklch(0.88 0.04 80)" }}>
 
