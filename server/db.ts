@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -159,8 +159,8 @@ export async function getBlogPosts(limit = 20) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(blogPosts)
-    .where(eq(blogPosts.isPublished, true))
-    .orderBy(blogPosts.publishedAt)
+    .where(sql`${blogPosts.isPublished} = 1`)
+    .orderBy(desc(blogPosts.publishedAt))
     .limit(limit);
 }
 

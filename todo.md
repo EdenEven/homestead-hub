@@ -55,3 +55,9 @@
 - [x] Build Community Members directory page showing real database profiles with skill badges
 - [x] Wire Community nav link to members directory; nav shows My Profile/Sign Out for signed-in users
 - [x] Fix profile.get returning undefined (must return null) when no profile row exists for new user
+- [x] Upload infographic, video, and audio to CDN
+- [x] Publish post: "From Bunkers to Bonds: A Conceptual Breakdown of Community Resilience"
+- [x] Publish post: "The Off-Grid Land Buyer's Geographic Selection Guide"
+- [x] Publish post: "Strategic Framework for Multi-Family Rural Land Development"
+- [x] Publish post: "Resilient Decentralized Communications: Infrastructure Implementation Plan"
+- [x] Publish post: "The Strategic Blueprint for Off-Grid Community Building" (converted from slide script)
