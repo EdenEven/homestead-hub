@@ -121,7 +121,8 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
   // ---- Profiles ----
   profile: router({
     get: protectedProcedure.query(async ({ ctx }) => {
-      return getProfileByUserId(ctx.user.id);
+      const profile = await getProfileByUserId(ctx.user.id);
+      return profile ?? null;
     }),
 
     getPublic: publicProcedure.query(async () => {

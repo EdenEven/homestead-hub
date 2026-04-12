@@ -54,3 +54,4 @@
 - [x] Build full Profile page UI (avatar upload, bio, location, skills, completion tracker, save)
 - [x] Build Community Members directory page showing real database profiles with skill badges
 - [x] Wire Community nav link to members directory; nav shows My Profile/Sign Out for signed-in users
+- [x] Fix profile.get returning undefined (must return null) when no profile row exists for new user

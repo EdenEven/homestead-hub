@@ -104,9 +104,9 @@ export async function updateUserStripeByCustomerId(customerId: string, data: {
 
 export async function getProfileByUserId(userId: number) {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   const result = await db.select().from(profiles).where(eq(profiles.userId, userId)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  return result.length > 0 ? result[0] : null;
 }
 
 export async function upsertProfile(data: InsertProfile) {
