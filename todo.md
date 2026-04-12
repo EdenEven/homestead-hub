@@ -49,3 +49,8 @@
 - [x] Remove Pricing page and Pricing nav link entirely
 - [x] Remove members-only gate from Foraging blog post (all content free)
 - [x] Update all CTAs to free community — no subscription required
+- [x] Extend user table with homesteader profile fields (bio, location, skills, avatar, website, isPublic)
+- [x] Add tRPC procedures for getProfile, updateProfile, uploadAvatar
+- [x] Build full Profile page UI (avatar upload, bio, location, skills, completion tracker, save)
+- [x] Build Community Members directory page showing real database profiles with skill badges
+- [x] Wire Community nav link to members directory; nav shows My Profile/Sign Out for signed-in users

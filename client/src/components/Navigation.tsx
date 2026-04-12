@@ -6,7 +6,9 @@
 
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Menu, X, Leaf } from "lucide-react";
+import { Menu, X, Leaf, User } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 
 const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "Skills Hub", href: "/skills" },
@@ -20,6 +22,7 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
 export default function Navigation() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [location] = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full" style={{ backgroundColor: "oklch(0.18 0.06 145)", borderBottom: "1px solid oklch(0.28 0.06 145)" }}>
@@ -62,19 +65,44 @@ export default function Navigation() {
           })}
         </nav>
 
-        {/* CTA Button */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/community"
-            className="px-4 py-2 text-sm font-semibold rounded-sm transition-all hover:opacity-90"
-            style={{
-              backgroundColor: "oklch(0.68 0.12 65)",
-              color: "oklch(0.18 0.06 145)",
-              fontFamily: "'Playfair Display', Georgia, serif",
-            }}
-          >
-            Join the Community
-          </Link>
+        {/* CTA — changes based on auth state */}
+        <div className="hidden md:flex items-center gap-2">
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/profile"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-sm transition-all hover:opacity-90"
+                style={{
+                  backgroundColor: "oklch(0.25 0.07 145)",
+                  color: "oklch(0.82 0.02 85)",
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  border: "1px solid oklch(0.35 0.07 145)",
+                }}
+              >
+                <User className="w-3.5 h-3.5" />
+                {user?.name?.split(" ")[0] || "My Profile"}
+              </Link>
+              <button
+                onClick={() => logout()}
+                className="px-3 py-2 text-xs font-semibold rounded-sm transition-all hover:opacity-70"
+                style={{ color: "oklch(0.60 0.02 85)" }}
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <a
+              href={getLoginUrl()}
+              className="px-4 py-2 text-sm font-semibold rounded-sm transition-all hover:opacity-90"
+              style={{
+                backgroundColor: "oklch(0.68 0.12 65)",
+                color: "oklch(0.18 0.06 145)",
+                fontFamily: "'Playfair Display', Georgia, serif",
+              }}
+            >
+              Join Free
+            </a>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -111,18 +139,43 @@ export default function Navigation() {
                 </Link>
               );
             })}
-            <Link
-              href="/community"
-              onClick={() => setMenuOpen(false)}
-              className="mt-2 px-4 py-3 text-sm font-semibold rounded-sm text-center transition-all"
-              style={{
-                backgroundColor: "oklch(0.68 0.12 65)",
-                color: "oklch(0.18 0.06 145)",
-                fontFamily: "'Playfair Display', Georgia, serif",
-              }}
-            >
-              Join the Community
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/profile"
+                  onClick={() => setMenuOpen(false)}
+                  className="mt-2 px-4 py-3 text-sm font-semibold rounded-sm flex items-center gap-2 transition-all"
+                  style={{
+                    backgroundColor: "oklch(0.68 0.12 65)",
+                    color: "oklch(0.18 0.06 145)",
+                    fontFamily: "'Playfair Display', Georgia, serif",
+                  }}
+                >
+                  <User className="w-4 h-4" />
+                  My Profile
+                </Link>
+                <button
+                  onClick={() => { logout(); setMenuOpen(false); }}
+                  className="px-4 py-2 text-sm text-left rounded-sm"
+                  style={{ color: "oklch(0.60 0.02 85)" }}
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <a
+                href={getLoginUrl()}
+                onClick={() => setMenuOpen(false)}
+                className="mt-2 px-4 py-3 text-sm font-semibold rounded-sm text-center transition-all"
+                style={{
+                  backgroundColor: "oklch(0.68 0.12 65)",
+                  color: "oklch(0.18 0.06 145)",
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                }}
+              >
+                Join Free
+              </a>
+            )}
           </nav>
         </div>
       )}

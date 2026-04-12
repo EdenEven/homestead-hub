@@ -18,6 +18,7 @@ import {
   createBlogPost,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
+import { storagePut } from "./storage";
 
 export const appRouter = router({
   system: systemRouter,
@@ -135,6 +136,7 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
         state: z.string().max(50).optional(),
         skills: z.string().optional(),
         websiteUrl: z.string().url().optional().or(z.literal("")),
+        avatarUrl: z.string().url().optional().or(z.literal("")),
         isPublic: z.boolean().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -143,6 +145,25 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
           ...input,
         });
         return { success: true };
+      }),
+
+    uploadAvatar: protectedProcedure
+      .input(z.object({
+        // base64-encoded image data
+        dataBase64: z.string(),
+        mimeType: z.string().regex(/^image\/(jpeg|png|webp|gif)$/),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const buffer = Buffer.from(input.dataBase64, "base64");
+        if (buffer.byteLength > 5 * 1024 * 1024) {
+          throw new Error("Avatar image must be under 5 MB");
+        }
+        const ext = input.mimeType.split("/")[1];
+        const key = `avatars/user-${ctx.user.id}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        // Save to profile immediately
+        await upsertProfile({ userId: ctx.user.id, avatarUrl: url });
+        return { avatarUrl: url };
       }),
   }),
 
