@@ -61,3 +61,8 @@
 - [x] Publish post: "Strategic Framework for Multi-Family Rural Land Development"
 - [x] Publish post: "Resilient Decentralized Communications: Infrastructure Implementation Plan"
 - [x] Publish post: "The Strategic Blueprint for Off-Grid Community Building" (converted from slide script)
+- [x] Upload poultry media assets to CDN (3 videos, PDF, mind map, slide images)
+- [x] Publish post: "The Honest Harvest: A Field Guide to Ethical Poultry Processing"
+- [x] Publish post: "Humane Dispatch: The Anatomy of an Ethical Kill"
+- [x] Publish post: "Dual-Purpose Chickens: Raising Breeds That Feed You Twice"
+- [x] Publish post: "Turkey vs. Everything: Processing Your Holiday Bird at Home"
