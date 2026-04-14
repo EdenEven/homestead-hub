@@ -66,3 +66,4 @@
 - [x] Publish post: "Humane Dispatch: The Anatomy of an Ethical Kill"
 - [x] Publish post: "Dual-Purpose Chickens: Raising Breeds That Feed You Twice"
 - [x] Publish post: "Turkey vs. Everything: Processing Your Holiday Bird at Home"
+- [x] Fix silver price decimal point error in markets ticker (showing ~$7,000 instead of ~$75/oz)

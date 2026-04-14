@@ -210,15 +210,16 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
     // Helper: fetch one symbol from Stooq CSV
     getPrices: publicProcedure.query(async () => {
       const symbols = [
-        { symbol: "zc.f", name: "Corn", unit: "/bu" },
-        { symbol: "zw.f", name: "Wheat", unit: "/bu" },
-        { symbol: "zs.f", name: "Soybeans", unit: "/bu" },
-        { symbol: "le.f", name: "Live Cattle", unit: "/cwt" },
-        { symbol: "he.f", name: "Lean Hogs", unit: "/cwt" },
-        { symbol: "gc.f", name: "Gold", unit: "/oz" },
-        { symbol: "si.f", name: "Silver", unit: "/oz" },
-        { symbol: "cl.f", name: "Crude Oil", unit: "/bbl" },
-        { symbol: "ng.f", name: "Nat Gas", unit: "/mmbtu" },
+        { symbol: "zc.f", name: "Corn", unit: "/bu", divisor: 1 },
+        { symbol: "zw.f", name: "Wheat", unit: "/bu", divisor: 1 },
+        { symbol: "zs.f", name: "Soybeans", unit: "/bu", divisor: 1 },
+        { symbol: "le.f", name: "Live Cattle", unit: "/cwt", divisor: 1 },
+        { symbol: "he.f", name: "Lean Hogs", unit: "/cwt", divisor: 1 },
+        { symbol: "gc.f", name: "Gold", unit: "/oz", divisor: 1 },
+        // Stooq reports silver futures (SI.F) in cents per troy oz — divide by 100 to get dollars
+        { symbol: "si.f", name: "Silver", unit: "/oz", divisor: 100 },
+        { symbol: "cl.f", name: "Crude Oil", unit: "/bbl", divisor: 1 },
+        { symbol: "ng.f", name: "Nat Gas", unit: "/mmbtu", divisor: 1 },
       ];
 
       const fetchStooq = async (sym: string) => {
@@ -243,11 +244,12 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
           try {
             const data = await fetchStooq(item.symbol);
             if (!data) return null;
+            const d = item.divisor ?? 1;
             return {
               symbol: item.symbol.toUpperCase(),
               name: item.name,
-              price: data.close,
-              change: data.change,
+              price: data.close / d,
+              change: data.change / d,
               changePercent: data.changePercent,
               unit: item.unit,
             };
