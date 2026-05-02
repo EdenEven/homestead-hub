@@ -149,12 +149,19 @@ export async function createBarterListing(data: InsertBarterListing) {
   await db.insert(barterListings).values(data);
 }
 
-export async function deleteBarterListing(id: number, userId: number) {
+export async function deleteBarterListing(id: number, userId: number, isAdmin = false) {
   const db = await getDb();
   if (!db) return;
-  await db.update(barterListings)
-    .set({ isActive: false })
-    .where(eq(barterListings.id, id));
+  // Admins can delete any listing; regular users can only delete their own
+  if (isAdmin) {
+    await db.update(barterListings)
+      .set({ isActive: false })
+      .where(eq(barterListings.id, id));
+  } else {
+    await db.update(barterListings)
+      .set({ isActive: false })
+      .where(and(eq(barterListings.id, id), eq(barterListings.userId, userId)));
+  }
 }
 
 // ---- Blog post helpers ----

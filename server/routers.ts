@@ -214,7 +214,8 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ ctx, input }) => {
-        await deleteBarterListing(input.id, ctx.user.id);
+        const isAdmin = ctx.user.role === "admin";
+        await deleteBarterListing(input.id, ctx.user.id, isAdmin);
         return { success: true };
       }),
   }),

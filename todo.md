@@ -69,3 +69,6 @@
 - [x] Fix silver price decimal point error in markets ticker (showing ~$7,000 instead of ~$75/oz)
 - [x] Fix Barter & Trade: submitted listings not appearing on the page
 - [x] Build classified-ad style listings display (category filters, listing cards, contact button)
+- [x] Add delete button to Barter & Trade listings (admin deletes any, users delete their own)
+- [x] Seed a polished example listing so the board never looks empty to new visitors
+- [x] Remove test/dummy entries from the live barter board
