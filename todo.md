@@ -72,3 +72,4 @@
 - [x] Add delete button to Barter & Trade listings (admin deletes any, users delete their own)
 - [x] Seed a polished example listing so the board never looks empty to new visitors
 - [x] Remove test/dummy entries from the live barter board
+- [x] Add A1 Homestead Hub Facebook page link to footer

@@ -6,6 +6,23 @@
 import { Link } from "wouter";
 import { Leaf, Heart } from "lucide-react";
 
+const FACEBOOK_URL = "https://www.facebook.com/a1homesteadhub";
+
+// Facebook SVG icon (official shape, no external dependency needed)
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+    </svg>
+  );
+}
+
 export default function Footer() {
   return (
     <footer style={{ backgroundColor: "oklch(0.15 0.05 145)", color: "oklch(0.82 0.02 85)" }}>
@@ -21,9 +38,31 @@ export default function Footer() {
                 The Homestead Hub
               </span>
             </div>
-            <p className="text-sm leading-relaxed" style={{ color: "oklch(0.65 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+            <p className="text-sm leading-relaxed mb-5" style={{ color: "oklch(0.65 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
               Building self-reliant communities one skill at a time. Knowledge is the most valuable resource you can own.
             </p>
+
+            {/* Social — Facebook */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: "oklch(0.68 0.12 65)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+                Follow Us
+              </p>
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-sm font-semibold text-sm transition-all hover:opacity-90 group"
+                style={{
+                  backgroundColor: "#1877F2",
+                  color: "#fff",
+                  fontFamily: "'Source Serif 4', Georgia, serif",
+                }}
+                aria-label="Follow A1 Homestead Hub on Facebook"
+              >
+                <FacebookIcon className="w-4 h-4 flex-shrink-0" />
+                <span>A1 Homestead Hub</span>
+              </a>
+            </div>
           </div>
 
           {/* Skills */}
@@ -88,6 +127,24 @@ export default function Footer() {
                 </li>
               ))}
             </ul>
+
+            {/* Facebook CTA in community column */}
+            <div className="mt-6 p-3 rounded-sm" style={{ backgroundColor: "oklch(0.20 0.05 145)", border: "1px solid oklch(0.28 0.05 145)" }}>
+              <p className="text-xs mb-2" style={{ color: "oklch(0.65 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+                Join our growing community of homesteaders on Facebook.
+              </p>
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold transition-colors hover:opacity-80"
+                style={{ color: "#5B9BD5", fontFamily: "'Source Serif 4', Georgia, serif" }}
+                aria-label="Like our Facebook page"
+              >
+                <FacebookIcon className="w-3.5 h-3.5" />
+                Like our page →
+              </a>
+            </div>
           </div>
         </div>
 
@@ -96,9 +153,22 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs" style={{ color: "oklch(0.5 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
           <p>© {new Date().getFullYear()} The Homestead Hub. Built for the self-reliant.</p>
-          <p className="flex items-center gap-1">
-            Made with <Heart className="w-3 h-3 inline" style={{ color: "oklch(0.68 0.12 65)" }} /> for homesteaders everywhere
-          </p>
+          <div className="flex items-center gap-4">
+            <a
+              href={FACEBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 transition-colors hover:text-blue-400"
+              style={{ color: "oklch(0.5 0.02 85)" }}
+              aria-label="Facebook"
+            >
+              <FacebookIcon className="w-3.5 h-3.5" />
+              Facebook
+            </a>
+            <p className="flex items-center gap-1">
+              Made with <Heart className="w-3 h-3 inline" style={{ color: "oklch(0.68 0.12 65)" }} /> for homesteaders everywhere
+            </p>
+          </div>
         </div>
       </div>
     </footer>
