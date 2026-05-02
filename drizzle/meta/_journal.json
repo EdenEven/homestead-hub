@@ -29,6 +29,13 @@
       "when": 1775926908018,
       "tag": "0003_classy_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1777711884313,
+      "tag": "0004_far_bloodstrike",
+      "breakpoints": true
     }
   ]
 }

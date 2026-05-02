@@ -62,6 +62,11 @@ export const barterListings = mysqlTable("barterListings", {
     "other"
   ]).notNull(),
   offeringType: mysqlEnum("offeringType", ["offer", "request"]).default("offer").notNull(),
+  // Classified-style: what they have vs what they want
+  offering: text("offering"), // what the poster is offering/has
+  seeking: text("seeking"),   // what the poster wants in return
+  posterName: varchar("posterName", { length: 100 }), // display name (can be guest)
+  posterEmail: varchar("posterEmail", { length: 320 }), // optional contact email
   location: varchar("location", { length: 200 }),
   state: varchar("state", { length: 50 }),
   contactMethod: varchar("contactMethod", { length: 200 }),

@@ -176,23 +176,37 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
         return getBarterListings(input.category);
       }),
 
-    create: protectedProcedure
+    // Anyone can post — no login required (guest posting with optional email)
+    create: publicProcedure
       .input(z.object({
         title: z.string().min(3).max(200),
-        description: z.string().min(10).max(2000),
+        offering: z.string().min(3).max(1000),
+        seeking: z.string().min(3).max(1000),
         category: z.enum([
           "food-produce", "skills-labor", "animals-livestock",
           "seeds-plants", "tools-equipment", "goods-crafts", "land-space", "other"
         ]),
-        offeringType: z.enum(["offer", "request"]).default("offer"),
         location: z.string().max(200).optional(),
         state: z.string().max(50).optional(),
-        contactMethod: z.string().max(200).optional(),
+        posterName: z.string().max(100).optional(),
+        posterEmail: z.string().email().max(320).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
+        // If logged in, use their user ID; otherwise use 0 as guest
+        const userId = (ctx as any).user?.id ?? 0;
         await createBarterListing({
-          userId: ctx.user.id,
-          ...input,
+          userId,
+          title: input.title,
+          description: `${input.offering} | Seeking: ${input.seeking}`,
+          offering: input.offering,
+          seeking: input.seeking,
+          category: input.category,
+          location: input.location,
+          state: input.state,
+          posterName: input.posterName,
+          posterEmail: input.posterEmail,
+          offeringType: "offer",
+          isActive: true,
         });
         return { success: true };
       }),

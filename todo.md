@@ -67,3 +67,5 @@
 - [x] Publish post: "Dual-Purpose Chickens: Raising Breeds That Feed You Twice"
 - [x] Publish post: "Turkey vs. Everything: Processing Your Holiday Bird at Home"
 - [x] Fix silver price decimal point error in markets ticker (showing ~$7,000 instead of ~$75/oz)
+- [x] Fix Barter & Trade: submitted listings not appearing on the page
+- [x] Build classified-ad style listings display (category filters, listing cards, contact button)

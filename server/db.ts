@@ -1,4 +1,4 @@
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -133,10 +133,14 @@ export async function getBarterListings(category?: string) {
   if (!db) return [];
   if (category && category !== "all") {
     return db.select().from(barterListings)
-      .where(eq(barterListings.category, category as any))
-      .limit(50);
+      .where(and(eq(barterListings.isActive, true), eq(barterListings.category, category as any)))
+      .orderBy(desc(barterListings.createdAt))
+      .limit(100);
   }
-  return db.select().from(barterListings).where(eq(barterListings.isActive, true)).limit(50);
+  return db.select().from(barterListings)
+    .where(eq(barterListings.isActive, true))
+    .orderBy(desc(barterListings.createdAt))
+    .limit(100);
 }
 
 export async function createBarterListing(data: InsertBarterListing) {
