@@ -81,7 +81,7 @@ export default function SkillDetail({ params }: Props) {
               text={[
                 skill.title + ". " + skill.tagline + ". ",
                 skill.intro + " ",
-                skill.steps.map((s, i) => `Step ${i + 1}: ${s.title}. ${s.description}`).join(" "),
+                skill.steps.map((s, i) => `Step ${i + 1}: ${s.title}. ${s.desc}`).join(" "),
                 skill.seasonalNotes ? " Seasonal notes: " + skill.seasonalNotes : "",
                 skill.tips.map(t => t.label + ": " + t.text).join(" "),
               ].join(" ")}

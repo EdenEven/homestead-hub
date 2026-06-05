@@ -464,7 +464,6 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
     }),
   }),
 
-<<<<<<< Updated upstream
   // ---- ElevenLabs Text-to-Speech ----
   // Proxies TTS requests through the server so the API key stays secure.
   // Affiliate link: https://try.elevenlabs.io/lhgu4tpm0stc
@@ -475,7 +474,7 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
         voiceId: z.string().default("EXAVITQu4vr4xnSDxMaL"), // Sarah — clear, reassuring
         modelId: z.string().default("eleven_flash_v2_5"),    // Flash: low latency
       }))
-      .mutation(async ({ input, ctx }) => {
+      .mutation(async ({ input }) => {
         const apiKey = process.env.ELEVENLABS_API_KEY;
         if (!apiKey) {
           throw new Error("ElevenLabs API key not configured on server.");
@@ -508,7 +507,6 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
           throw new Error(`ElevenLabs API error ${response.status}: ${errBody}`);
         }
 
-        // Convert audio buffer to base64 so it can be sent over tRPC JSON
         const audioBuffer = await response.arrayBuffer();
         const base64Audio = Buffer.from(audioBuffer).toString("base64");
 
@@ -518,7 +516,9 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
           voiceId: input.voiceId,
           affiliateLink: "https://try.elevenlabs.io/lhgu4tpm0stc",
         };
-=======
+      }),
+  }),
+
   // ---- Notifications ----
   notifications: router({
     // Get the current active sitewide announcement (public)
@@ -577,7 +577,6 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
       .mutation(async ({ input }) => {
         await deletePushSubscription(input.endpoint);
         return { success: true };
->>>>>>> Stashed changes
       }),
   }),
 });
