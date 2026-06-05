@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { ArrowLeft, Headphones, FileText, Calendar, User, Tag } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
 
 function renderContent(content: string) {
   // Convert the plain text with markdown-style formatting into JSX sections
@@ -187,6 +188,18 @@ export default function BlogPost() {
               <Tag className="w-4 h-4" /> {post.tags}
             </div>
           )}
+        </div>
+
+        {/* ElevenLabs AI Read-Aloud Player */}
+        <div className="mb-8">
+          <ElevenLabsAudioPlayer
+            title={post.title}
+            text={[
+              post.title + ". ",
+              post.subtitle ? post.subtitle + ". " : "",
+              post.content,
+            ].join(" ").slice(0, 4500)}
+          />
         </div>
 
         {/* Audio player */}

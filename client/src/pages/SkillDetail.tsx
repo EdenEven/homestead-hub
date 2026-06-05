@@ -9,6 +9,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { getSkillBySlug } from "@/lib/skillsData";
 import { ArrowLeft, AlertTriangle, Lightbulb, ExternalLink, Clock, BookOpen } from "lucide-react";
+import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
 
 interface Props {
   params: { slug: string };
@@ -74,6 +75,18 @@ export default function SkillDetail({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
+            {/* ElevenLabs Audio Player */}
+            <ElevenLabsAudioPlayer
+              title={`${skill.title} — Full Skill Guide`}
+              text={[
+                skill.title + ". " + skill.tagline + ". ",
+                skill.intro + " ",
+                skill.steps.map((s, i) => `Step ${i + 1}: ${s.title}. ${s.description}`).join(" "),
+                skill.seasonalNotes ? " Seasonal notes: " + skill.seasonalNotes : "",
+                skill.tips.map(t => t.label + ": " + t.text).join(" "),
+              ].join(" ")}
+            />
+
             {/* Introduction */}
             <div>
               <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.18 0.06 145)" }}>
