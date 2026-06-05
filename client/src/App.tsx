@@ -8,6 +8,9 @@ import HomesteadAIChat from "./components/HomesteadAIChat";
 import WelcomeModal from "./components/WelcomeModal";
 import CommoditiesTicker from "./components/CommoditiesTicker";
 import WeatherAlertTicker from "./components/WeatherAlertTicker";
+import { AnnouncementBar, AnnouncementAdminPanel } from "./components/AnnouncementBar";
+import { NotificationToast } from "./components/NotificationToast";
+import { PushNotificationPrompt } from "./components/PushNotificationPrompt";
 import Home from "./pages/Home";
 import SkillsHub from "./pages/SkillsHub";
 import SkillDetail from "./pages/SkillDetail";
@@ -44,11 +47,15 @@ function App() {
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster />
+          <AnnouncementBar />
           <CommoditiesTicker />
           <WeatherAlertTicker />
           <Router />
           <HomesteadAIChat />
           <WelcomeModal />
+          <NotificationToast />
+          <PushNotificationPrompt />
+          <AnnouncementAdminPanel />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

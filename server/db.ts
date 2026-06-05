@@ -1,6 +1,6 @@
 import { eq, desc, sql, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -206,4 +206,50 @@ export async function getAllEmailSubscribers() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(emailSubscribers).orderBy(emailSubscribers.createdAt).limit(1000);
+}
+
+// ---- Site announcement helpers ----
+
+export async function getActiveAnnouncement() {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(siteAnnouncements)
+    .where(eq(siteAnnouncements.isActive, true))
+    .orderBy(desc(siteAnnouncements.createdAt))
+    .limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function createAnnouncement(data: InsertSiteAnnouncement) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  // Deactivate all existing announcements first
+  await db.update(siteAnnouncements).set({ isActive: false });
+  await db.insert(siteAnnouncements).values(data);
+}
+
+export async function clearAnnouncement() {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(siteAnnouncements).set({ isActive: false });
+}
+
+// ---- Push subscription helpers ----
+
+export async function savePushSubscription(data: InsertPushSubscription) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(pushSubscriptions).values(data);
+}
+
+export async function getAllPushSubscriptions() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(pushSubscriptions).limit(10000);
+}
+
+export async function deletePushSubscription(endpoint: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(pushSubscriptions).where(eq(pushSubscriptions.endpoint, endpoint));
 }

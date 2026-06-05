@@ -73,3 +73,8 @@
 - [x] Seed a polished example listing so the board never looks empty to new visitors
 - [x] Remove test/dummy entries from the live barter board
 - [x] Add A1 Homestead Hub Facebook page link to footer
+- [x] Add sitewide admin announcement bar (admin can set/clear a banner message)
+- [x] Add new blog post toast notification when a post is published
+- [x] Add new barter listing toast notification when a trade is posted
+- [x] Add browser push notification opt-in system
+- [ ] Implement server-side web push delivery (VAPID keys + send on new blog post / new barter listing)

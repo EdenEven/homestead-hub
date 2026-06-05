@@ -36,6 +36,13 @@
       "when": 1777711884313,
       "tag": "0004_far_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1780691698069,
+      "tag": "0005_clear_karen_page",
+      "breakpoints": true
     }
   ]
 }

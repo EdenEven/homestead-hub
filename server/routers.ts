@@ -16,6 +16,11 @@ import {
   getBlogPosts,
   getBlogPostBySlug,
   createBlogPost,
+  getActiveAnnouncement,
+  createAnnouncement,
+  clearAnnouncement,
+  savePushSubscription,
+  deletePushSubscription,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
@@ -459,6 +464,7 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
     }),
   }),
 
+<<<<<<< Updated upstream
   // ---- ElevenLabs Text-to-Speech ----
   // Proxies TTS requests through the server so the API key stays secure.
   // Affiliate link: https://try.elevenlabs.io/lhgu4tpm0stc
@@ -512,6 +518,66 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
           voiceId: input.voiceId,
           affiliateLink: "https://try.elevenlabs.io/lhgu4tpm0stc",
         };
+=======
+  // ---- Notifications ----
+  notifications: router({
+    // Get the current active sitewide announcement (public)
+    getAnnouncement: publicProcedure.query(async () => {
+      return getActiveAnnouncement();
+    }),
+
+    // Admin: set a new sitewide announcement
+    setAnnouncement: protectedProcedure
+      .input(z.object({
+        message: z.string().min(1).max(500),
+        linkUrl: z.string().optional(),
+        linkText: z.string().max(100).optional(),
+        type: z.enum(["info", "success", "warning", "alert"]).default("info"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin only");
+        await createAnnouncement({
+          message: input.message,
+          linkUrl: input.linkUrl ?? null,
+          linkText: input.linkText ?? null,
+          type: input.type,
+          isActive: true,
+          createdBy: ctx.user.id,
+        });
+        return { success: true };
+      }),
+
+    // Admin: clear/dismiss the sitewide announcement
+    clearAnnouncement: protectedProcedure.mutation(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new Error("Admin only");
+      await clearAnnouncement();
+      return { success: true };
+    }),
+
+    // Save a browser push subscription
+    subscribePush: publicProcedure
+      .input(z.object({
+        endpoint: z.string(),
+        p256dh: z.string(),
+        auth: z.string(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await savePushSubscription({
+          endpoint: input.endpoint,
+          p256dh: input.p256dh,
+          auth: input.auth,
+          userId: ctx.user?.id ?? null,
+        });
+        return { success: true };
+      }),
+
+    // Unsubscribe from push notifications
+    unsubscribePush: publicProcedure
+      .input(z.object({ endpoint: z.string() }))
+      .mutation(async ({ input }) => {
+        await deletePushSubscription(input.endpoint);
+        return { success: true };
+>>>>>>> Stashed changes
       }),
   }),
 });

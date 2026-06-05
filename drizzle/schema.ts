@@ -119,3 +119,36 @@ export const emailSubscribers = mysqlTable("emailSubscribers", {
 
 export type EmailSubscriber = typeof emailSubscribers.$inferSelect;
 export type InsertEmailSubscriber = typeof emailSubscribers.$inferInsert;
+
+/**
+ * Sitewide announcement bar — admin-controlled banner
+ */
+export const siteAnnouncements = mysqlTable("siteAnnouncements", {
+  id: int("id").autoincrement().primaryKey(),
+  message: text("message").notNull(),
+  linkUrl: text("linkUrl"),
+  linkText: varchar("linkText", { length: 100 }),
+  type: mysqlEnum("type", ["info", "success", "warning", "alert"]).default("info").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdBy: int("createdBy").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SiteAnnouncement = typeof siteAnnouncements.$inferSelect;
+export type InsertSiteAnnouncement = typeof siteAnnouncements.$inferInsert;
+
+/**
+ * Browser push notification subscriptions
+ */
+export const pushSubscriptions = mysqlTable("pushSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userId: int("userId"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
