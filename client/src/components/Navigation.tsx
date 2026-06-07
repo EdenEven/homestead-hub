@@ -15,6 +15,7 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "From the Field", href: "/blog" },
   { label: "Community", href: "/community" },
   { label: "Barter & Trade", href: "/barter" },
+  { label: "The Schoolhouse", href: "/schoolhouse", highlight: true },
   { label: "Land Access", href: "/land-access" },
   { label: "Map Explorer", href: "/map" },
 ];

@@ -152,3 +152,129 @@ export const pushSubscriptions = mysqlTable("pushSubscriptions", {
 
 export type PushSubscription = typeof pushSubscriptions.$inferSelect;
 export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+// ============================================================
+// THE SCHOOLHOUSE — Homeschool Course Studio
+// ============================================================
+
+/**
+ * Courses — pre-built A1HSH courses or user-created curricula
+ */
+export const schoolCourses = mysqlTable("schoolCourses", {
+  id: int("id").autoincrement().primaryKey(),
+  createdBy: int("createdBy"), // null = A1HSH pre-built
+  title: varchar("title", { length: 300 }).notNull(),
+  description: text("description").notNull(),
+  subject: varchar("subject", { length: 100 }).notNull(), // e.g. "Science", "Math"
+  gradeMin: int("gradeMin").notNull(), // K=0, 1st=1 ... 12th=12
+  gradeMax: int("gradeMax").notNull(),
+  coverImageUrl: text("coverImageUrl"),
+  isPrebuilt: boolean("isPrebuilt").default(false).notNull(),
+  isPublished: boolean("isPublished").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SchoolCourse = typeof schoolCourses.$inferSelect;
+export type InsertSchoolCourse = typeof schoolCourses.$inferInsert;
+
+/**
+ * Lessons — individual lessons within a course
+ */
+export const schoolLessons = mysqlTable("schoolLessons", {
+  id: int("id").autoincrement().primaryKey(),
+  courseId: int("courseId").notNull(),
+  title: varchar("title", { length: 300 }).notNull(),
+  objective: text("objective"),
+  content: text("content"), // rich text / markdown
+  videoUrl: text("videoUrl"),
+  materials: text("materials"), // comma-separated list
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SchoolLesson = typeof schoolLessons.$inferSelect;
+export type InsertSchoolLesson = typeof schoolLessons.$inferInsert;
+
+/**
+ * Quizzes — one quiz per lesson (optional)
+ */
+export const schoolQuizzes = mysqlTable("schoolQuizzes", {
+  id: int("id").autoincrement().primaryKey(),
+  lessonId: int("lessonId").notNull().unique(),
+  title: varchar("title", { length: 300 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SchoolQuiz = typeof schoolQuizzes.$inferSelect;
+export type InsertSchoolQuiz = typeof schoolQuizzes.$inferInsert;
+
+/**
+ * Quiz questions — multiple choice questions for a quiz
+ */
+export const schoolQuizQuestions = mysqlTable("schoolQuizQuestions", {
+  id: int("id").autoincrement().primaryKey(),
+  quizId: int("quizId").notNull(),
+  question: text("question").notNull(),
+  optionA: varchar("optionA", { length: 500 }).notNull(),
+  optionB: varchar("optionB", { length: 500 }).notNull(),
+  optionC: varchar("optionC", { length: 500 }),
+  optionD: varchar("optionD", { length: 500 }),
+  correctAnswer: mysqlEnum("correctAnswer", ["A", "B", "C", "D"]).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+});
+
+export type SchoolQuizQuestion = typeof schoolQuizQuestions.$inferSelect;
+export type InsertSchoolQuizQuestion = typeof schoolQuizQuestions.$inferInsert;
+
+/**
+ * Students — child profiles managed by a parent/teacher user
+ */
+export const schoolStudents = mysqlTable("schoolStudents", {
+  id: int("id").autoincrement().primaryKey(),
+  parentUserId: int("parentUserId").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  gradeLevel: int("gradeLevel").notNull(), // 0=K, 1-12
+  avatarUrl: text("avatarUrl"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SchoolStudent = typeof schoolStudents.$inferSelect;
+export type InsertSchoolStudent = typeof schoolStudents.$inferInsert;
+
+/**
+ * Lesson progress — tracks which lessons a student has completed
+ */
+export const schoolLessonProgress = mysqlTable("schoolLessonProgress", {
+  id: int("id").autoincrement().primaryKey(),
+  studentId: int("studentId").notNull(),
+  lessonId: int("lessonId").notNull(),
+  isCompleted: boolean("isCompleted").default(false).notNull(),
+  quizScore: int("quizScore"), // 0-100
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SchoolLessonProgress = typeof schoolLessonProgress.$inferSelect;
+export type InsertSchoolLessonProgress = typeof schoolLessonProgress.$inferInsert;
+
+/**
+ * Grade entries — teacher-entered grades for assignments
+ */
+export const schoolGradeEntries = mysqlTable("schoolGradeEntries", {
+  id: int("id").autoincrement().primaryKey(),
+  studentId: int("studentId").notNull(),
+  courseId: int("courseId").notNull(),
+  subject: varchar("subject", { length: 100 }).notNull(),
+  assignmentTitle: varchar("assignmentTitle", { length: 300 }).notNull(),
+  grade: varchar("grade", { length: 10 }).notNull(), // e.g. "A", "92", "Pass"
+  notes: text("notes"),
+  gradedAt: timestamp("gradedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SchoolGradeEntry = typeof schoolGradeEntries.$inferSelect;
+export type InsertSchoolGradeEntry = typeof schoolGradeEntries.$inferInsert;

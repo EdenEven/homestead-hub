@@ -21,6 +21,11 @@ import MapExplorer from "./pages/MapExplorer";
 import Profile from "./pages/Profile";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import Schoolhouse from "./pages/Schoolhouse";
+import SchoolCourse from "./pages/SchoolCourse";
+import SchoolBuilder from "./pages/SchoolBuilder";
+import SchoolStudents from "./pages/SchoolStudents";
+import SchoolGradebook from "./pages/SchoolGradebook";
 
 function Router() {
   return (
@@ -35,6 +40,11 @@ function Router() {
       <Route path="/profile" component={Profile} />
       <Route path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
+      <Route path="/schoolhouse" component={Schoolhouse} />
+      <Route path="/schoolhouse/course/:id" component={SchoolCourse} />
+      <Route path="/schoolhouse/builder" component={SchoolBuilder} />
+      <Route path="/schoolhouse/students" component={SchoolStudents} />
+      <Route path="/schoolhouse/gradebook" component={SchoolGradebook} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

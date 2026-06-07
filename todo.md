@@ -78,3 +78,19 @@
 - [x] Add new barter listing toast notification when a trade is posted
 - [x] Add browser push notification opt-in system
 - [ ] Implement server-side web push delivery (VAPID keys + send on new blog post / new barter listing)
+
+## The Schoolhouse — Homeschool Course Studio
+- [x] Add Schoolhouse DB tables (courses, lessons, quizzes, students, progress, grades)
+- [x] Build Schoolhouse tRPC router (courses, lessons, students, grades CRUD)
+- [x] Seed 5 pre-built homestead courses (K-8 STEM + 9-12 AP/STEM) with lessons and quizzes
+- [x] Build Schoolhouse landing dashboard (welcome banner, active courses, student progress)
+- [x] Build Course Browser page (pre-built + user-created courses grid)
+- [x] Build Course Viewer page (lesson list, video embeds, quiz, progress tracking)
+- [x] Build Course Builder Studio (lesson editor, quiz builder, media library)
+- [x] Build Student Profiles page (photo, grade level, progress bars, mood log)
+- [x] Build GradeBook view (table, student selector, quiz scores, letter grades)
+- [ ] Build Printable Lesson Packet (PDF-ready branded output)
+- [ ] Add CSV export to GradeBook
+- [x] Write vitest tests for Schoolhouse router helpers
+- [x] Add Schoolhouse link to main navigation
+- [x] Write vitest tests for Schoolhouse router

@@ -43,6 +43,13 @@
       "when": 1780691698069,
       "tag": "0005_clear_karen_page",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1780809280685,
+      "tag": "0006_mute_bishop",
+      "breakpoints": true
     }
   ]
 }

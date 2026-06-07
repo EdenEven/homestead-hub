@@ -21,6 +21,30 @@ import {
   clearAnnouncement,
   savePushSubscription,
   deletePushSubscription,
+  getSchoolCourses,
+  getSchoolCourseById,
+  createSchoolCourse,
+  updateSchoolCourse,
+  deleteSchoolCourse,
+  getLessonsByCourse,
+  getLessonById,
+  createLesson,
+  updateLesson,
+  deleteLesson,
+  getQuizByLessonId,
+  getQuizQuestions,
+  createQuiz,
+  createQuizQuestion,
+  getStudentsByParent,
+  getStudentById,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+  getLessonProgress,
+  markLessonComplete,
+  getGradesByStudent,
+  createGradeEntry,
+  deleteGradeEntry,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
@@ -576,6 +600,275 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
       .input(z.object({ endpoint: z.string() }))
       .mutation(async ({ input }) => {
         await deletePushSubscription(input.endpoint);
+        return { success: true };
+      }),
+  }),
+
+  // ---- The Schoolhouse ----
+  schoolhouse: router({
+    // Courses
+    getCourses: publicProcedure.query(async () => {
+      return getSchoolCourses();
+    }),
+
+    getCourse: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return getSchoolCourseById(input.id);
+      }),
+
+    createCourse: protectedProcedure
+      .input(z.object({
+        title: z.string().min(1).max(300),
+        description: z.string().min(1),
+        subject: z.string().min(1).max(100),
+        gradeMin: z.number().min(0).max(12),
+        gradeMax: z.number().min(0).max(12),
+        coverImageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await createSchoolCourse({
+          ...input,
+          coverImageUrl: input.coverImageUrl ?? null,
+          createdBy: ctx.user.id,
+          isPrebuilt: false,
+          isPublished: true,
+        });
+        return { id };
+      }),
+
+    updateCourse: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).max(300).optional(),
+        description: z.string().optional(),
+        subject: z.string().optional(),
+        gradeMin: z.number().min(0).max(12).optional(),
+        gradeMax: z.number().min(0).max(12).optional(),
+        coverImageUrl: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateSchoolCourse(id, data);
+        return { success: true };
+      }),
+
+    deleteCourse: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteSchoolCourse(input.id);
+        return { success: true };
+      }),
+
+    // Lessons
+    getLessons: publicProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ input }) => {
+        return getLessonsByCourse(input.courseId);
+      }),
+
+    getLesson: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return getLessonById(input.id);
+      }),
+
+    createLesson: protectedProcedure
+      .input(z.object({
+        courseId: z.number(),
+        title: z.string().min(1).max(300),
+        objective: z.string().optional(),
+        content: z.string().optional(),
+        videoUrl: z.string().optional(),
+        materials: z.string().optional(),
+        sortOrder: z.number().default(0),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await createLesson({
+          ...input,
+          objective: input.objective ?? null,
+          content: input.content ?? null,
+          videoUrl: input.videoUrl ?? null,
+          materials: input.materials ?? null,
+        });
+        return { id };
+      }),
+
+    updateLesson: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        objective: z.string().optional(),
+        content: z.string().optional(),
+        videoUrl: z.string().optional(),
+        materials: z.string().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateLesson(id, data);
+        return { success: true };
+      }),
+
+    deleteLesson: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteLesson(input.id);
+        return { success: true };
+      }),
+
+    // Quiz
+    getQuiz: publicProcedure
+      .input(z.object({ lessonId: z.number() }))
+      .query(async ({ input }) => {
+        const quiz = await getQuizByLessonId(input.lessonId);
+        if (!quiz) return null;
+        const questions = await getQuizQuestions(quiz.id);
+        return { ...quiz, questions };
+      }),
+
+    createQuiz: protectedProcedure
+      .input(z.object({
+        lessonId: z.number(),
+        title: z.string().min(1).max(300),
+        questions: z.array(z.object({
+          question: z.string().min(1),
+          optionA: z.string().min(1),
+          optionB: z.string().min(1),
+          optionC: z.string().optional(),
+          optionD: z.string().optional(),
+          correctAnswer: z.enum(["A", "B", "C", "D"]),
+          sortOrder: z.number().default(0),
+        })),
+      }))
+      .mutation(async ({ input }) => {
+        const quizId = await createQuiz({ lessonId: input.lessonId, title: input.title });
+        for (const q of input.questions) {
+          await createQuizQuestion({
+            quizId,
+            question: q.question,
+            optionA: q.optionA,
+            optionB: q.optionB,
+            optionC: q.optionC ?? null,
+            optionD: q.optionD ?? null,
+            correctAnswer: q.correctAnswer,
+            sortOrder: q.sortOrder,
+          });
+        }
+        return { quizId };
+      }),
+
+    // Students
+    getStudents: protectedProcedure.query(async ({ ctx }) => {
+      return getStudentsByParent(ctx.user.id);
+    }),
+
+    createStudent: protectedProcedure
+      .input(z.object({
+        name: z.string().min(1).max(100),
+        gradeLevel: z.number().min(0).max(12),
+        avatarUrl: z.string().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const id = await createStudent({
+          parentUserId: ctx.user.id,
+          name: input.name,
+          gradeLevel: input.gradeLevel,
+          avatarUrl: input.avatarUrl ?? null,
+          notes: input.notes ?? null,
+        });
+        return { id };
+      }),
+
+    updateStudent: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        gradeLevel: z.number().min(0).max(12).optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const student = await getStudentById(input.id);
+        if (!student || student.parentUserId !== ctx.user.id) throw new Error("Not authorized");
+        const { id, ...data } = input;
+        await updateStudent(id, data);
+        return { success: true };
+      }),
+
+    deleteStudent: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const student = await getStudentById(input.id);
+        if (!student || student.parentUserId !== ctx.user.id) throw new Error("Not authorized");
+        await deleteStudent(input.id);
+        return { success: true };
+      }),
+
+    // Progress
+    getProgress: protectedProcedure
+      .input(z.object({ studentId: z.number(), courseId: z.number().optional() }))
+      .query(async ({ ctx, input }) => {
+        const student = await getStudentById(input.studentId);
+        if (!student || student.parentUserId !== ctx.user.id) throw new Error("Not authorized");
+        return getLessonProgress(input.studentId, input.courseId);
+      }),
+
+    markComplete: protectedProcedure
+      .input(z.object({
+        studentId: z.number(),
+        lessonId: z.number(),
+        quizScore: z.number().min(0).max(100).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const student = await getStudentById(input.studentId);
+        if (!student || student.parentUserId !== ctx.user.id) throw new Error("Not authorized");
+        await markLessonComplete({
+          studentId: input.studentId,
+          lessonId: input.lessonId,
+          isCompleted: true,
+          quizScore: input.quizScore ?? null,
+          completedAt: new Date(),
+        });
+        return { success: true };
+      }),
+
+    // Grades
+    getGrades: protectedProcedure
+      .input(z.object({ studentId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const student = await getStudentById(input.studentId);
+        if (!student || student.parentUserId !== ctx.user.id) throw new Error("Not authorized");
+        return getGradesByStudent(input.studentId);
+      }),
+
+    addGrade: protectedProcedure
+      .input(z.object({
+        studentId: z.number(),
+        courseId: z.number(),
+        subject: z.string().min(1).max(100),
+        assignmentTitle: z.string().min(1).max(300),
+        grade: z.string().min(1).max(10),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const student = await getStudentById(input.studentId);
+        if (!student || student.parentUserId !== ctx.user.id) throw new Error("Not authorized");
+        await createGradeEntry({
+          studentId: input.studentId,
+          courseId: input.courseId,
+          subject: input.subject,
+          assignmentTitle: input.assignmentTitle,
+          grade: input.grade,
+          notes: input.notes ?? null,
+        });
+        return { success: true };
+      }),
+
+    deleteGrade: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteGradeEntry(input.id);
         return { success: true };
       }),
   }),
