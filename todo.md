@@ -105,3 +105,8 @@
 - [x] Write Patreon page description for A1 Homestead Hub
 - [x] Write first Patreon post demoing the website
 - [x] Add Share to Patreon button on course pages and study guide panel
+
+## AI Course Creator
+- [x] Add generateCourse tRPC procedure (LLM structured JSON — full course with lessons and quizzes)
+- [x] Build AI Course Creator UI (describe prompt, grade level, subject, generate button, preview, save)
+- [x] Wire AI Course Creator into The Schoolhouse navigation

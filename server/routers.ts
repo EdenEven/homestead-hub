@@ -964,6 +964,128 @@ Write in a warm, encouraging tone appropriate for ${gradeLabel}. Use the homeste
         await deleteStudyGuide(input.id, ctx.user.id);
         return { success: true };
       }),
+
+    generateCourse: protectedProcedure
+      .input(z.object({
+        prompt: z.string().min(10).max(1000),
+        gradeLevel: z.string().optional(),
+        subject: z.string().optional(),
+        lessonCount: z.number().min(2).max(10).default(5),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const gradeLabel = input.gradeLevel ?? "K-8";
+        const subjectLabel = input.subject ?? "Homesteading & STEM";
+        const systemPrompt = `You are an expert homeschool curriculum designer specializing in homesteading, self-reliant living, and STEM education. You create engaging, practical, hands-on courses for homeschool families. Always respond with valid JSON only — no markdown fences, no extra text.`;
+        const userPrompt = `Create a complete homeschool course based on this description:
+"${input.prompt}"
+
+Grade Level: ${gradeLabel}
+Subject Area: ${subjectLabel}
+Number of Lessons: ${input.lessonCount}
+
+Return a JSON object with this exact structure:
+{
+  "title": "Course title (concise, engaging)",
+  "description": "2-3 sentence course overview for parents",
+  "gradeRange": "e.g. Grades 3-6",
+  "subject": "subject category",
+  "estimatedWeeks": 4,
+  "lessons": [
+    {
+      "title": "Lesson title",
+      "content": "Full lesson in Markdown (400-600 words). Include: learning objectives, key concepts, real homestead examples, hands-on activity, and a fun fact.",
+      "sortOrder": 1,
+      "quiz": {
+        "title": "Quiz title",
+        "questions": [
+          {
+            "question": "Question text?",
+            "optionA": "Option A",
+            "optionB": "Option B",
+            "optionC": "Option C",
+            "optionD": "Option D",
+            "correctAnswer": "A",
+            "explanation": "Why this is correct"
+          }
+        ]
+      }
+    }
+  ]
+}
+
+Each lesson must have exactly 3 quiz questions. Make content practical, warm, and grounded in real homestead skills.`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        });
+
+        const rawContent = response.choices[0]?.message?.content ?? "{}";
+        const contentStr = typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent);
+        // Strip markdown fences if present
+        const cleaned = contentStr.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
+        let courseData: any;
+        try {
+          courseData = JSON.parse(cleaned);
+        } catch {
+          throw new Error("AI returned invalid JSON. Please try again.");
+        }
+
+        // Parse gradeLevel string (e.g. "K-2", "3-5", "9-12") into gradeMin/gradeMax integers
+        // K=0, 1st=1 ... 12th=12
+        const parseGradeRange = (gl: string): { gradeMin: number; gradeMax: number } => {
+          const parts = gl.replace(/[^0-9K\-]/gi, "").split("-");
+          const toInt = (s: string) => s.toUpperCase() === "K" ? 0 : parseInt(s, 10) || 0;
+          const min = toInt(parts[0] ?? "0");
+          const max = parts.length > 1 ? toInt(parts[1]) : min;
+          return { gradeMin: Math.min(min, max), gradeMax: Math.max(min, max) };
+        };
+        const { gradeMin, gradeMax } = parseGradeRange(gradeLabel);
+
+        const courseId = await createSchoolCourse({
+          title: courseData.title,
+          description: courseData.description,
+          gradeMin,
+          gradeMax,
+          subject: courseData.subject ?? subjectLabel,
+          isPublished: false,
+          createdBy: ctx.user.id,
+        });
+
+        for (const lesson of (courseData.lessons ?? [])) {
+          const lessonId = await createLesson({
+            courseId,
+            title: lesson.title,
+            content: lesson.content,
+            videoUrl: null,
+            sortOrder: lesson.sortOrder ?? 1,
+          });
+          if (lesson.quiz && Array.isArray(lesson.quiz.questions) && lesson.quiz.questions.length > 0) {
+            const quizId = await createQuiz({ lessonId, title: lesson.quiz.title ?? `Quiz: ${lesson.title}` });
+            for (const q of lesson.quiz.questions) {
+              await createQuizQuestion({
+                quizId,
+                question: q.question,
+                optionA: q.optionA,
+                optionB: q.optionB,
+                optionC: q.optionC ?? null,
+                optionD: q.optionD ?? null,
+                correctAnswer: q.correctAnswer,
+                sortOrder: 1,
+              });
+            }
+          }
+        }
+
+        return {
+          courseId,
+          title: courseData.title,
+          description: courseData.description,
+          lessonCount: (courseData.lessons ?? []).length,
+        };
+      }),
   }),
 });
 export type AppRouter = typeof appRouter;

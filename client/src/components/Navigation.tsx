@@ -16,6 +16,7 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "Community", href: "/community" },
   { label: "Barter & Trade", href: "/barter" },
   { label: "The Schoolhouse", href: "/schoolhouse", highlight: true },
+  { label: "✦ AI Course Creator", href: "/schoolhouse/ai-creator", highlight: true },
   { label: "Land Access", href: "/land-access" },
   { label: "Map Explorer", href: "/map" },
 ];
