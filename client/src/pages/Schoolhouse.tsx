@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { BookOpen, GraduationCap, Users, Pencil, ChevronRight, Star, Sprout, Sparkles } from "lucide-react";
+import { BookOpen, GraduationCap, Users, Pencil, ChevronRight, Star, Sprout, Sparkles, Zap } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const GRADE_LABELS: Record<number, string> = {
@@ -146,6 +146,18 @@ export default function Schoolhouse() {
               </div>
             </Link>
           )}
+          <Link href="/schoolhouse/pro">
+            <div className="bg-gradient-to-br from-[oklch(0.68_0.12_65)] to-[oklch(0.58_0.14_55)] rounded-xl border border-[oklch(0.55_0.12_65)] p-5 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer group">
+              <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                <Zap className="w-6 h-6 text-[oklch(0.18_0.06_145)]" />
+              </div>
+              <div>
+                <div className="font-semibold text-[oklch(0.18_0.06_145)]">Schoolhouse Pro</div>
+                <div className="text-sm text-[oklch(0.25_0.06_145)]/80">Voice tutor + unlimited AI</div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[oklch(0.25_0.06_145)]/60 ml-auto" />
+            </div>
+          </Link>
         </div>
       </section>
 

@@ -27,6 +27,8 @@ import SchoolBuilder from "./pages/SchoolBuilder";
 import SchoolStudents from "./pages/SchoolStudents";
 import SchoolGradebook from "./pages/SchoolGradebook";
 import SchoolAICreator from "./pages/SchoolAICreator";
+import SchoolPrint from "./pages/SchoolPrint";
+import SchoolhousePro from "./pages/SchoolhousePro";
 
 function Router() {
   return (
@@ -47,6 +49,8 @@ function Router() {
       <Route path="/schoolhouse/students" component={SchoolStudents} />
       <Route path="/schoolhouse/gradebook" component={SchoolGradebook} />
       <Route path="/schoolhouse/ai-creator" component={SchoolAICreator} />
+      <Route path="/schoolhouse/course/:id/print" component={SchoolPrint} />
+      <Route path="/schoolhouse/pro" component={SchoolhousePro} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -295,3 +295,35 @@ export const schoolStudyGuides = mysqlTable("schoolStudyGuides", {
 
 export type SchoolStudyGuide = typeof schoolStudyGuides.$inferSelect;
 export type InsertSchoolStudyGuide = typeof schoolStudyGuides.$inferInsert;
+
+/**
+ * AI Tutor Sessions — per-course chat history with Miss Hazel
+ */
+export const schoolTutorSessions = mysqlTable("schoolTutorSessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  courseId: int("courseId").notNull(),
+  lessonId: int("lessonId"), // optional — which lesson context is active
+  messages: text("messages").notNull(), // JSON array of { role, content } objects
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SchoolTutorSession = typeof schoolTutorSessions.$inferSelect;
+export type InsertSchoolTutorSession = typeof schoolTutorSessions.$inferInsert;
+
+/**
+ * Schoolhouse Pro Subscriptions — tracks paid upgrade status
+ */
+export const schoolProSubscriptions = mysqlTable("schoolProSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 128 }),
+  status: mysqlEnum("status", ["active", "canceled", "past_due", "trialing"]).default("trialing").notNull(),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SchoolProSubscription = typeof schoolProSubscriptions.$inferSelect;
+export type InsertSchoolProSubscription = typeof schoolProSubscriptions.$inferInsert;

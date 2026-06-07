@@ -266,6 +266,8 @@ import {
   schoolStudents, InsertSchoolStudent,
   schoolLessonProgress, InsertSchoolLessonProgress,
   schoolGradeEntries, InsertSchoolGradeEntry,
+  schoolTutorSessions, InsertSchoolTutorSession,
+  schoolProSubscriptions, InsertSchoolProSubscription,
 } from "../drizzle/schema";
 
 // ---- Courses ----
@@ -504,4 +506,61 @@ export async function deleteStudyGuide(id: number, userId: number) {
   if (!db) return;
   await db.delete(schoolStudyGuides)
     .where(and(eq(schoolStudyGuides.id, id), eq(schoolStudyGuides.createdByUserId, userId)));
+}
+
+// ---- AI Tutor Sessions ----
+
+export async function getTutorSession(userId: number, courseId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(schoolTutorSessions)
+    .where(and(eq(schoolTutorSessions.userId, userId), eq(schoolTutorSessions.courseId, courseId)))
+    .orderBy(desc(schoolTutorSessions.updatedAt))
+    .limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function upsertTutorSession(userId: number, courseId: number, lessonId: number | null, messages: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getTutorSession(userId, courseId);
+  if (existing) {
+    await db.update(schoolTutorSessions)
+      .set({ messages, lessonId, updatedAt: new Date() })
+      .where(eq(schoolTutorSessions.id, existing.id));
+    return existing.id;
+  } else {
+    const result = await db.insert(schoolTutorSessions).values({ userId, courseId, lessonId, messages });
+    return result[0].insertId as number;
+  }
+}
+
+// ---- Schoolhouse Pro Subscriptions ----
+
+export async function getProSubscription(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(schoolProSubscriptions)
+    .where(eq(schoolProSubscriptions.userId, userId))
+    .limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function isUserPro(userId: number): Promise<boolean> {
+  const sub = await getProSubscription(userId);
+  if (!sub) return false;
+  if (sub.status !== "active" && sub.status !== "trialing") return false;
+  if (sub.expiresAt && sub.expiresAt < new Date()) return false;
+  return true;
+}
+
+export async function upsertProSubscription(data: InsertSchoolProSubscription) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const existing = await getProSubscription(data.userId);
+  if (existing) {
+    await db.update(schoolProSubscriptions).set(data).where(eq(schoolProSubscriptions.userId, data.userId));
+  } else {
+    await db.insert(schoolProSubscriptions).values(data);
+  }
 }

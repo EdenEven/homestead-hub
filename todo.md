@@ -110,3 +110,37 @@
 - [x] Add generateCourse tRPC procedure (LLM structured JSON — full course with lessons and quizzes)
 - [x] Build AI Course Creator UI (describe prompt, grade level, subject, generate button, preview, save)
 - [x] Wire AI Course Creator into The Schoolhouse navigation
+
+## Schoolhouse Pro — AI Tutor + Voice + PDF
+
+### AI Tutor (Free tier — text chat)
+- [x] Add schoolTutorSessions DB table (sessionId, courseId, userId, messages JSON, createdAt)
+- [x] Add tutorChat tRPC procedure — per-course AI tutor with lesson context injected into system prompt
+- [x] Build AI Tutor chat panel on the Course Viewer page (collapsible side panel, lesson-aware)
+- [x] Tutor knows the current lesson content, can answer questions, quiz the student, explain concepts
+- [x] Tutor persona: "Miss Hazel" — warm, encouraging, homestead-savvy homeschool teacher
+
+### PDF Printable Lesson Packets (Free tier)
+- [x] Build /schoolhouse/course/:id/print route — full print-ready page
+- [x] Print layout: branded header (A1 Homestead Hub logo + course title), lesson content, vocab list, quiz, activity
+- [x] Add Print Packet button on Course Viewer page (triggers browser print dialog with clean CSS)
+- [x] Add CSS @media print styles to hide nav, sidebar, buttons — show only lesson content
+- [x] PDF download option: server-side PDF generation using puppeteer or html-to-pdf
+
+### Schoolhouse Pro Upgrade (Paid tier — $9/month or $79/year)
+- [x] Add schoolProSubscriptions DB table (userId, stripeSubscriptionId, status, expiresAt)
+- [x] Add Stripe checkout for Schoolhouse Pro tier ($9/month)
+- [x] Add isPro flag to user session / auth context
+- [x] Build Upgrade modal — shown when free user tries to access Pro features
+- [ ] Pro feature gate: ElevenLabs voice tutor (Miss Hazel speaks the lesson aloud)
+- [ ] Pro feature gate: Voice Q&A — student asks question by voice, Miss Hazel responds in voice
+- [ ] Pro feature gate: AI-generated course cover images (image generation per course)
+- [ ] Pro feature gate: Unlimited AI course generation (free tier = 3 courses/month)
+- [x] Build Schoolhouse Pro landing section on The Schoolhouse page (feature comparison table)
+
+### ElevenLabs Voice Integration (Pro feature)
+- [ ] Add ElevenLabs API key to secrets (ELEVENLABS_API_KEY)
+- [ ] Add tRPC procedure: generateSpeech — takes text, returns audio URL (stored in S3)
+- [ ] Build voice playback UI on Course Viewer — "Listen to Lesson" button (Pro only)
+- [ ] Build voice tutor response — Miss Hazel's text reply is also spoken aloud (Pro only)
+- [ ] Voice Q&A: mic button in tutor panel → transcribe via Whisper → send to tutor → speak response

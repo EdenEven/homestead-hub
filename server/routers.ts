@@ -49,12 +49,41 @@ import {
   getStudyGuidesByCourse,
   getStudyGuideById,
   deleteStudyGuide,
+  getTutorSession,
+  upsertTutorSession,
+  isUserPro,
+  upsertProSubscription,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
+import Stripe from "stripe";
 
 export const appRouter = router({
   system: systemRouter,
+
+  // ---- Stripe Checkout ----
+  stripe: router({
+    createCheckoutSession: protectedProcedure
+      .input(z.object({
+        priceId: z.string(),
+        successUrl: z.string().url(),
+        cancelUrl: z.string().url(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+          apiVersion: "2026-02-25.clover" as any,
+        });
+        const session = await stripeClient.checkout.sessions.create({
+          mode: "subscription",
+          payment_method_types: ["card"],
+          line_items: [{ price: input.priceId, quantity: 1 }],
+          success_url: input.successUrl,
+          cancel_url: input.cancelUrl,
+          metadata: { user_id: String(ctx.user.id) },
+        });
+        return { url: session.url };
+      }),
+  }),
 
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -1085,6 +1114,75 @@ Each lesson must have exactly 3 quiz questions. Make content practical, warm, an
           description: courseData.description,
           lessonCount: (courseData.lessons ?? []).length,
         };
+      }),
+
+    // ---- AI Tutor (Miss Hazel) ----
+    getTutorSession: protectedProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const session = await getTutorSession(ctx.user.id, input.courseId);
+        if (!session) return { messages: [] };
+        try {
+          return { messages: JSON.parse(session.messages) as Array<{ role: string; content: string }> };
+        } catch {
+          return { messages: [] };
+        }
+      }),
+
+    tutorChat: protectedProcedure
+      .input(z.object({
+        courseId: z.number(),
+        lessonId: z.number().optional(),
+        lessonTitle: z.string().optional(),
+        lessonContent: z.string().optional(),
+        courseTitle: z.string(),
+        userMessage: z.string().min(1).max(2000),
+        history: z.array(z.object({ role: z.string(), content: z.string() })).optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const systemPrompt = `You are Miss Hazel, a warm, encouraging, and knowledgeable homeschool tutor at The Homestead Hub Schoolhouse. You specialize in homesteading, self-reliant living, STEM, and practical life skills.
+
+You are currently helping a student with the course: "${input.courseTitle}".
+${input.lessonTitle ? `The student is on lesson: "${input.lessonTitle}".` : ""}
+${input.lessonContent ? `\nLesson content for context:\n${input.lessonContent.slice(0, 2000)}` : ""}
+
+Your personality:
+- Warm, patient, and encouraging — like a beloved teacher
+- Use real homestead examples and analogies
+- Ask follow-up questions to check understanding
+- Celebrate correct answers with genuine enthusiasm
+- When a student is wrong, gently redirect without discouraging them
+- Keep responses concise (2-4 paragraphs max) unless explaining a complex concept
+- You can quiz the student, explain concepts, suggest hands-on activities, and answer questions
+- Never provide medical, legal, or dangerous advice`;
+
+        const history = (input.history ?? []).slice(-10); // Keep last 10 messages for context
+        const messages = [
+          { role: "system" as const, content: systemPrompt },
+          ...history.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
+          { role: "user" as const, content: input.userMessage },
+        ];
+
+        const response = await invokeLLM({ messages });
+        const reply = response.choices[0]?.message?.content ?? "I'm sorry, I had trouble thinking of a response. Please try again!";
+        const replyText = typeof reply === "string" ? reply : JSON.stringify(reply);
+
+        // Save updated session
+        const updatedHistory = [
+          ...history,
+          { role: "user", content: input.userMessage },
+          { role: "assistant", content: replyText },
+        ];
+        await upsertTutorSession(ctx.user.id, input.courseId, input.lessonId ?? null, JSON.stringify(updatedHistory));
+
+        return { reply: replyText };
+      }),
+
+    // ---- Pro Status ----
+    checkPro: protectedProcedure
+      .query(async ({ ctx }) => {
+        const pro = await isUserPro(ctx.user.id);
+        return { isPro: pro };
       }),
   }),
 });

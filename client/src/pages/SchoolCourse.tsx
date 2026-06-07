@@ -3,7 +3,8 @@ import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2, GraduationCap, MessageCircle, X } from "lucide-react";
+import { AIChatBox, Message } from "@/components/AIChatBox";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -46,6 +47,47 @@ export default function SchoolCourse() {
         setPatreonShareText(null);
       }, 800);
     });
+  }
+
+  // Tutor state
+  const [showTutor, setShowTutor] = useState(false);
+  const [tutorMessages, setTutorMessages] = useState<Message[]>([]);
+  const [tutorInitialized, setTutorInitialized] = useState(false);
+
+  const tutorChatMutation = trpc.schoolhouse.tutorChat.useMutation({
+    onSuccess: (data) => {
+      setTutorMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+    },
+    onError: () => {
+      setTutorMessages(prev => [...prev, { role: "assistant", content: "I'm sorry, I had a little trouble there. Could you try asking again?" }]);
+    },
+  });
+
+  function handleTutorSend(content: string) {
+    if (!course) return;
+    const newMsg: Message = { role: "user", content };
+    const updatedHistory = [...tutorMessages, newMsg];
+    setTutorMessages(updatedHistory);
+    tutorChatMutation.mutate({
+      courseId,
+      courseTitle: course.title,
+      lessonId: currentLesson?.id,
+      lessonTitle: currentLesson?.title,
+      lessonContent: currentLesson?.content ?? undefined,
+      userMessage: content,
+      history: tutorMessages.map(m => ({ role: m.role, content: m.content })),
+    });
+  }
+
+  function openTutor() {
+    if (!tutorInitialized && course) {
+      setTutorMessages([{
+        role: "assistant",
+        content: `Hello! I'm **Miss Hazel**, your personal tutor for *${course.title}*. 🌾\n\nI'm here to help you understand the lessons, answer your questions, and quiz you when you're ready. What would you like to explore today?`,
+      }]);
+      setTutorInitialized(true);
+    }
+    setShowTutor(true);
   }
 
   // Study guide state
@@ -222,13 +264,15 @@ export default function SchoolCourse() {
                         </p>
                       )}
                     </div>
-                    <button
-                      onClick={() => window.print()}
+                    <a
+                      href={`/schoolhouse/course/${courseId}/print`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="shrink-0 flex items-center gap-1.5 text-sm text-[oklch(0.45_0.05_50)] hover:text-[oklch(0.35_0.08_50)] border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 hover:bg-[oklch(0.96_0.02_80)] transition-colors"
                     >
                       <Printer className="w-4 h-4" />
-                      Print
-                    </button>
+                      Print Packet
+                    </a>
                   </div>
 
                   {/* Materials */}
@@ -569,6 +613,64 @@ export default function SchoolCourse() {
             )}
           </div>
         </div>
+      )}
+
+      {/* Miss Hazel AI Tutor — floating button + slide-up panel */}
+      {user && course && (
+        <>
+          {/* Floating Tutor Button */}
+          {!showTutor && (
+            <button
+              onClick={openTutor}
+              className="fixed bottom-24 right-6 z-40 flex items-center gap-2 bg-[oklch(0.28_0.06_50)] hover:bg-[oklch(0.35_0.08_60)] text-white font-bold px-5 py-3 rounded-full shadow-xl transition-all hover:scale-105 border-2 border-[oklch(0.55_0.12_80)]"
+            >
+              <GraduationCap className="w-5 h-5 text-[oklch(0.85_0.15_80)]" />
+              Ask Miss Hazel
+            </button>
+          )}
+
+          {/* Tutor Panel */}
+          {showTutor && (
+            <div className="fixed bottom-0 right-0 left-0 md:left-auto md:right-6 md:bottom-6 md:w-[420px] z-50 flex flex-col bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border border-[oklch(0.88_0.03_80)] overflow-hidden" style={{ maxHeight: "75vh" }}>
+              {/* Panel header */}
+              <div className="flex items-center justify-between px-4 py-3 bg-[oklch(0.25_0.06_50)] text-white shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[oklch(0.68_0.12_65)] flex items-center justify-center text-[oklch(0.18_0.06_145)] font-bold text-sm">H</div>
+                  <div>
+                    <div className="font-bold text-sm">Miss Hazel</div>
+                    <div className="text-xs text-white/70">Your Schoolhouse Tutor</div>
+                  </div>
+                </div>
+                <button onClick={() => setShowTutor(false)} className="text-white/70 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              {/* Lesson context badge */}
+              {currentLesson && (
+                <div className="px-4 py-2 bg-[oklch(0.95_0.03_80)] border-b border-[oklch(0.88_0.03_80)] text-xs text-[oklch(0.45_0.05_50)] flex items-center gap-1.5 shrink-0">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Currently on: <span className="font-semibold text-[oklch(0.35_0.05_50)]">{currentLesson.title}</span>
+                </div>
+              )}
+              {/* Chat */}
+              <div className="flex-1 overflow-hidden">
+                <AIChatBox
+                  messages={tutorMessages}
+                  onSendMessage={handleTutorSend}
+                  isLoading={tutorChatMutation.isPending}
+                  placeholder="Ask Miss Hazel anything about this lesson…"
+                  height="100%"
+                  suggestedPrompts={[
+                    "Can you explain this lesson in simpler terms?",
+                    "Quiz me on what I just learned!",
+                    "What's a hands-on activity for this topic?",
+                    "Why is this important for homesteading?",
+                  ]}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <Footer />
