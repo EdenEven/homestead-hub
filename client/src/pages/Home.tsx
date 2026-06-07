@@ -11,6 +11,25 @@ import Footer from "@/components/Footer";
 import { ArrowRight, BookOpen, Calendar, Headphones, FileText, MapPin, Repeat2, TreePine, Users } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
+const SITE_URL = "https://a1homesteadhub.com";
+
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "A1 Homestead Hub",
+  "url": SITE_URL,
+  "logo": `${SITE_URL}/favicon.ico`,
+  "description": "A1 Homestead Hub is a self-reliant living community offering homesteading skills, AI-powered homeschool courses, barter & trade, land access resources, and community connection for homesteaders across America.",
+  "sameAs": [
+    "https://www.facebook.com/a1homesteadhub"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "contactType": "customer support",
+    "url": SITE_URL
+  }
+};
+
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/hero-homestead-LxdjGSkwEZ2SSqHyG2V4jA.webp";
 const SKILLS_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/skills-collage-KwZPrPQKyyFRcZtTBfbfuA.webp";
 const BARTER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/barter-trade-3QymJoA3SDb8yHv3z9pTvD.webp";
@@ -205,6 +224,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "oklch(0.96 0.025 85)" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
       <Navigation />
 
       {/* ── HERO ── */}

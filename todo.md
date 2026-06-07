@@ -161,3 +161,11 @@
 - [x] Build CommodityChartModal component — price line chart using recharts, range selector, OHLC summary
 - [x] Make each ticker item clickable to open the chart modal
 - [x] Show symbol name, current price, change, and historical chart in the modal
+
+## Structured Data / Schema Markup (SEO Rich Results)
+- [x] Add Article + BreadcrumbList JSON-LD schema to BlogPost page
+- [x] Add HowTo + BreadcrumbList JSON-LD schema to SkillDetail page
+- [x] Add Course + BreadcrumbList JSON-LD schema to SchoolCourse page
+- [x] Add Organization JSON-LD schema to homepage (Home.tsx)
+- [x] Generate dynamic sitemap.xml at /sitemap.xml via Express route
+- [x] Add robots.txt with sitemap reference

@@ -10,6 +10,48 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import ElevenLabsSetupModal from "@/components/ElevenLabsSetupModal";
 
+const SITE_URL = "https://a1homesteadhub.com";
+
+function CourseSchema({ course, lessons }: {
+  course: { id: number; title: string; description: string; subject: string; gradeMin: number; gradeMax: number };
+  lessons: { title: string; content?: string | null }[];
+}) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Course",
+        "name": course.title,
+        "description": course.description,
+        "provider": {
+          "@type": "Organization",
+          "name": "A1 Homestead Hub",
+          "url": SITE_URL
+        },
+        "url": `${SITE_URL}/schoolhouse/course/${course.id}`,
+        "educationalLevel": gradeRange(course.gradeMin, course.gradeMax),
+        "about": course.subject,
+        "hasCourseInstance": {
+          "@type": "CourseInstance",
+          "courseMode": "online",
+          "instructor": { "@type": "Person", "name": "Miss Hazel (AI Tutor)" }
+        },
+        "numberOfCredits": lessons.length,
+        "teaches": lessons.map(l => l.title).join(", ")
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
+          { "@type": "ListItem", "position": 2, "name": "The Schoolhouse", "item": `${SITE_URL}/schoolhouse` },
+          { "@type": "ListItem", "position": 3, "name": course.title, "item": `${SITE_URL}/schoolhouse/course/${course.id}` }
+        ]
+      }
+    ]
+  };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+}
+
 const GRADE_LABELS: Record<number, string> = {
   0: "K", 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th",
   6: "6th", 7: "7th", 8: "8th", 9: "9th", 10: "10th", 11: "11th", 12: "12th",
@@ -238,6 +280,7 @@ export default function SchoolCourse() {
 
   return (
     <div className="min-h-screen bg-[oklch(0.98_0.01_80)]">
+      <CourseSchema course={course} lessons={lessons} />
       <Navigation />
 
       {/* Breadcrumb */}

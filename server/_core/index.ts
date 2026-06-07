@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { stripeWebhookRouter } from "../stripeWebhook";
 import { generateBlogPostHandler, weeklyCleanupHandler } from "../scheduledContent";
+import { sitemapHandler, robotsHandler } from "../sitemap";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -42,6 +43,9 @@ async function startServer() {
   // Scheduled content jobs (Heartbeat cron callbacks)
   app.post("/api/scheduled/generate-blog-post", generateBlogPostHandler);
   app.post("/api/scheduled/weekly-cleanup", weeklyCleanupHandler);
+  // SEO: dynamic sitemap and robots.txt
+  app.get("/sitemap.xml", sitemapHandler);
+  app.get("/robots.txt", robotsHandler);
   // tRPC API
   app.use(
     "/api/trpc",

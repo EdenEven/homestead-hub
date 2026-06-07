@@ -98,6 +98,43 @@ function renderContent(content: string) {
   return elements;
 }
 
+const SITE_URL = "https://a1homesteadhub.com";
+
+function ArticleSchema({ post }: { post: { title: string; excerpt?: string | null; author: string; publishedAt: Date; updatedAt: Date; heroImageUrl?: string | null; slug: string; tags?: string | null } }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "headline": post.title,
+        "description": post.excerpt ?? "",
+        "author": { "@type": "Person", "name": post.author },
+        "publisher": {
+          "@type": "Organization",
+          "name": "A1 Homestead Hub",
+          "url": SITE_URL,
+          "logo": { "@type": "ImageObject", "url": `${SITE_URL}/favicon.ico` }
+        },
+        "datePublished": new Date(post.publishedAt).toISOString(),
+        "dateModified": new Date(post.updatedAt).toISOString(),
+        "image": post.heroImageUrl ?? `${SITE_URL}/favicon.ico`,
+        "url": `${SITE_URL}/blog/${post.slug}`,
+        "keywords": post.tags ?? "",
+        "mainEntityOfPage": { "@type": "WebPage", "@id": `${SITE_URL}/blog/${post.slug}` }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
+          { "@type": "ListItem", "position": 2, "name": "From the Field", "item": `${SITE_URL}/blog` },
+          { "@type": "ListItem", "position": 3, "name": post.title, "item": `${SITE_URL}/blog/${post.slug}` }
+        ]
+      }
+    ]
+  };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+}
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { data: post, isLoading, error } = trpc.blog.getBySlug.useQuery({ slug: slug || "" }, { enabled: !!slug });
@@ -138,6 +175,7 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "oklch(0.97 0.01 80)" }}>
+      <ArticleSchema post={post} />
       <Navigation />
 
       {/* Hero image */}

@@ -11,6 +11,42 @@ import { getSkillBySlug } from "@/lib/skillsData";
 import { ArrowLeft, AlertTriangle, Lightbulb, ExternalLink, Clock, BookOpen } from "lucide-react";
 import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
 
+const SITE_URL = "https://a1homesteadhub.com";
+
+function HowToSchema({ skill }: { skill: { slug: string; title: string; intro: string; steps: { title: string; desc: string }[] } }) {
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "HowTo",
+        "name": `How to ${skill.title} — A Homesteader's Guide`,
+        "description": skill.intro,
+        "url": `${SITE_URL}/skills/${skill.slug}`,
+        "publisher": {
+          "@type": "Organization",
+          "name": "A1 Homestead Hub",
+          "url": SITE_URL
+        },
+        "step": skill.steps.map((step, i) => ({
+          "@type": "HowToStep",
+          "position": i + 1,
+          "name": step.title,
+          "text": step.desc
+        }))
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": SITE_URL },
+          { "@type": "ListItem", "position": 2, "name": "Skills Hub", "item": `${SITE_URL}/skills` },
+          { "@type": "ListItem", "position": 3, "name": skill.title, "item": `${SITE_URL}/skills/${skill.slug}` }
+        ]
+      }
+    ]
+  };
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />;
+}
+
 interface Props {
   params: { slug: string };
 }
@@ -43,6 +79,7 @@ export default function SkillDetail({ params }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "oklch(0.96 0.025 85)" }}>
+      <HowToSchema skill={skill} />
       <Navigation />
 
       {/* Header */}
