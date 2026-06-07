@@ -3,7 +3,7 @@ import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -27,6 +27,26 @@ export default function SchoolCourse() {
   const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
+
+  // Patreon share modal
+  const [patreonShareText, setPatreonShareText] = useState<string | null>(null);
+  const [patreonShareCopied, setPatreonShareCopied] = useState(false);
+
+  function openPatreonShare(text: string) {
+    setPatreonShareText(text);
+    setPatreonShareCopied(false);
+  }
+
+  function copyAndOpenPatreon() {
+    if (!patreonShareText) return;
+    navigator.clipboard.writeText(patreonShareText).then(() => {
+      setPatreonShareCopied(true);
+      setTimeout(() => {
+        window.open("https://www.patreon.com/posts/create", "_blank");
+        setPatreonShareText(null);
+      }, 800);
+    });
+  }
 
   // Study guide state
   const [showGuidePanel, setShowGuidePanel] = useState(false);
@@ -138,6 +158,16 @@ export default function SchoolCourse() {
                 {gradeRange(course.gradeMin, course.gradeMax)} · {lessons.length} Lessons
               </div>
             </div>
+            {/* Share to Patreon */}
+            <button
+              onClick={() => openPatreonShare(
+                `🌾 New Course Alert on The Homestead Hub Schoolhouse!\n\n📚 ${course.title}\n\n${course.description}\n\nGrades: ${gradeRange(course.gradeMin, course.gradeMax)} · ${lessons.length} Lessons\n\nFree to access at:\nhttps://www.a1homesteadhub.com/schoolhouse/${course.id}\n\n#Homesteading #Homeschool #SelfReliant #A1HomesteadHub`
+              )}
+              className="shrink-0 flex items-center gap-2 bg-[oklch(0.55_0.18_25)] hover:bg-[oklch(0.48_0.18_25)] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+              Share to Patreon
+            </button>
           </div>
         </div>
       </div>
@@ -499,12 +529,20 @@ export default function SchoolCourse() {
                     <div className="bg-white rounded-xl border border-[oklch(0.88_0.03_80)] overflow-hidden">
                       <div className="px-6 py-4 border-b border-[oklch(0.88_0.03_80)] flex items-center justify-between gap-4">
                         <h3 className="font-bold text-[oklch(0.25_0.05_50)] text-base leading-snug">{activeGuide.title}</h3>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0 flex-wrap">
                           <button
                             onClick={() => window.print()}
                             className="flex items-center gap-1.5 text-sm text-[oklch(0.45_0.05_50)] hover:text-[oklch(0.35_0.08_50)] border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 hover:bg-[oklch(0.96_0.02_80)] transition-colors"
                           >
                             <Printer className="w-4 h-4" /> Print
+                          </button>
+                          <button
+                            onClick={() => openPatreonShare(
+                              `📚 Just generated a new AI study guide for our homeschool!\n\n"${activeGuide.title}"\n\nThe Homestead Hub Schoolhouse AI builds custom study guides for every course — vocabulary, key concepts, review questions, hands-on activities, and more. Free for all Hub members!\n\nGenerate yours at:\nhttps://www.a1homesteadhub.com/schoolhouse/${course.id}\n\n#Homeschool #HomesteadHub #STEMEducation #A1HomesteadHub`
+                            )}
+                            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-[oklch(0.55_0.18_25)] hover:bg-[oklch(0.48_0.18_25)] rounded-lg px-3 py-1.5 transition-colors"
+                          >
+                            <Share2 className="w-4 h-4" /> Share to Patreon
                           </button>
                           <button
                             onClick={() => {
@@ -534,6 +572,46 @@ export default function SchoolCourse() {
       )}
 
       <Footer />
+
+      {/* Patreon Share Modal */}
+      {patreonShareText && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => setPatreonShareText(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-[oklch(0.88_0.03_80)] flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-[oklch(0.25_0.05_50)] text-lg">Share to Patreon</h3>
+                <p className="text-sm text-[oklch(0.55_0.05_50)] mt-0.5">Copy this post, then paste it into your Patreon editor.</p>
+              </div>
+              <button onClick={() => setPatreonShareText(null)} className="text-[oklch(0.55_0.05_50)] hover:text-[oklch(0.35_0.05_50)] text-xl font-bold leading-none">&times;</button>
+            </div>
+            <div className="px-6 py-4">
+              <textarea
+                readOnly
+                value={patreonShareText}
+                className="w-full h-52 text-sm text-[oklch(0.25_0.05_50)] bg-[oklch(0.97_0.01_80)] border border-[oklch(0.88_0.03_80)] rounded-xl p-4 resize-none focus:outline-none font-mono leading-relaxed"
+              />
+            </div>
+            <div className="px-6 pb-5 flex gap-3">
+              <button
+                onClick={copyAndOpenPatreon}
+                className="flex-1 flex items-center justify-center gap-2 bg-[oklch(0.55_0.18_25)] hover:bg-[oklch(0.48_0.18_25)] text-white font-semibold py-3 rounded-xl transition-colors"
+              >
+                {patreonShareCopied ? (
+                  <><CheckCircle className="w-4 h-4" /> Copied! Opening Patreon...</>
+                ) : (
+                  <><Share2 className="w-4 h-4" /> Copy &amp; Open Patreon</>
+                )}
+              </button>
+              <button
+                onClick={() => setPatreonShareText(null)}
+                className="px-5 py-3 rounded-xl border border-[oklch(0.88_0.03_80)] text-[oklch(0.45_0.05_50)] hover:bg-[oklch(0.96_0.02_80)] transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

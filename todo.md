@@ -104,3 +104,4 @@
 ## Patreon
 - [x] Write Patreon page description for A1 Homestead Hub
 - [x] Write first Patreon post demoing the website
+- [x] Add Share to Patreon button on course pages and study guide panel
