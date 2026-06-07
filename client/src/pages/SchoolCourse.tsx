@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2, GraduationCap, MessageCircle, X } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2, GraduationCap, MessageCircle, X, Volume2, VolumeX, Pause, Play } from "lucide-react";
 import { AIChatBox, Message } from "@/components/AIChatBox";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import ElevenLabsSetupModal from "@/components/ElevenLabsSetupModal";
 
 const GRADE_LABELS: Record<number, string> = {
   0: "K", 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th",
@@ -88,6 +89,67 @@ export default function SchoolCourse() {
       setTutorInitialized(true);
     }
     setShowTutor(true);
+  }
+
+  // Voice / ElevenLabs state
+  const [showVoiceSetup, setShowVoiceSetup] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const { data: hasKeyData, refetch: refetchHasKey } = trpc.elevenLabs.hasKey.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
+  const hasElevenLabsKey = hasKeyData?.hasKey ?? false;
+
+  const speakMutation = trpc.elevenLabs.speak.useMutation({
+    onSuccess: (data) => {
+      // Stop any current audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+      // Decode base64 and play
+      const byteChars = atob(data.audioBase64);
+      const bytes = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([bytes], { type: data.mimeType });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => { setIsPlayingAudio(false); URL.revokeObjectURL(url); };
+      audio.onerror = () => { setIsPlayingAudio(false); };
+      audio.play();
+      setIsPlayingAudio(true);
+    },
+    onError: (err) => {
+      setIsPlayingAudio(false);
+      if (err.message === 'NO_KEY' || err.message === 'INVALID_KEY') {
+        setShowVoiceSetup(true);
+      } else {
+        toast.error('Voice playback failed. Please try again.');
+      }
+    },
+  });
+
+  function handleReadAloud() {
+    if (!currentLesson?.content) return;
+    if (isPlayingAudio) {
+      audioRef.current?.pause();
+      setIsPlayingAudio(false);
+      return;
+    }
+    if (!user) { toast.error('Sign in to use voice features.'); return; }
+    if (!hasElevenLabsKey) { setShowVoiceSetup(true); return; }
+    // Strip markdown for cleaner TTS
+    const plainText = (currentLesson.content || '')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/`[^`]+`/g, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .slice(0, 4500);
+    speakMutation.mutate({ text: plainText });
   }
 
   // Study guide state
@@ -264,15 +326,39 @@ export default function SchoolCourse() {
                         </p>
                       )}
                     </div>
-                    <a
-                      href={`/schoolhouse/course/${courseId}/print`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 flex items-center gap-1.5 text-sm text-[oklch(0.45_0.05_50)] hover:text-[oklch(0.35_0.08_50)] border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 hover:bg-[oklch(0.96_0.02_80)] transition-colors"
-                    >
-                      <Printer className="w-4 h-4" />
-                      Print Packet
-                    </a>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {/* Read-aloud button (Pro voice feature) */}
+                      {user && (
+                        <button
+                          onClick={handleReadAloud}
+                          disabled={speakMutation.isPending}
+                          title={hasElevenLabsKey ? (isPlayingAudio ? 'Pause Miss Hazel' : 'Listen to this lesson') : 'Connect ElevenLabs to enable voice'}
+                          className={`flex items-center gap-1.5 text-sm border rounded-lg px-3 py-1.5 transition-colors ${
+                            isPlayingAudio
+                              ? 'bg-[oklch(0.93_0.04_80)] border-[oklch(0.75_0.08_80)] text-[oklch(0.35_0.08_80)]'
+                              : 'text-[oklch(0.45_0.05_50)] hover:text-[oklch(0.35_0.08_50)] border-[oklch(0.88_0.03_80)] hover:bg-[oklch(0.96_0.02_80)]'
+                          }`}
+                        >
+                          {speakMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : isPlayingAudio ? (
+                            <Pause className="w-4 h-4" />
+                          ) : (
+                            <Volume2 className="w-4 h-4" />
+                          )}
+                          {speakMutation.isPending ? 'Loading…' : isPlayingAudio ? 'Pause' : 'Listen'}
+                        </button>
+                      )}
+                      <a
+                        href={`/schoolhouse/course/${courseId}/print`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 text-sm text-[oklch(0.45_0.05_50)] hover:text-[oklch(0.35_0.08_50)] border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 hover:bg-[oklch(0.96_0.02_80)] transition-colors"
+                      >
+                        <Printer className="w-4 h-4" />
+                        Print Packet
+                      </a>
+                    </div>
                   </div>
 
                   {/* Materials */}
@@ -674,6 +760,18 @@ export default function SchoolCourse() {
       )}
 
       <Footer />
+
+      {/* ElevenLabs BYOK Setup Modal */}
+      {showVoiceSetup && (
+        <ElevenLabsSetupModal
+          onClose={() => setShowVoiceSetup(false)}
+          onSuccess={() => {
+            setShowVoiceSetup(false);
+            refetchHasKey();
+            toast.success("Miss Hazel's voice is ready! Hit Listen on any lesson.");
+          }}
+        />
+      )}
 
       {/* Patreon Share Modal */}
       {patreonShareText && (

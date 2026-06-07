@@ -144,3 +144,14 @@
 - [ ] Build voice playback UI on Course Viewer — "Listen to Lesson" button (Pro only)
 - [ ] Build voice tutor response — Miss Hazel's text reply is also spoken aloud (Pro only)
 - [ ] Voice Q&A: mic button in tutor panel → transcribe via Whisper → send to tutor → speak response
+
+## BYOK ElevenLabs + Pro Voice Activation
+- [x] Add userElevenLabsKey column to users table (encrypted, nullable)
+- [x] Add saveElevenLabsKey and getElevenLabsKey tRPC procedures (protectedProcedure)
+- [x] Build ElevenLabs onboarding modal — step 1: affiliate link to get account, step 2: paste API key, step 3: validate key with test call, step 4: success
+- [x] Validate key server-side before saving (test TTS call with 1 character)
+- [x] Wire Miss Hazel read-aloud button on course viewer — uses user's own ElevenLabs key, gated behind Pro
+- [ ] Voice Q&A in Miss Hazel chat — microphone input → transcription → Miss Hazel text response → ElevenLabs TTS reply
+- [x] Show "Activate Voice" prompt in Miss Hazel panel when Pro user has no key saved
+- [x] Affiliate link used throughout: https://try.elevenlabs.io/lhgu4tpm0stc
+- [ ] Add ElevenLabs key management to user Profile/Settings page

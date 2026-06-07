@@ -100,6 +100,27 @@ export async function updateUserStripeByCustomerId(customerId: string, data: {
   await db.update(users).set(data).where(eq(users.stripeCustomerId, customerId));
 }
 
+// ---- ElevenLabs BYOK helpers ----
+
+export async function saveElevenLabsKey(userId: number, key: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ elevenLabsKey: key }).where(eq(users.id, userId));
+}
+
+export async function getElevenLabsKey(userId: number): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select({ elevenLabsKey: users.elevenLabsKey }).from(users).where(eq(users.id, userId)).limit(1);
+  return result[0]?.elevenLabsKey ?? null;
+}
+
+export async function clearElevenLabsKey(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ elevenLabsKey: null }).where(eq(users.id, userId));
+}
+
 // ---- Profile helpers ----
 
 export async function getProfileByUserId(userId: number) {

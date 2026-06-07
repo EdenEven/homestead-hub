@@ -61,12 +61,10 @@ export default function SchoolhousePro() {
       return;
     }
     createCheckout.mutate({
-      priceId: billingPeriod === "monthly"
-        ? "price_schoolhouse_pro_monthly"
-        : "price_schoolhouse_pro_yearly",
+      billingPeriod,
       successUrl: `${window.location.origin}/schoolhouse?pro=success`,
       cancelUrl: `${window.location.origin}/schoolhouse/pro`,
-    } as { priceId: string; successUrl: string; cancelUrl: string });
+    } as { billingPeriod: "monthly" | "yearly"; successUrl: string; cancelUrl: string });
   }
 
   const monthlyPrice = billingPeriod === "monthly" ? "$9" : "$6.58";

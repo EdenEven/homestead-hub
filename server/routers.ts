@@ -53,6 +53,9 @@ import {
   upsertTutorSession,
   isUserPro,
   upsertProSubscription,
+  saveElevenLabsKey,
+  getElevenLabsKey,
+  clearElevenLabsKey,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
@@ -65,18 +68,30 @@ export const appRouter = router({
   stripe: router({
     createCheckoutSession: protectedProcedure
       .input(z.object({
-        priceId: z.string(),
+        billingPeriod: z.enum(["monthly", "yearly"]),
         successUrl: z.string().url(),
         cancelUrl: z.string().url(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
+        const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+        if (!stripeSecretKey) throw new Error("Stripe is not configured.");
+
+        // Resolve price ID server-side so keys never touch the browser
+        const priceId = input.billingPeriod === "monthly"
+          ? process.env.STRIPE_PRICE_PRO_MONTHLY
+          : process.env.STRIPE_PRICE_PRO_YEARLY;
+
+        if (!priceId) {
+          throw new Error(`Stripe price ID for ${input.billingPeriod} plan is not configured. Please set STRIPE_PRICE_PRO_${input.billingPeriod.toUpperCase()} in your environment.`);
+        }
+
+        const stripeClient = new Stripe(stripeSecretKey, {
           apiVersion: "2026-02-25.clover" as any,
         });
         const session = await stripeClient.checkout.sessions.create({
           mode: "subscription",
           payment_method_types: ["card"],
-          line_items: [{ price: input.priceId, quantity: 1 }],
+          line_items: [{ price: priceId, quantity: 1 }],
           success_url: input.successUrl,
           cancel_url: input.cancelUrl,
           metadata: { user_id: String(ctx.user.id) },
@@ -521,22 +536,65 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
     }),
   }),
 
-  // ---- ElevenLabs Text-to-Speech ----
-  // Proxies TTS requests through the server so the API key stays secure.
-  // Affiliate link: https://try.elevenlabs.io/lhgu4tpm0stc
-  tts: router({
-    speak: publicProcedure
+  // ---- ElevenLabs BYOK Key Management ----
+  // Users bring their own ElevenLabs API key (via affiliate link) for Pro voice features.
+  // Keys are stored server-side and never exposed to the browser.
+  elevenLabs: router({
+    // Save or update the user's ElevenLabs API key (validates before saving)
+    saveKey: protectedProcedure
+      .input(z.object({ key: z.string().min(10).max(255) }))
+      .mutation(async ({ ctx, input }) => {
+        // Validate the key with a minimal TTS call before saving
+        const testResponse = await fetch(
+          "https://api.elevenlabs.io/v1/text-to-speech/EXAVITQu4vr4xnSDxMaL",
+          {
+            method: "POST",
+            headers: {
+              "xi-api-key": input.key,
+              "Content-Type": "application/json",
+              "Accept": "audio/mpeg",
+            },
+            body: JSON.stringify({
+              text: "Hi",
+              model_id: "eleven_flash_v2_5",
+              voice_settings: { stability: 0.5, similarity_boost: 0.8 },
+            }),
+          }
+        );
+        if (!testResponse.ok) {
+          if (testResponse.status === 401) {
+            throw new Error("Invalid API key — please check and try again.");
+          }
+          throw new Error(`ElevenLabs returned ${testResponse.status} — please try again.`);
+        }
+        await saveElevenLabsKey(ctx.user.id, input.key);
+        return { success: true };
+      }),
+
+    // Check if the current user has a key saved (returns boolean, not the key itself)
+    hasKey: protectedProcedure.query(async ({ ctx }) => {
+      const key = await getElevenLabsKey(ctx.user.id);
+      return { hasKey: !!key };
+    }),
+
+    // Remove the saved key
+    removeKey: protectedProcedure.mutation(async ({ ctx }) => {
+      await clearElevenLabsKey(ctx.user.id);
+      return { success: true };
+    }),
+
+    // TTS using the user's own key (Pro feature)
+    speak: protectedProcedure
       .input(z.object({
         text: z.string().min(1).max(5000),
-        voiceId: z.string().default("EXAVITQu4vr4xnSDxMaL"), // Sarah — clear, reassuring
-        modelId: z.string().default("eleven_flash_v2_5"),    // Flash: low latency
+        voiceId: z.string().default("EXAVITQu4vr4xnSDxMaL"), // Sarah — warm, clear
+        modelId: z.string().default("eleven_flash_v2_5"),    // Flash: ultra-low latency
       }))
-      .mutation(async ({ input }) => {
-        const apiKey = process.env.ELEVENLABS_API_KEY;
+      .mutation(async ({ ctx, input }) => {
+        const apiKey = await getElevenLabsKey(ctx.user.id);
         if (!apiKey) {
-          throw new Error("ElevenLabs API key not configured on server.");
+          throw new Error("NO_KEY"); // Frontend catches this to show setup modal
         }
-
         const response = await fetch(
           `https://api.elevenlabs.io/v1/text-to-speech/${input.voiceId}`,
           {
@@ -558,21 +616,55 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
             }),
           }
         );
-
         if (!response.ok) {
           const errBody = await response.text();
+          if (response.status === 401) throw new Error("INVALID_KEY");
           throw new Error(`ElevenLabs API error ${response.status}: ${errBody}`);
         }
-
         const audioBuffer = await response.arrayBuffer();
         const base64Audio = Buffer.from(audioBuffer).toString("base64");
-
         return {
           audioBase64: base64Audio,
           mimeType: "audio/mpeg" as const,
           voiceId: input.voiceId,
-          affiliateLink: "https://try.elevenlabs.io/lhgu4tpm0stc",
         };
+      }),
+  }),
+
+  // ---- ElevenLabs Text-to-Speech (legacy public route for blog/skills audio player) ----
+  tts: router({
+    speak: publicProcedure
+      .input(z.object({
+        text: z.string().min(1).max(5000),
+        voiceId: z.string().default("EXAVITQu4vr4xnSDxMaL"),
+        modelId: z.string().default("eleven_flash_v2_5"),
+      }))
+      .mutation(async ({ input }) => {
+        const apiKey = process.env.ELEVENLABS_API_KEY;
+        if (!apiKey) throw new Error("ElevenLabs API key not configured on server.");
+        const response = await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${input.voiceId}`,
+          {
+            method: "POST",
+            headers: {
+              "xi-api-key": apiKey,
+              "Content-Type": "application/json",
+              "Accept": "audio/mpeg",
+            },
+            body: JSON.stringify({
+              text: input.text,
+              model_id: input.modelId,
+              voice_settings: { stability: 0.50, similarity_boost: 0.80, style: 0.20, use_speaker_boost: true },
+            }),
+          }
+        );
+        if (!response.ok) {
+          const errBody = await response.text();
+          throw new Error(`ElevenLabs API error ${response.status}: ${errBody}`);
+        }
+        const audioBuffer = await response.arrayBuffer();
+        const base64Audio = Buffer.from(audioBuffer).toString("base64");
+        return { audioBase64: base64Audio, mimeType: "audio/mpeg" as const, voiceId: input.voiceId, affiliateLink: "https://try.elevenlabs.io/lhgu4tpm0stc" };
       }),
   }),
 
