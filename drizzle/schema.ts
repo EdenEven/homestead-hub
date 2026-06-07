@@ -278,3 +278,20 @@ export const schoolGradeEntries = mysqlTable("schoolGradeEntries", {
 
 export type SchoolGradeEntry = typeof schoolGradeEntries.$inferSelect;
 export type InsertSchoolGradeEntry = typeof schoolGradeEntries.$inferInsert;
+
+/**
+ * AI-generated study guides — one per course, optionally scoped to a student
+ */
+export const schoolStudyGuides = mysqlTable("schoolStudyGuides", {
+  id: int("id").autoincrement().primaryKey(),
+  courseId: int("courseId").notNull(),
+  studentId: int("studentId"), // optional — null means generic guide
+  createdByUserId: int("createdByUserId").notNull(),
+  title: varchar("title", { length: 300 }).notNull(),
+  content: text("content").notNull(), // markdown from LLM
+  gradeLevel: int("gradeLevel"), // grade level used when generating
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SchoolStudyGuide = typeof schoolStudyGuides.$inferSelect;
+export type InsertSchoolStudyGuide = typeof schoolStudyGuides.$inferInsert;

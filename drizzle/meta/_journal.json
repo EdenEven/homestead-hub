@@ -50,6 +50,13 @@
       "when": 1780809280685,
       "tag": "0006_mute_bishop",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1780810916674,
+      "tag": "0007_absent_rocket_racer",
+      "breakpoints": true
     }
   ]
 }

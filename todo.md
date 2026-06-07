@@ -94,3 +94,13 @@
 - [x] Write vitest tests for Schoolhouse router helpers
 - [x] Add Schoolhouse link to main navigation
 - [x] Write vitest tests for Schoolhouse router
+
+## AI Study Guide Generator
+- [x] Add studyGuides DB table to schema
+- [x] Add generateStudyGuide tRPC procedure (LLM-powered)
+- [x] Add getStudyGuides and deleteStudyGuide DB helpers
+- [x] Build Study Guide UI on the Course page (generate button, display, save, print)
+
+## Patreon
+- [x] Write Patreon page description for A1 Homestead Hub
+- [x] Write first Patreon post demoing the website

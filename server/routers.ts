@@ -45,6 +45,10 @@ import {
   getGradesByStudent,
   createGradeEntry,
   deleteGradeEntry,
+  createStudyGuide,
+  getStudyGuidesByCourse,
+  getStudyGuideById,
+  deleteStudyGuide,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
@@ -869,6 +873,95 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteGradeEntry(input.id);
+        return { success: true };
+      }),
+
+    // ---- Study Guides ----
+
+    generateStudyGuide: protectedProcedure
+      .input(z.object({
+        courseId: z.number(),
+        studentId: z.number().optional(),
+        gradeLevel: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Fetch course and its lessons
+        const course = await getSchoolCourseById(input.courseId);
+        if (!course) throw new Error("Course not found");
+        const lessons = await getLessonsByCourse(input.courseId);
+
+        const gradeLabel = input.gradeLevel
+          ? `Grade ${input.gradeLevel}`
+          : course.gradeMin && course.gradeMax
+            ? `Grades ${course.gradeMin}–${course.gradeMax}`
+            : "All grades";
+
+        const lessonSummaries = lessons
+          .map((l, i) => `Lesson ${i + 1}: ${l.title}\n${l.content?.slice(0, 400) ?? ""}...`)
+          .join("\n\n");
+
+        const prompt = `You are an expert homeschool curriculum designer. Create a comprehensive, engaging study guide for the following course.
+
+Course: ${course.title}
+Subject: ${course.subject}
+Grade Level: ${gradeLabel}
+Description: ${course.description}
+
+Lessons covered:
+${lessonSummaries}
+
+Create a study guide in Markdown format that includes:
+1. **Course Overview** — a brief, encouraging introduction for the student
+2. **Key Vocabulary** — 8–12 important terms with clear, age-appropriate definitions
+3. **Core Concepts** — the main ideas from each lesson, explained clearly
+4. **Study Questions** — 10 review questions (mix of recall, comprehension, and application)
+5. **Hands-On Activities** — 3–5 practical activities the student can do at home on the homestead
+6. **Further Exploration** — 3 suggestions for going deeper (books, experiments, real-world practice)
+7. **Quick Reference Checklist** — a checklist of skills/concepts the student should be able to demonstrate
+
+Write in a warm, encouraging tone appropriate for ${gradeLabel}. Use the homestead context throughout — connect concepts to real farm and self-reliant living skills.`;
+
+        const response = await invokeLLM({
+          messages: [
+            { role: "system", content: "You are an expert homeschool curriculum designer specializing in homesteading, STEM, and self-reliant living education. Always write in Markdown format." },
+            { role: "user", content: prompt },
+          ],
+        });
+
+        const rawContent = response.choices[0]?.message?.content ?? "";
+        const content = typeof rawContent === "string" ? rawContent : JSON.stringify(rawContent);
+        const title = `Study Guide: ${course.title} (${gradeLabel})`;
+
+        const id = await createStudyGuide({
+          courseId: input.courseId,
+          studentId: input.studentId ?? null,
+          createdByUserId: ctx.user.id,
+          title,
+          content,
+          gradeLevel: input.gradeLevel ?? null,
+        });
+
+        return { id, title, content };
+      }),
+
+    getStudyGuides: protectedProcedure
+      .input(z.object({ courseId: z.number() }))
+      .query(async ({ ctx, input }) => {
+        return getStudyGuidesByCourse(input.courseId, ctx.user.id);
+      }),
+
+    getStudyGuide: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ ctx, input }) => {
+        const guide = await getStudyGuideById(input.id);
+        if (!guide || guide.createdByUserId !== ctx.user.id) throw new Error("Not found");
+        return guide;
+      }),
+
+    deleteStudyGuide: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        await deleteStudyGuide(input.id, ctx.user.id);
         return { success: true };
       }),
   }),

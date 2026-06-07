@@ -1,6 +1,6 @@
 import { eq, desc, sql, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -473,4 +473,35 @@ export async function deleteGradeEntry(id: number) {
   const db = await getDb();
   if (!db) return;
   await db.delete(schoolGradeEntries).where(eq(schoolGradeEntries.id, id));
+}
+
+// ---- Study Guides ----
+
+export async function createStudyGuide(data: InsertSchoolStudyGuide) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(schoolStudyGuides).values(data);
+  return result[0].insertId as number;
+}
+
+export async function getStudyGuidesByCourse(courseId: number, userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(schoolStudyGuides)
+    .where(and(eq(schoolStudyGuides.courseId, courseId), eq(schoolStudyGuides.createdByUserId, userId)))
+    .orderBy(desc(schoolStudyGuides.createdAt));
+}
+
+export async function getStudyGuideById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(schoolStudyGuides).where(eq(schoolStudyGuides.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+export async function deleteStudyGuide(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(schoolStudyGuides)
+    .where(and(eq(schoolStudyGuides.id, id), eq(schoolStudyGuides.createdByUserId, userId)));
 }

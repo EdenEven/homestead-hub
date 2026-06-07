@@ -3,9 +3,10 @@ import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 const GRADE_LABELS: Record<number, string> = {
   0: "K", 1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th",
@@ -27,6 +28,12 @@ export default function SchoolCourse() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState<number | null>(null);
 
+  // Study guide state
+  const [showGuidePanel, setShowGuidePanel] = useState(false);
+  const [activeGuideId, setActiveGuideId] = useState<number | null>(null);
+  const [selectedStudentId, setSelectedStudentId] = useState<number | undefined>(undefined);
+  const [selectedGradeLevel, setSelectedGradeLevel] = useState<number | undefined>(undefined);
+
   const { data: course, isLoading: courseLoading } = trpc.schoolhouse.getCourse.useQuery({ id: courseId });
   const { data: lessons = [], isLoading: lessonsLoading } = trpc.schoolhouse.getLessons.useQuery({ courseId });
   const { data: students = [] } = trpc.schoolhouse.getStudents.useQuery(undefined, { enabled: !!user });
@@ -38,6 +45,31 @@ export default function SchoolCourse() {
   );
 
   const markComplete = trpc.schoolhouse.markComplete.useMutation();
+
+  // Study guides
+  const utils = trpc.useUtils();
+  const { data: studyGuides = [], refetch: refetchGuides } = trpc.schoolhouse.getStudyGuides.useQuery(
+    { courseId },
+    { enabled: !!user && courseId > 0 }
+  );
+  const generateGuide = trpc.schoolhouse.generateStudyGuide.useMutation({
+    onSuccess: (data) => {
+      refetchGuides();
+      setActiveGuideId(data.id);
+      setShowGuidePanel(true);
+      toast.success("Study guide generated!");
+    },
+    onError: () => toast.error("Failed to generate study guide. Please try again."),
+  });
+  const deleteGuide = trpc.schoolhouse.deleteStudyGuide.useMutation({
+    onSuccess: () => {
+      refetchGuides();
+      setActiveGuideId(null);
+      toast.success("Study guide deleted.");
+    },
+  });
+
+  const activeGuide = studyGuides.find(g => g.id === activeGuideId) ?? null;
 
   function handleQuizSubmit(studentId: number) {
     if (!quiz) return;
@@ -340,6 +372,166 @@ export default function SchoolCourse() {
           </main>
         </div>
       </div>
+
+      {/* Study Guide Panel */}
+      {user && (
+        <div className="border-t border-[oklch(0.88_0.03_80)] bg-[oklch(0.97_0.01_80)]">
+          <div className="container py-6">
+            {/* Header row */}
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => setShowGuidePanel(p => !p)}
+                className="flex items-center gap-2 font-bold text-[oklch(0.25_0.05_50)] text-lg hover:text-[oklch(0.35_0.08_50)] transition-colors"
+              >
+                <FileText className="w-5 h-5 text-[oklch(0.55_0.15_80)]" />
+                AI Study Guides
+                {studyGuides.length > 0 && (
+                  <span className="ml-1 text-xs font-semibold bg-[oklch(0.88_0.05_80)] text-[oklch(0.35_0.08_50)] rounded-full px-2 py-0.5">{studyGuides.length}</span>
+                )}
+                {showGuidePanel ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {/* Generate button */}
+              <button
+                disabled={generateGuide.isPending}
+                onClick={() => {
+                  if (!user) { toast.error("Sign in to generate a study guide."); return; }
+                  generateGuide.mutate({
+                    courseId,
+                    studentId: selectedStudentId,
+                    gradeLevel: selectedGradeLevel ?? course?.gradeMin,
+                  });
+                  setShowGuidePanel(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-[oklch(0.55_0.15_80)] text-white rounded-xl text-sm font-semibold hover:bg-[oklch(0.48_0.13_80)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+              >
+                {generateGuide.isPending ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Generating&hellip;</>
+                ) : (
+                  <><Sparkles className="w-4 h-4" /> Generate Study Guide</>
+                )}
+              </button>
+            </div>
+
+            {/* Options row — student + grade selector */}
+            {showGuidePanel && (
+              <div className="flex flex-wrap gap-3 mb-4">
+                {students.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs font-semibold text-[oklch(0.45_0.05_50)] uppercase tracking-wide">For student:</label>
+                    <select
+                      value={selectedStudentId ?? ""}
+                      onChange={e => setSelectedStudentId(e.target.value ? Number(e.target.value) : undefined)}
+                      className="text-sm border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 bg-white text-[oklch(0.25_0.05_50)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.55_0.15_80)]"
+                    >
+                      <option value="">Any student</option>
+                      {students.map(s => <option key={s.id} value={s.id}>{s.name} (Grade {s.gradeLevel})</option>)}
+                    </select>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-semibold text-[oklch(0.45_0.05_50)] uppercase tracking-wide">Grade level:</label>
+                  <select
+                    value={selectedGradeLevel ?? ""}
+                    onChange={e => setSelectedGradeLevel(e.target.value ? Number(e.target.value) : undefined)}
+                    className="text-sm border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 bg-white text-[oklch(0.25_0.05_50)] focus:outline-none focus:ring-2 focus:ring-[oklch(0.55_0.15_80)]"
+                  >
+                    <option value="">Use course default</option>
+                    {Array.from({ length: 13 }, (_, i) => (
+                      <option key={i} value={i}>{i === 0 ? "Kindergarten" : `Grade ${i}`}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {/* Panel body */}
+            {showGuidePanel && (
+              <div className="flex gap-4 flex-col md:flex-row">
+                {/* Saved guides list */}
+                <div className="md:w-64 shrink-0">
+                  {studyGuides.length === 0 ? (
+                    <div className="bg-white rounded-xl border border-[oklch(0.88_0.03_80)] p-5 text-center">
+                      {generateGuide.isPending ? (
+                        <div className="flex flex-col items-center gap-3 py-4">
+                          <Loader2 className="w-8 h-8 animate-spin text-[oklch(0.55_0.15_80)]" />
+                          <p className="text-sm text-[oklch(0.45_0.05_50)]">The AI is writing your study guide&hellip;<br /><span className="text-xs">This takes about 15–30 seconds.</span></p>
+                        </div>
+                      ) : (
+                        <>
+                          <Sparkles className="w-8 h-8 mx-auto mb-2 text-[oklch(0.75_0.15_80)]" />
+                          <p className="text-sm text-[oklch(0.45_0.05_50)]">No study guides yet.<br />Click &ldquo;Generate Study Guide&rdquo; to create one.</p>
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="space-y-2">
+                      {studyGuides.map(g => (
+                        <li key={g.id}>
+                          <button
+                            onClick={() => setActiveGuideId(g.id)}
+                            className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-colors ${
+                              activeGuideId === g.id
+                                ? "bg-[oklch(0.93_0.05_80)] border-[oklch(0.65_0.15_80)] text-[oklch(0.25_0.05_50)] font-semibold"
+                                : "bg-white border-[oklch(0.88_0.03_80)] text-[oklch(0.35_0.05_50)] hover:border-[oklch(0.75_0.10_80)]"
+                            }`}
+                          >
+                            <div className="font-medium leading-snug">{g.title}</div>
+                            <div className="text-xs text-[oklch(0.55_0.05_50)] mt-0.5">{new Date(g.createdAt).toLocaleDateString()}</div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Guide content */}
+                <div className="flex-1 min-w-0">
+                  {generateGuide.isPending && !activeGuide ? (
+                    <div className="bg-white rounded-xl border border-[oklch(0.88_0.03_80)] p-10 flex flex-col items-center gap-4">
+                      <Loader2 className="w-10 h-10 animate-spin text-[oklch(0.55_0.15_80)]" />
+                      <div className="text-center">
+                        <p className="font-semibold text-[oklch(0.25_0.05_50)]">Generating your study guide&hellip;</p>
+                        <p className="text-sm text-[oklch(0.45_0.05_50)] mt-1">The AI is reading all the lessons and building a comprehensive guide. This usually takes 15–30 seconds.</p>
+                      </div>
+                    </div>
+                  ) : activeGuide ? (
+                    <div className="bg-white rounded-xl border border-[oklch(0.88_0.03_80)] overflow-hidden">
+                      <div className="px-6 py-4 border-b border-[oklch(0.88_0.03_80)] flex items-center justify-between gap-4">
+                        <h3 className="font-bold text-[oklch(0.25_0.05_50)] text-base leading-snug">{activeGuide.title}</h3>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => window.print()}
+                            className="flex items-center gap-1.5 text-sm text-[oklch(0.45_0.05_50)] hover:text-[oklch(0.35_0.08_50)] border border-[oklch(0.88_0.03_80)] rounded-lg px-3 py-1.5 hover:bg-[oklch(0.96_0.02_80)] transition-colors"
+                          >
+                            <Printer className="w-4 h-4" /> Print
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (confirm("Delete this study guide?")) deleteGuide.mutate({ id: activeGuide.id });
+                            }}
+                            className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 border border-red-200 rounded-lg px-3 py-1.5 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" /> Delete
+                          </button>
+                        </div>
+                      </div>
+                      <div className="px-6 py-6 prose prose-sm max-w-none prose-headings:text-[oklch(0.25_0.05_50)] prose-p:text-[oklch(0.35_0.05_50)] prose-li:text-[oklch(0.35_0.05_50)] prose-strong:text-[oklch(0.25_0.05_50)] prose-blockquote:border-[oklch(0.75_0.15_80)] prose-code:bg-[oklch(0.93_0.02_80)] prose-code:text-[oklch(0.35_0.08_50)] prose-code:px-1 prose-code:rounded">
+                        <ReactMarkdown>{activeGuide.content}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white rounded-xl border border-[oklch(0.88_0.03_80)] p-10 text-center text-[oklch(0.55_0.05_50)]">
+                      <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                      <p className="text-sm">Select a study guide from the list, or generate a new one.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
