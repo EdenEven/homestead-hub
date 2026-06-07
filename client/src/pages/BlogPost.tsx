@@ -4,6 +4,7 @@ import { ArrowLeft, Headphones, FileText, Calendar, User, Tag } from "lucide-rea
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
+import ShareButtons from "@/components/ShareButtons";
 
 function renderContent(content: string) {
   // Convert the plain text with markdown-style formatting into JSX sections
@@ -259,6 +260,17 @@ export default function BlogPost() {
         <article className="prose-custom">
           {renderContent(post.content)}
         </article>
+
+        {/* Social sharing */}
+        <div className="mt-10 pt-8 border-t" style={{ borderColor: "oklch(0.88 0.03 75)" }}>
+          <ShareButtons
+            url={`https://a1homesteadhub.com/blog/${post.slug}`}
+            title={post.title}
+            description={post.excerpt ?? post.subtitle ?? ""}
+            imageUrl={post.heroImageUrl ?? ""}
+            variant="bar"
+          />
+        </div>
 
         {/* PDF download */}
         {post.pdfUrl && (

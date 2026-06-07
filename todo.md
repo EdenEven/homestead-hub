@@ -169,3 +169,8 @@
 - [x] Add Organization JSON-LD schema to homepage (Home.tsx)
 - [x] Generate dynamic sitemap.xml at /sitemap.xml via Express route
 - [x] Add robots.txt with sitemap reference
+
+## Social Sharing Buttons
+- [x] Build reusable ShareButtons component (Facebook, X/Twitter, Pinterest, Copy Link)
+- [x] Add ShareButtons to BlogPost page
+- [x] Add ShareButtons to SchoolCourse page

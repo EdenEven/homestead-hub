@@ -9,6 +9,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import ElevenLabsSetupModal from "@/components/ElevenLabsSetupModal";
+import ShareButtons from "@/components/ShareButtons";
 
 const SITE_URL = "https://a1homesteadhub.com";
 
@@ -305,16 +306,25 @@ export default function SchoolCourse() {
                 {gradeRange(course.gradeMin, course.gradeMax)} · {lessons.length} Lessons
               </div>
             </div>
-            {/* Share to Patreon */}
-            <button
-              onClick={() => openPatreonShare(
-                `🌾 New Course Alert on The Homestead Hub Schoolhouse!\n\n📚 ${course.title}\n\n${course.description}\n\nGrades: ${gradeRange(course.gradeMin, course.gradeMax)} · ${lessons.length} Lessons\n\nFree to access at:\nhttps://www.a1homesteadhub.com/schoolhouse/${course.id}\n\n#Homesteading #Homeschool #SelfReliant #A1HomesteadHub`
-              )}
-              className="shrink-0 flex items-center gap-2 bg-[oklch(0.55_0.18_25)] hover:bg-[oklch(0.48_0.18_25)] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
-            >
-              <Share2 className="w-4 h-4" />
-              Share to Patreon
-            </button>
+            <div className="shrink-0 flex flex-col gap-2 items-end">
+              {/* Share to Patreon */}
+              <button
+                onClick={() => openPatreonShare(
+                  `🌾 New Course Alert on The Homestead Hub Schoolhouse!\n\n📚 ${course.title}\n\n${course.description}\n\nGrades: ${gradeRange(course.gradeMin, course.gradeMax)} · ${lessons.length} Lessons\n\nFree to access at:\nhttps://www.a1homesteadhub.com/schoolhouse/${course.id}\n\n#Homesteading #Homeschool #SelfReliant #A1HomesteadHub`
+                )}
+                className="flex items-center gap-2 bg-[oklch(0.55_0.18_25)] hover:bg-[oklch(0.48_0.18_25)] text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors"
+              >
+                <Share2 className="w-4 h-4" />
+                Share to Patreon
+              </button>
+              {/* Social share buttons */}
+              <ShareButtons
+                url={`https://a1homesteadhub.com/schoolhouse/course/${course.id}`}
+                title={`${course.title} — Free Homestead Course for ${gradeRange(course.gradeMin, course.gradeMax)}`}
+                description={course.description}
+                variant="compact"
+              />
+            </div>
           </div>
         </div>
       </div>
