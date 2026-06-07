@@ -155,3 +155,9 @@
 - [x] Show "Activate Voice" prompt in Miss Hazel panel when Pro user has no key saved
 - [x] Affiliate link used throughout: https://try.elevenlabs.io/lhgu4tpm0stc
 - [ ] Add ElevenLabs key management to user Profile/Settings page
+
+## Clickable Ticker — Historical Chart Modal
+- [x] Add tRPC procedure to fetch historical price data for a given symbol (1W, 1M, 3M, 1Y ranges)
+- [x] Build CommodityChartModal component — price line chart using recharts, range selector, OHLC summary
+- [x] Make each ticker item clickable to open the chart modal
+- [x] Show symbol name, current price, change, and historical chart in the modal

@@ -397,6 +397,46 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
         )
         .map((r) => r.value);
     }),
+
+    // Historical OHLC data for a given symbol and range
+    getHistory: publicProcedure
+      .input(z.object({
+        symbol: z.string(),
+        range: z.enum(["1W", "1M", "3M", "1Y"]),
+      }))
+      .query(async ({ input }) => {
+        const rangeMap: Record<string, { range: string; interval: string }> = {
+          "1W": { range: "5d",  interval: "1h" },
+          "1M": { range: "1mo", interval: "1d" },
+          "3M": { range: "3mo", interval: "1d" },
+          "1Y": { range: "1y",  interval: "1wk" },
+        };
+        const { range, interval } = rangeMap[input.range];
+        const res = await callDataApi("YahooFinance/get_stock_chart", {
+          query: { symbol: input.symbol, region: "US", interval, range },
+        }) as any;
+        const result = res?.chart?.result?.[0];
+        if (!result) return { symbol: input.symbol, points: [], meta: null };
+        const meta = result.meta;
+        const timestamps: number[] = result.timestamp ?? [];
+        const quotes = result.indicators?.quote?.[0] ?? {};
+        const points = timestamps.map((ts: number, i: number) => ({
+          ts: ts * 1000,
+          open:  quotes.open?.[i]  ?? null,
+          high:  quotes.high?.[i]  ?? null,
+          low:   quotes.low?.[i]   ?? null,
+          close: quotes.close?.[i] ?? null,
+          volume: quotes.volume?.[i] ?? null,
+        })).filter((p: any) => p.close !== null);
+        return {
+          symbol: input.symbol,
+          name: meta?.longName ?? meta?.shortName ?? input.symbol,
+          currency: meta?.currency ?? "USD",
+          currentPrice: meta?.regularMarketPrice ?? null,
+          prevClose: meta?.chartPreviousClose ?? null,
+          points,
+        };
+      }),
   }),
 
   // ---- Blog / From the Field ----

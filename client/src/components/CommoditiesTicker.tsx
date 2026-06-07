@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import CommodityChartModal from "./CommodityChartModal";
 
 interface TickerData {
   symbol: string;
@@ -12,12 +13,24 @@ interface TickerData {
   isIndex?: boolean;
 }
 
-function TickerItem({ item }: { item: TickerData }) {
+interface TickerItemProps {
+  item: TickerData;
+  onSelect: (item: TickerData) => void;
+}
+
+function TickerItem({ item, onSelect }: TickerItemProps) {
   const isUp = item.change > 0;
   const isDown = item.change < 0;
 
   return (
-    <span className="inline-flex items-center gap-2 px-4 py-1 whitespace-nowrap text-sm">
+    <button
+      className="inline-flex items-center gap-2 px-4 py-1 whitespace-nowrap text-sm hover:bg-white/5 rounded transition-colors cursor-pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect(item);
+      }}
+      title={`Click to view ${item.name} chart`}
+    >
       <span className={`font-semibold ${item.isIndex ? "text-sky-300" : "text-amber-200"}`}>
         {item.name}
       </span>
@@ -43,17 +56,7 @@ function TickerItem({ item }: { item: TickerData }) {
         {item.changePercent.toFixed(2)}%
       </span>
       <span className="text-amber-700/30 mx-1">|</span>
-    </span>
-  );
-}
-
-// Divider between indices and commodities sections
-function SectionDivider({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center px-3 whitespace-nowrap">
-      <span className="text-amber-700/50 text-xs font-bold tracking-widest uppercase">{label}</span>
-      <span className="text-amber-700/30 ml-3">◆</span>
-    </span>
+    </button>
   );
 }
 
@@ -62,6 +65,7 @@ export default function CommoditiesTicker() {
   const animRef = useRef<number | null>(null);
   const posRef = useRef(0);
   const [paused, setPaused] = useState(false);
+  const [selected, setSelected] = useState<TickerData | null>(null);
 
   const { data: commodities } = trpc.commodities.getPrices.useQuery(undefined, {
     refetchInterval: 5 * 60 * 1000,
@@ -78,6 +82,9 @@ export default function CommoditiesTicker() {
     ...(commodities ?? []).map((c) => ({ ...c, isIndex: false })),
   ];
 
+  // Pause scroll when modal is open
+  const isPaused = paused || !!selected;
+
   useEffect(() => {
     const track = trackRef.current;
     if (!track || !allItems.length) return;
@@ -85,7 +92,7 @@ export default function CommoditiesTicker() {
     const speed = 0.45;
 
     const animate = () => {
-      if (!paused) {
+      if (!isPaused) {
         posRef.current -= speed;
         const halfWidth = track.scrollWidth / 2;
         if (Math.abs(posRef.current) >= halfWidth) {
@@ -100,7 +107,7 @@ export default function CommoditiesTicker() {
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current);
     };
-  }, [allItems.length, paused]);
+  }, [allItems.length, isPaused]);
 
   if (!allItems.length) {
     return (
@@ -113,33 +120,53 @@ export default function CommoditiesTicker() {
   const doubled = [...allItems, ...allItems];
 
   return (
-    <div
-      className="w-full bg-[#1a2e1a] border-b border-amber-900/40 overflow-hidden h-8 flex items-center cursor-pointer select-none"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      title="Hover to pause — Live market data updated every 5 minutes"
-    >
-      {/* Label */}
-      <div className="flex-shrink-0 bg-[#2D4A2D] px-3 h-full flex items-center border-r border-amber-900/40 z-10">
-        <span className="text-amber-400 text-xs font-bold tracking-wider uppercase">
-          Markets
-        </span>
+    <>
+      <div
+        className="w-full bg-[#1a2e1a] border-b border-amber-900/40 overflow-hidden h-8 flex items-center select-none"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        title="Click any item for a detailed chart · Hover to pause"
+      >
+        {/* Label */}
+        <div className="flex-shrink-0 bg-[#2D4A2D] px-3 h-full flex items-center border-r border-amber-900/40 z-10">
+          <span className="text-amber-400 text-xs font-bold tracking-wider uppercase">
+            Markets
+          </span>
+        </div>
+
+        {/* Scrolling track */}
+        <div className="flex-1 overflow-hidden relative">
+          <div ref={trackRef} className="inline-flex items-center will-change-transform">
+            {doubled.map((item, i) => (
+              <TickerItem
+                key={`${item.symbol}-${i}`}
+                item={item}
+                onSelect={setSelected}
+              />
+            ))}
+          </div>
+        </div>
+
+        {isPaused && !selected && (
+          <div className="flex-shrink-0 px-3 h-full flex items-center border-l border-amber-900/40">
+            <span className="text-amber-400/50 text-xs">⏸</span>
+          </div>
+        )}
       </div>
 
-      {/* Scrolling track */}
-      <div className="flex-1 overflow-hidden relative">
-        <div ref={trackRef} className="inline-flex items-center will-change-transform">
-          {doubled.map((item, i) => (
-            <TickerItem key={`${item.symbol}-${i}`} item={item} />
-          ))}
-        </div>
-      </div>
-
-      {paused && (
-        <div className="flex-shrink-0 px-3 h-full flex items-center border-l border-amber-900/40">
-          <span className="text-amber-400/50 text-xs">⏸</span>
-        </div>
+      {/* Chart modal */}
+      {selected && (
+        <CommodityChartModal
+          symbol={selected.symbol}
+          name={selected.name}
+          currentPrice={selected.price}
+          change={selected.change}
+          changePercent={selected.changePercent}
+          unit={selected.unit}
+          isIndex={selected.isIndex}
+          onClose={() => setSelected(null)}
+        />
       )}
-    </div>
+    </>
   );
 }
