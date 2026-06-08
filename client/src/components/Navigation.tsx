@@ -19,6 +19,8 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "✦ AI Course Creator", href: "/schoolhouse/ai-creator", highlight: true },
   { label: "Land Access", href: "/land-access" },
   { label: "Map Explorer", href: "/map" },
+  { label: "Features", href: "/features" },
+  { label: "About", href: "/about" },
 ];
 
 export default function Navigation() {

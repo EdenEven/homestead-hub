@@ -174,3 +174,11 @@
 - [x] Build reusable ShareButtons component (Facebook, X/Twitter, Pinterest, Copy Link)
 - [x] Add ShareButtons to BlogPost page
 - [x] Add ShareButtons to SchoolCourse page
+
+## AI Discoverability & Documentation (Gemini/Google indexing)
+- [x] Build /features page — explicit documentation of every feature, ElevenLabs partnership, how AI Course Creator works
+- [x] Add FAQPage JSON-LD schema to homepage and features page
+- [x] Add FAQ section to homepage with 8 key questions about the platform
+- [x] Build /about page — platform story, tech partnerships (ElevenLabs), mission
+- [ ] Add ElevenLabs affiliate badge/partnership callout on Schoolhouse pages
+- [ ] Update meta description tags on all pages to include "ElevenLabs", "AI tutor", "homeschool"

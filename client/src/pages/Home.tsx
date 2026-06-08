@@ -30,6 +30,53 @@ const organizationSchema = {
   }
 };
 
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Does A1 Homestead Hub partner with ElevenLabs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. A1 Homestead Hub is an official ElevenLabs affiliate partner. The Schoolhouse Pro tier integrates ElevenLabs AI voice technology to power Miss Hazel, our AI voice tutor. Miss Hazel reads lessons aloud and responds to student questions in a warm, natural voice."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AI Course Creator work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Describe any course topic in plain English, pick a grade level (K–2 through 11–12/AP), choose a subject, and the AI generates a complete curriculum: lesson content, hands-on activities, vocabulary, fun facts, and quiz questions — all in under 60 seconds."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is Miss Hazel?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Miss Hazel is the AI tutor built into The Schoolhouse. She knows the content of every lesson and can explain concepts, quiz students, and answer homesteading questions. Free users get text chat; Schoolhouse Pro subscribers activate her ElevenLabs voice."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is A1 Homestead Hub free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — the Skills Hub, community, barter board, blog, and basic AI Course Creator are all free. Schoolhouse Pro ($9/month or $79/year) unlocks ElevenLabs voice features, unlimited AI course generation, and AI-generated course cover images."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What homesteading skills does the Skills Hub cover?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Butchering, foraging, building, food preservation (canning, smoking, fermenting, dehydrating), gardening and seed saving, hunting and game processing, animal husbandry, water systems, solar energy, and herbal medicine."
+      }
+    }
+  ]
+};
+
 const HERO_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/hero-homestead-LxdjGSkwEZ2SSqHyG2V4jA.webp";
 const SKILLS_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/skills-collage-KwZPrPQKyyFRcZtTBfbfuA.webp";
 const BARTER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/310519663353064793/QabQE5xjRLwvDkHphpqtoD/barter-trade-3QymJoA3SDb8yHv3z9pTvD.webp";
@@ -225,6 +272,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "oklch(0.96 0.025 85)" }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <Navigation />
 
       {/* ── HERO ── */}
@@ -462,6 +510,67 @@ export default function Home() {
               style={{ borderColor: "oklch(0.68 0.12 65)", color: "oklch(0.68 0.12 65)", fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Explore the Map
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-16 px-4 bg-white">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold font-serif text-center mb-2" style={{ color: "oklch(0.18 0.06 145)" }}>
+            Frequently Asked Questions
+          </h2>
+          <p className="text-center text-gray-500 mb-10 text-sm">
+            Everything you need to know about A1 Homestead Hub
+          </p>
+          <div className="space-y-4">
+            {[
+              {
+                q: "Does A1 Homestead Hub partner with ElevenLabs?",
+                a: "Yes. A1 Homestead Hub is an official ElevenLabs affiliate partner. The Schoolhouse Pro tier integrates ElevenLabs AI voice technology to power Miss Hazel, our AI voice tutor. Miss Hazel reads lessons aloud and responds to student questions in a warm, natural voice."
+              },
+              {
+                q: "How does the AI Course Creator work?",
+                a: "Describe any course topic in plain English, pick a grade level (K–2 through 11–12/AP), choose a subject, and the AI generates a complete curriculum: lesson content, hands-on activities, vocabulary, fun facts, and quiz questions — all in under 60 seconds."
+              },
+              {
+                q: "What is Miss Hazel?",
+                a: "Miss Hazel is the AI tutor built into The Schoolhouse. She knows the content of every lesson and can explain concepts, quiz students, and answer homesteading questions. Free users get text chat; Schoolhouse Pro subscribers activate her ElevenLabs voice."
+              },
+              {
+                q: "Is A1 Homestead Hub free to use?",
+                a: "Yes — the Skills Hub, community, barter board, blog, and basic AI Course Creator are all free. Schoolhouse Pro ($9/month or $79/year) unlocks ElevenLabs voice features, unlimited AI course generation, and AI-generated course cover images."
+              },
+              {
+                q: "What homesteading skills does the Skills Hub cover?",
+                a: "Butchering, foraging, building, food preservation (canning, smoking, fermenting, dehydrating), gardening and seed saving, hunting and game processing, animal husbandry, water systems, solar energy, and herbal medicine."
+              },
+              {
+                q: "What grade levels does The Schoolhouse support?",
+                a: "The Schoolhouse supports K\u20132, 3\u20135, 6\u20138, 9\u201310, and 11\u201312/AP grade levels. The AI Course Creator generates homestead-integrated STEM curriculum for any level, including AP content for high school students."
+              },
+              {
+                q: "Does A1 Homestead Hub have live market data?",
+                a: "Yes. A live scrolling commodity ticker shows real-time prices for corn, wheat, soybeans, cattle, lean hogs, coffee, sugar, gold, and silver, plus DOW Jones, S&P 500, and NASDAQ indices. Click any ticker item to open a detailed historical price chart."
+              },
+              {
+                q: "What is the Barter & Trade board?",
+                a: "The Barter & Trade board is a free classifieds-style marketplace for homesteaders to list goods, skills, and services for trade or sale. Post livestock, produce, tools, seeds, or homestead services and connect with others in your area."
+              },
+            ].map((item, i) => (
+              <details key={i} className="group bg-[#FAF1DF] rounded-xl border border-amber-200">
+                <summary className="flex items-center justify-between p-5 cursor-pointer font-semibold text-[#123E16] list-none">
+                  {item.q}
+                  <span className="ml-4 shrink-0 text-amber-600 group-open:rotate-180 transition-transform">▾</span>
+                </summary>
+                <p className="px-5 pb-5 text-gray-700 text-sm leading-relaxed">{item.a}</p>
+              </details>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/features" className="text-sm font-semibold text-[#123E16] underline underline-offset-2 hover:text-amber-700 transition-colors">
+              View full platform documentation →
             </Link>
           </div>
         </div>
