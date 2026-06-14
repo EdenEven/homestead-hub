@@ -1,4 +1,4 @@
-import { eq, desc, sql, and } from "drizzle-orm";
+import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -584,4 +584,59 @@ export async function upsertProSubscription(data: InsertSchoolProSubscription) {
   } else {
     await db.insert(schoolProSubscriptions).values(data);
   }
+}
+
+// ============================================================
+// WEEKLY CLEANUP HELPERS
+// ============================================================
+
+/**
+ * Soft-delete barter listings older than `daysOld` days.
+ * Returns the count of listings deactivated.
+ */
+export async function expireOldBarterListings(daysOld = 90): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - daysOld);
+  const result = await db.update(barterListings)
+    .set({ isActive: false })
+    .where(and(eq(barterListings.isActive, true), lt(barterListings.createdAt, cutoff)));
+  // result[0].affectedRows is the MySQL2 affected row count
+  return (result[0] as any)?.affectedRows ?? 0;
+}
+
+/**
+ * Delete tutor sessions that are older than `daysOld` days.
+ * These are low-value chat histories that accumulate over time.
+ * Returns the count of sessions deleted.
+ */
+export async function purgeOldTutorSessions(daysOld = 30): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - daysOld);
+  const result = await db.delete(schoolTutorSessions)
+    .where(lt(schoolTutorSessions.updatedAt, cutoff));
+  return (result[0] as any)?.affectedRows ?? 0;
+}
+
+/**
+ * Delete expired Pro subscriptions that have been canceled/past_due
+ * and whose expiresAt is more than 30 days in the past.
+ * Returns the count of subscriptions removed.
+ */
+export async function purgeExpiredProSubscriptions(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 30);
+  const result = await db.delete(schoolProSubscriptions)
+    .where(
+      and(
+        lt(schoolProSubscriptions.expiresAt, cutoff),
+        sql`${schoolProSubscriptions.status} IN ('canceled', 'past_due')`
+      )
+    );
+  return (result[0] as any)?.affectedRows ?? 0;
 }

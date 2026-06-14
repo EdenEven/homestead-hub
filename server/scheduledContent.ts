@@ -10,7 +10,12 @@
 
 import type { Request, Response } from "express";
 import { invokeLLM } from "./_core/llm";
-import { createBlogPost } from "./db";
+import {
+  createBlogPost,
+  expireOldBarterListings,
+  purgeOldTutorSessions,
+  purgeExpiredProSubscriptions,
+} from "./db";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -143,24 +148,65 @@ Return ONLY valid JSON in this exact shape:
   }
 }
 
-// ─── Seed Content Cleanup ────────────────────────────────────────────────────
+// ─── Weekly Cleanup ──────────────────────────────────────────────────────────
 
 /**
  * POST /api/scheduled/weekly-cleanup
- * Lightweight weekly cleanup: removes barter listings older than 90 days.
+ * Runs every Sunday at 3am UTC. Performs three housekeeping operations:
+ *
+ *  1. Soft-deletes barter listings older than 90 days (sets isActive = false).
+ *     Sellers can still see their own listings in their profile; they just
+ *     disappear from the public board.
+ *
+ *  2. Hard-deletes AI tutor session chat histories older than 30 days.
+ *     These are ephemeral Q&A logs — no user data is lost, only chat context
+ *     that has long since expired.
+ *
+ *  3. Removes canceled/past_due Pro subscriptions whose expiresAt is more
+ *     than 30 days in the past (stale billing records).
+ *
+ * Called by the weekly Heartbeat cron job.
  */
 export async function weeklyCleanupHandler(req: Request, res: Response) {
+  const startedAt = new Date().toISOString();
   try {
     if (!isCronRequest(req)) {
-      return res.status(403).json({ error: "cron-only endpoint" });
+      return res.status(403).json({ error: "permission error for cron cookie" });
     }
 
-    // No-op for now — placeholder for future cleanup logic
-    // e.g. expire old barter listings, purge orphaned tutor sessions, etc.
-    console.log("[Scheduled] Weekly cleanup ran.");
-    return res.json({ ok: true, message: "cleanup complete" });
+    console.log(`[Scheduled] Weekly cleanup started at ${startedAt}`);
+
+    // 1. Expire old barter listings (90-day policy)
+    const expiredListings = await expireOldBarterListings(90);
+    console.log(`[Scheduled] Barter listings expired: ${expiredListings}`);
+
+    // 2. Purge old tutor session histories (30-day rolling window)
+    const purgedSessions = await purgeOldTutorSessions(30);
+    console.log(`[Scheduled] Tutor sessions purged: ${purgedSessions}`);
+
+    // 3. Remove stale canceled/past_due Pro subscription records
+    const purgedSubs = await purgeExpiredProSubscriptions();
+    console.log(`[Scheduled] Expired Pro subscriptions removed: ${purgedSubs}`);
+
+    const summary = {
+      ok: true,
+      startedAt,
+      completedAt: new Date().toISOString(),
+      results: {
+        barterListingsExpired: expiredListings,
+        tutorSessionsPurged: purgedSessions,
+        expiredProSubscriptionsRemoved: purgedSubs,
+      },
+    };
+
+    console.log("[Scheduled] Weekly cleanup complete:", JSON.stringify(summary.results));
+    return res.json(summary);
   } catch (err: any) {
     console.error("[Scheduled] weeklyCleanup error:", err);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({
+      error: err.message,
+      startedAt,
+      timestamp: new Date().toISOString(),
+    });
   }
 }
