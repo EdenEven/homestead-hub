@@ -8,8 +8,103 @@ import { useEffect, useRef } from "react";
 import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowRight, BookOpen, Calendar, Headphones, FileText, MapPin, Repeat2, TreePine, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Calendar, Headphones, FileText, MapPin, Repeat2, TreePine, Users, Sparkles, TrendingUp, CloudSun, Leaf, Newspaper } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+
+// ─── This Week in Homesteading — Live Daily Feed ─────────────────────────────
+
+const FEED_ICONS: Record<string, React.ReactNode> = {
+  market: <TrendingUp className="w-5 h-5" />,
+  weather: <CloudSun className="w-5 h-5" />,
+  seasonal: <Leaf className="w-5 h-5" />,
+  tip: <Sparkles className="w-5 h-5" />,
+  news: <Newspaper className="w-5 h-5" />,
+};
+
+const FEED_COLORS: Record<string, { bg: string; border: string; icon: string; label: string }> = {
+  market:   { bg: "oklch(0.97 0.02 65)",  border: "oklch(0.82 0.06 65)",  icon: "oklch(0.55 0.12 65)",  label: "Market Watch" },
+  weather:  { bg: "oklch(0.97 0.02 220)", border: "oklch(0.80 0.06 220)", icon: "oklch(0.50 0.12 220)", label: "Weather & Climate" },
+  seasonal: { bg: "oklch(0.96 0.03 140)", border: "oklch(0.78 0.07 140)", icon: "oklch(0.45 0.12 140)", label: "Seasonal" },
+  tip:      { bg: "oklch(0.96 0.03 145)", border: "oklch(0.78 0.07 145)", icon: "oklch(0.42 0.12 145)", label: "Homestead Tip" },
+  news:     { bg: "oklch(0.97 0.01 75)",  border: "oklch(0.82 0.03 75)",  icon: "oklch(0.45 0.05 75)",  label: "Community" },
+};
+
+function HomesteadFeed() {
+  const { data: items, isLoading } = trpc.freshness.getHomesteadFeed.useQuery({ limit: 6 });
+
+  if (isLoading) {
+    return (
+      <section className="py-16" style={{ backgroundColor: "oklch(0.98 0.01 85)" }}>
+        <div className="container">
+          <div className="flex items-center gap-3 mb-8">
+            <Sparkles className="w-6 h-6" style={{ color: "oklch(0.52 0.12 140)" }} />
+            <h2 className="text-3xl font-black" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.18 0.06 145)" }}>
+              This Week in Homesteading
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="p-5 rounded-sm animate-pulse" style={{ backgroundColor: "oklch(0.93 0.02 85)", height: "140px" }} />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (!items || items.length === 0) return null;
+
+  return (
+    <section className="py-16" style={{ backgroundColor: "oklch(0.98 0.01 85)" }}>
+      <div className="container">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <Sparkles className="w-6 h-6" style={{ color: "oklch(0.52 0.12 140)" }} />
+            <h2 className="text-3xl font-black" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.18 0.06 145)" }}>
+              This Week in Homesteading
+            </h2>
+          </div>
+          <span className="text-xs px-3 py-1 rounded-full font-medium" style={{ backgroundColor: "oklch(0.88 0.05 140)", color: "oklch(0.28 0.08 140)" }}>
+            Updated Daily
+          </span>
+        </div>
+        <p className="mb-8 text-sm" style={{ color: "oklch(0.50 0.03 65)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+          Fresh insights, seasonal tips, and market context — generated every morning for the homesteading community.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item) => {
+            const colors = FEED_COLORS[item.type] ?? FEED_COLORS.tip;
+            return (
+              <div
+                key={item.id}
+                className="p-5 rounded-sm"
+                style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span style={{ color: colors.icon }}>{FEED_ICONS[item.type]}</span>
+                  <span className="text-xs font-bold uppercase tracking-wide" style={{ color: colors.icon }}>
+                    {colors.label}
+                  </span>
+                </div>
+                <h3 className="font-bold mb-2 text-sm leading-snug" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.18 0.06 145)" }}>
+                  {item.headline}
+                </h3>
+                <p className="text-xs leading-relaxed" style={{ color: "oklch(0.38 0.03 65)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+                  {item.body}
+                </p>
+                {item.source && (
+                  <p className="text-xs mt-3 opacity-60" style={{ color: "oklch(0.45 0.03 65)" }}>
+                    — {item.source}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const SITE_URL = "https://a1homesteadhub.com";
 
@@ -482,6 +577,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── THIS WEEK IN HOMESTEADING — Daily AI Feed ── */}
+      <HomesteadFeed />
 
       {/* ── FROM THE FIELD TEASER ── */}
       <FromTheFieldTeaser />

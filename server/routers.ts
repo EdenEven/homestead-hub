@@ -56,6 +56,10 @@ import {
   saveElevenLabsKey,
   getElevenLabsKey,
   clearElevenLabsKey,
+  getLatestSkillTip,
+  getSkillTips,
+  getHomesteadFeed,
+  getCourseExpansions,
 } from "./db";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
@@ -1310,6 +1314,36 @@ Your personality:
       .query(async ({ ctx }) => {
         const pro = await isUserPro(ctx.user.id);
         return { isPro: pro };
+      }),
+  }),
+  // ---- Daily Freshness Engine ----
+  freshness: router({
+    // Get the latest tip for a skill page
+    getSkillTip: publicProcedure
+      .input(z.object({ skillSlug: z.string() }))
+      .query(async ({ input }) => {
+        return getLatestSkillTip(input.skillSlug);
+      }),
+
+    // Get recent tips for a skill (for tip history panel)
+    getSkillTips: publicProcedure
+      .input(z.object({ skillSlug: z.string(), limit: z.number().min(1).max(20).default(7) }))
+      .query(async ({ input }) => {
+        return getSkillTips(input.skillSlug, input.limit);
+      }),
+
+    // Get the homepage feed items
+    getHomesteadFeed: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(12).default(6) }))
+      .query(async ({ input }) => {
+        return getHomesteadFeed(input.limit);
+      }),
+
+    // Get daily expansions for a course
+    getCourseExpansions: publicProcedure
+      .input(z.object({ courseId: z.number(), limit: z.number().min(1).max(10).default(5) }))
+      .query(async ({ input }) => {
+        return getCourseExpansions(input.courseId, input.limit);
       }),
   }),
 });

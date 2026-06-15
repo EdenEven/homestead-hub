@@ -8,7 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { stripeWebhookRouter } from "../stripeWebhook";
-import { generateBlogPostHandler, weeklyCleanupHandler } from "../scheduledContent";
+import { generateBlogPostHandler, generateSkillTipHandler, expandCourseHandler, refreshHomesteadFeedHandler, weeklyCleanupHandler } from "../scheduledContent";
 import { sitemapHandler, robotsHandler } from "../sitemap";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -42,6 +42,9 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Scheduled content jobs (Heartbeat cron callbacks)
   app.post("/api/scheduled/generate-blog-post", generateBlogPostHandler);
+  app.post("/api/scheduled/generate-skill-tip", generateSkillTipHandler);
+  app.post("/api/scheduled/expand-course", expandCourseHandler);
+  app.post("/api/scheduled/refresh-homestead-feed", refreshHomesteadFeedHandler);
   app.post("/api/scheduled/weekly-cleanup", weeklyCleanupHandler);
   // SEO: dynamic sitemap and robots.txt
   app.get("/sitemap.xml", sitemapHandler);

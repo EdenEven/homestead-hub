@@ -71,6 +71,13 @@
       "when": 1780821969244,
       "tag": "0009_nosy_boomer",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1781538661714,
+      "tag": "0010_broken_darkhawk",
+      "breakpoints": true
     }
   ]
 }

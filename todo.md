@@ -182,3 +182,15 @@
 - [x] Build /about page — platform story, tech partnerships (ElevenLabs), mission
 - [ ] Add ElevenLabs affiliate badge/partnership callout on Schoolhouse pages
 - [ ] Update meta description tags on all pages to include "ElevenLabs", "AI tutor", "homeschool"
+
+## Daily Site Freshness Engine (Phase 2 Automation)
+- [x] Add skillTips table to DB schema (skillSlug, tip text, createdAt)
+- [x] Add freshness.getSkillTip tRPC procedure — returns the most recent tip for a given skill slug (rotates 1 skill/day to keep costs low)
+- [x] Add /api/scheduled/generate-skill-tip Heartbeat endpoint — generates 1 tip per skill per day via LLM
+- [x] Add "Tip of the Day" UI card to each SkillDetail page
+- [x] Add schoolDailyExpansions table to DB schema (courseId, content, type, createdAt)
+- [x] Add /api/scheduled/expand-course Heartbeat endpoint — adds 1 new quiz question or lesson note to a random course daily
+- [ ] Surface new lesson expansions on the Course Viewer page (tRPC procedure built, UI pending)
+- [x] Add homesteadFeed table to DB schema (type, headline, body, source, createdAt)
+- [x] Add /api/scheduled/refresh-homestead-feed Heartbeat endpoint — generates daily homesteading insight (seasonal/market/tip/news)
+- [x] Build "This Week in Homesteading" section on homepage — live feed cards from homesteadFeed table

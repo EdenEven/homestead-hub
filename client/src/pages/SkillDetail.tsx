@@ -8,8 +8,62 @@ import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { getSkillBySlug } from "@/lib/skillsData";
-import { ArrowLeft, AlertTriangle, Lightbulb, ExternalLink, Clock, BookOpen } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Lightbulb, ExternalLink, Clock, BookOpen, Sparkles, RefreshCw } from "lucide-react";
 import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
+import { trpc } from "@/lib/trpc";
+
+function TipOfTheDay({ skillSlug }: { skillSlug: string }) {
+  const { data: tip, isLoading } = trpc.freshness.getSkillTip.useQuery({ skillSlug });
+
+  if (isLoading) {
+    return (
+      <div className="p-5 rounded-sm animate-pulse" style={{ backgroundColor: "oklch(0.95 0.04 145)", border: "1px solid oklch(0.78 0.06 145)" }}>
+        <div className="h-4 rounded mb-3" style={{ backgroundColor: "oklch(0.82 0.04 145)", width: "60%" }} />
+        <div className="h-3 rounded mb-2" style={{ backgroundColor: "oklch(0.88 0.03 145)" }} />
+        <div className="h-3 rounded" style={{ backgroundColor: "oklch(0.88 0.03 145)", width: "80%" }} />
+      </div>
+    );
+  }
+
+  if (!tip) {
+    return (
+      <div className="p-5 rounded-sm" style={{ backgroundColor: "oklch(0.95 0.04 145)", border: "1px solid oklch(0.78 0.06 145)" }}>
+        <h3 className="font-bold mb-2 flex items-center gap-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.22 0.07 140)" }}>
+          <Sparkles className="w-4 h-4" />
+          Tip of the Day
+        </h3>
+        <p className="text-sm italic" style={{ color: "oklch(0.42 0.05 140)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+          Daily tips are generated each morning. Check back tomorrow!
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-5 rounded-sm" style={{ backgroundColor: "oklch(0.95 0.04 145)", border: "2px solid oklch(0.68 0.08 145)" }}>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-bold flex items-center gap-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.22 0.07 140)" }}>
+          <Sparkles className="w-4 h-4" style={{ color: "oklch(0.52 0.12 140)" }} />
+          Tip of the Day
+        </h3>
+        <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: "oklch(0.78 0.08 140)", color: "oklch(0.18 0.07 140)" }}>
+          AI-Generated
+        </span>
+      </div>
+      <p className="text-sm leading-relaxed" style={{ color: "oklch(0.25 0.06 140)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+        {tip.tip}
+      </p>
+      {tip.source && (
+        <p className="text-xs mt-2 opacity-70" style={{ color: "oklch(0.38 0.05 140)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+          — {tip.source}
+        </p>
+      )}
+      <p className="text-xs mt-3 opacity-60" style={{ color: "oklch(0.45 0.04 140)" }}>
+        Updated daily · {new Date(tip.createdAt).toLocaleDateString()}
+      </p>
+    </div>
+  );
+}
 
 const SITE_URL = "https://a1homesteadhub.com";
 
@@ -180,6 +234,9 @@ export default function SkillDetail({ params }: Props) {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Tip of the Day — AI-generated daily */}
+            <TipOfTheDay skillSlug={skill.slug} />
+
             {/* Tips */}
             <div className="p-5 rounded-sm" style={{ backgroundColor: "oklch(0.98 0.01 85)", border: "1px solid oklch(0.82 0.03 75)" }}>
               <h3 className="font-bold mb-4 flex items-center gap-2" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.18 0.06 145)" }}>

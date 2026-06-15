@@ -329,3 +329,57 @@ export const schoolProSubscriptions = mysqlTable("schoolProSubscriptions", {
 
 export type SchoolProSubscription = typeof schoolProSubscriptions.$inferSelect;
 export type InsertSchoolProSubscription = typeof schoolProSubscriptions.$inferInsert;
+
+// ============================================================
+// DAILY FRESHNESS ENGINE — auto-generated content that keeps
+// every section of the site alive and growing every day
+// ============================================================
+
+/**
+ * Skill Tips — one AI-generated practical tip per skill per day.
+ * Powers the "Tip of the Day" card on each Skills Hub page.
+ */
+export const skillTips = mysqlTable("skillTips", {
+  id: int("id").autoincrement().primaryKey(),
+  skillSlug: varchar("skillSlug", { length: 100 }).notNull(), // e.g. "foraging", "butchering"
+  tip: text("tip").notNull(),
+  source: varchar("source", { length: 200 }), // optional attribution
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SkillTip = typeof skillTips.$inferSelect;
+export type InsertSkillTip = typeof skillTips.$inferInsert;
+
+/**
+ * Homestead Feed — curated daily insights surfaced on the homepage.
+ * Populated by the daily freshness cron: commodity context, NOAA alerts,
+ * seasonal tips, and homesteading news summaries.
+ */
+export const homesteadFeed = mysqlTable("homesteadFeed", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("type", ["market", "weather", "seasonal", "tip", "news"]).notNull(),
+  headline: varchar("headline", { length: 300 }).notNull(),
+  body: text("body").notNull(),
+  source: varchar("source", { length: 200 }), // e.g. "NOAA", "USDA", "A1 Homestead Hub"
+  sourceUrl: text("sourceUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type HomesteadFeedItem = typeof homesteadFeed.$inferSelect;
+export type InsertHomesteadFeedItem = typeof homesteadFeed.$inferInsert;
+
+/**
+ * School Daily Expansions — AI-generated bonus content added to existing
+ * courses each day: extra quiz questions, fun facts, hands-on activity ideas.
+ * Keeps the Schoolhouse growing without requiring full new courses.
+ */
+export const schoolDailyExpansions = mysqlTable("schoolDailyExpansions", {
+  id: int("id").autoincrement().primaryKey(),
+  courseId: int("courseId").notNull(),
+  type: mysqlEnum("type", ["quiz_question", "fun_fact", "activity"]).notNull(),
+  content: text("content").notNull(), // JSON for quiz_question, markdown for others
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SchoolDailyExpansion = typeof schoolDailyExpansions.$inferSelect;
+export type InsertSchoolDailyExpansion = typeof schoolDailyExpansions.$inferInsert;

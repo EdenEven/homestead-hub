@@ -1,6 +1,6 @@
 import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -586,6 +586,7 @@ export async function upsertProSubscription(data: InsertSchoolProSubscription) {
   }
 }
 
+<<<<<<< Updated upstream
 // ============================================================
 // WEEKLY CLEANUP HELPERS
 // ============================================================
@@ -639,4 +640,86 @@ export async function purgeExpiredProSubscriptions(): Promise<number> {
       )
     );
   return (result[0] as any)?.affectedRows ?? 0;
+=======
+// ─── Daily Freshness Engine — DB Helpers ────────────────────────────────────
+
+/** Insert a new AI-generated skill tip */
+export async function addSkillTip(data: InsertSkillTip) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(skillTips).values(data);
+}
+
+/** Get the most recent tip for a given skill slug */
+export async function getLatestSkillTip(skillSlug: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(skillTips)
+    .where(eq(skillTips.skillSlug, skillSlug))
+    .orderBy(desc(skillTips.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** Get the most recent N tips for a skill (for history display) */
+export async function getSkillTips(skillSlug: string, limit = 7) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(skillTips)
+    .where(eq(skillTips.skillSlug, skillSlug))
+    .orderBy(desc(skillTips.createdAt))
+    .limit(limit);
+}
+
+/** Insert a new homestead feed item */
+export async function addHomesteadFeedItem(data: InsertHomesteadFeedItem) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(homesteadFeed).values(data);
+}
+
+/** Get the most recent N homestead feed items for the homepage */
+export async function getHomesteadFeed(limit = 6) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(homesteadFeed)
+    .orderBy(desc(homesteadFeed.createdAt))
+    .limit(limit);
+}
+
+/** Insert a daily expansion for a course */
+export async function addSchoolDailyExpansion(data: InsertSchoolDailyExpansion) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(schoolDailyExpansions).values(data);
+}
+
+/** Get recent expansions for a course (shown on the course viewer page) */
+export async function getCourseExpansions(courseId: number, limit = 5) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(schoolDailyExpansions)
+    .where(eq(schoolDailyExpansions.courseId, courseId))
+    .orderBy(desc(schoolDailyExpansions.createdAt))
+    .limit(limit);
+}
+
+/** Get all published course IDs (used by the expansion job to pick a random course) */
+export async function getAllPublishedCourseIds(): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({ id: schoolCourses.id })
+    .from(schoolCourses)
+    .where(eq(schoolCourses.isPublished, true));
+  return rows.map(r => r.id);
+>>>>>>> Stashed changes
 }
