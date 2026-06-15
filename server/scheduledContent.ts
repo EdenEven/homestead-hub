@@ -23,16 +23,13 @@ import type { Request, Response } from "express";
 import { invokeLLM } from "./_core/llm";
 import {
   createBlogPost,
-<<<<<<< Updated upstream
   expireOldBarterListings,
   purgeOldTutorSessions,
   purgeExpiredProSubscriptions,
-=======
   addSkillTip,
   addHomesteadFeedItem,
   addSchoolDailyExpansion,
   getAllPublishedCourseIds,
->>>>>>> Stashed changes
 } from "./db";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -174,26 +171,6 @@ Return ONLY valid JSON in this exact shape:
   }
 }
 
-<<<<<<< Updated upstream
-// ─── Weekly Cleanup ──────────────────────────────────────────────────────────
-
-/**
- * POST /api/scheduled/weekly-cleanup
- * Runs every Sunday at 3am UTC. Performs three housekeeping operations:
- *
- *  1. Soft-deletes barter listings older than 90 days (sets isActive = false).
- *     Sellers can still see their own listings in their profile; they just
- *     disappear from the public board.
- *
- *  2. Hard-deletes AI tutor session chat histories older than 30 days.
- *     These are ephemeral Q&A logs — no user data is lost, only chat context
- *     that has long since expired.
- *
- *  3. Removes canceled/past_due Pro subscriptions whose expiresAt is more
- *     than 30 days in the past (stale billing records).
- *
- * Called by the weekly Heartbeat cron job.
-=======
 // ─── 2. Skills Hub — Daily Tip Generator ────────────────────────────────────
 
 /**
@@ -449,7 +426,6 @@ Return ONLY valid JSON: { "headline": "under 80 chars", "body": "2–3 sentences
  * Lightweight weekly cleanup: removes barter listings older than 90 days
  * and prunes homestead feed items older than 30 days to keep the DB lean.
  * Called every Sunday at 3am UTC.
->>>>>>> Stashed changes
  */
 export async function weeklyCleanupHandler(req: Request, res: Response) {
   const startedAt = new Date().toISOString();
@@ -458,7 +434,6 @@ export async function weeklyCleanupHandler(req: Request, res: Response) {
       return res.status(403).json({ error: "permission error for cron cookie" });
     }
 
-<<<<<<< Updated upstream
     console.log(`[Scheduled] Weekly cleanup started at ${startedAt}`);
 
     // 1. Expire old barter listings (90-day policy)
@@ -486,10 +461,6 @@ export async function weeklyCleanupHandler(req: Request, res: Response) {
 
     console.log("[Scheduled] Weekly cleanup complete:", JSON.stringify(summary.results));
     return res.json(summary);
-=======
-    console.log("[Scheduled] Weekly cleanup ran.");
-    return res.json({ ok: true, message: "cleanup complete" });
->>>>>>> Stashed changes
   } catch (err: any) {
     console.error("[Scheduled] weeklyCleanup error:", err);
     return res.status(500).json({

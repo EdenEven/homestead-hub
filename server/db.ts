@@ -586,7 +586,6 @@ export async function upsertProSubscription(data: InsertSchoolProSubscription) {
   }
 }
 
-<<<<<<< Updated upstream
 // ============================================================
 // WEEKLY CLEANUP HELPERS
 // ============================================================
@@ -603,14 +602,11 @@ export async function expireOldBarterListings(daysOld = 90): Promise<number> {
   const result = await db.update(barterListings)
     .set({ isActive: false })
     .where(and(eq(barterListings.isActive, true), lt(barterListings.createdAt, cutoff)));
-  // result[0].affectedRows is the MySQL2 affected row count
   return (result[0] as any)?.affectedRows ?? 0;
 }
 
 /**
  * Delete tutor sessions that are older than `daysOld` days.
- * These are low-value chat histories that accumulate over time.
- * Returns the count of sessions deleted.
  */
 export async function purgeOldTutorSessions(daysOld = 30): Promise<number> {
   const db = await getDb();
@@ -625,7 +621,6 @@ export async function purgeOldTutorSessions(daysOld = 30): Promise<number> {
 /**
  * Delete expired Pro subscriptions that have been canceled/past_due
  * and whose expiresAt is more than 30 days in the past.
- * Returns the count of subscriptions removed.
  */
 export async function purgeExpiredProSubscriptions(): Promise<number> {
   const db = await getDb();
@@ -640,7 +635,8 @@ export async function purgeExpiredProSubscriptions(): Promise<number> {
       )
     );
   return (result[0] as any)?.affectedRows ?? 0;
-=======
+}
+
 // ─── Daily Freshness Engine — DB Helpers ────────────────────────────────────
 
 /** Insert a new AI-generated skill tip */
@@ -721,5 +717,4 @@ export async function getAllPublishedCourseIds(): Promise<number[]> {
     .from(schoolCourses)
     .where(eq(schoolCourses.isPublished, true));
   return rows.map(r => r.id);
->>>>>>> Stashed changes
 }
