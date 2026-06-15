@@ -14,6 +14,7 @@
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import {
   Sprout,
@@ -633,12 +634,18 @@ export default function Partners() {
           <div className="mt-10 p-6 rounded-sm text-center" style={{ backgroundColor: "oklch(0.22 0.06 145)" }}>
             <Mail className="w-8 h-8 mx-auto mb-3" style={{ color: "oklch(0.68 0.12 65)" }} />
             <p className="font-bold mb-1" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.96 0.025 85)" }}>
-              Prefer to reach out directly?
+              Want more detail before applying?
             </p>
-            <p className="text-sm" style={{ color: "oklch(0.72 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
-              Use the application form above — it goes directly to the founder.
-              No ticketing system. No virtual assistant. Just a real person.
+            <p className="text-sm mb-4" style={{ color: "oklch(0.72 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
+              Review our full Media Kit — audience profile, content reach, ad formats, brand standards, and pricing philosophy.
             </p>
+            <Link
+              href="/media-kit"
+              className="inline-flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-sm transition-all hover:opacity-90"
+              style={{ backgroundColor: "oklch(0.68 0.12 65)", color: "oklch(0.18 0.06 145)", fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              View Media Kit →
+            </Link>
           </div>
         </div>
       </section>

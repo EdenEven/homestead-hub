@@ -22,6 +22,7 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "Features", href: "/features" },
   { label: "About", href: "/about" },
   { label: "🤝 Partner With Us", href: "/partners" },
+  { label: "📋 Media Kit", href: "/media-kit" },
 ];
 
 export default function Navigation() {

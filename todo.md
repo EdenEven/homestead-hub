@@ -202,3 +202,8 @@
 - [x] Build /partners landing page with hero, media kit stats, partnership tiers, and application form
 - [x] Add "Partners" link to site navigation
 - [x] Wire /partners route in App.tsx
+
+## Media Kit Page
+- [x] Build /media-kit page — platform overview, audience stats, content categories, ad formats, pricing philosophy, contact CTA
+- [x] Wire /media-kit route in App.tsx
+- [x] Add "Media Kit" link to Partners page and navigation

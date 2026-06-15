@@ -32,6 +32,7 @@ import SchoolhousePro from "./pages/SchoolhousePro";
 import Features from "./pages/Features";
 import About from "./pages/About";
 import Partners from "./pages/Partners";
+import MediaKit from "./pages/MediaKit";
 
 function Router() {
   return (
@@ -57,6 +58,7 @@ function Router() {
       <Route path="/features" component={Features} />
       <Route path="/about" component={About} />
       <Route path="/partners" component={Partners} />
+      <Route path="/media-kit" component={MediaKit} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
