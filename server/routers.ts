@@ -60,7 +60,11 @@ import {
   getSkillTips,
   getHomesteadFeed,
   getCourseExpansions,
+  createPartnerApplication,
+  getPartnerApplications,
+  updatePartnerApplicationStatus,
 } from "./db";
+import { notifyOwner } from "./_core/notification";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
 import Stripe from "stripe";
@@ -1316,6 +1320,58 @@ Your personality:
         return { isPro: pro };
       }),
   }),
+  // ---- Partner Applications ----
+  partners: router({
+    // Public: submit a partnership application
+    submit: publicProcedure
+      .input(z.object({
+        contactName: z.string().min(2).max(200),
+        company: z.string().min(1).max(200),
+        email: z.string().email(),
+        website: z.string().url().optional().or(z.literal("")),
+        phone: z.string().max(50).optional(),
+        partnerType: z.enum(["seed_supplier", "product_advertiser", "affiliate", "sponsored_content", "other"]),
+        message: z.string().min(20).max(3000),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await createPartnerApplication({
+          contactName: input.contactName,
+          company: input.company,
+          email: input.email,
+          website: input.website || null,
+          phone: input.phone || null,
+          partnerType: input.partnerType,
+          message: input.message,
+        });
+        // Notify the site owner immediately
+        await notifyOwner({
+          title: `New Partner Application: ${input.company}`,
+          content: `**${input.contactName}** from **${input.company}** submitted a partnership inquiry.\n\n**Type:** ${input.partnerType.replace(/_/g, " ")}\n**Email:** ${input.email}\n**Website:** ${input.website || "—"}\n\n**Message:**\n${input.message}`,
+        });
+        return { id, success: true };
+      }),
+
+    // Admin: list all applications
+    list: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Forbidden");
+        return getPartnerApplications();
+      }),
+
+    // Admin: update application status
+    updateStatus: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["new", "reviewing", "approved", "declined"]),
+        adminNotes: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Forbidden");
+        await updatePartnerApplicationStatus(input.id, input.status, input.adminNotes);
+        return { success: true };
+      }),
+  }),
+
   // ---- Daily Freshness Engine ----
   freshness: router({
     // Get the latest tip for a skill page

@@ -194,3 +194,11 @@
 - [x] Add homesteadFeed table to DB schema (type, headline, body, source, createdAt)
 - [x] Add /api/scheduled/refresh-homestead-feed Heartbeat endpoint — generates daily homesteading insight (seasonal/market/tip/news)
 - [x] Build "This Week in Homesteading" section on homepage — live feed cards from homesteadFeed table
+
+## Partner & Advertiser Landing Page
+- [x] Add partnerApplications table to DB schema (name, company, email, website, partnerType, message, status, createdAt)
+- [x] Add submitPartnerApplication tRPC procedure (public) — saves to DB and notifies owner
+- [x] Add getPartnerApplications tRPC procedure (admin-only) — lists all submissions
+- [x] Build /partners landing page with hero, media kit stats, partnership tiers, and application form
+- [x] Add "Partners" link to site navigation
+- [x] Wire /partners route in App.tsx

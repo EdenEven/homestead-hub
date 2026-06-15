@@ -21,6 +21,7 @@ const navLinks: { label: string; href: string; highlight?: boolean }[] = [
   { label: "Map Explorer", href: "/map" },
   { label: "Features", href: "/features" },
   { label: "About", href: "/about" },
+  { label: "🤝 Partner With Us", href: "/partners" },
 ];
 
 export default function Navigation() {

@@ -718,3 +718,45 @@ export async function getAllPublishedCourseIds(): Promise<number[]> {
     .where(eq(schoolCourses.isPublished, true));
   return rows.map(r => r.id);
 }
+
+// ─── Partner Applications ────────────────────────────────────────────────────
+
+import {
+  partnerApplications,
+  type InsertPartnerApplication,
+  type PartnerApplication,
+} from "../drizzle/schema";
+
+/** Save a new partner/advertiser application */
+export async function createPartnerApplication(
+  data: InsertPartnerApplication
+): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(partnerApplications).values(data);
+  return (result[0] as any)?.insertId ?? 0;
+}
+
+/** Get all partner applications, newest first (admin use) */
+export async function getPartnerApplications(): Promise<PartnerApplication[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(partnerApplications)
+    .orderBy(desc(partnerApplications.createdAt));
+}
+
+/** Update the status of a partner application */
+export async function updatePartnerApplicationStatus(
+  id: number,
+  status: PartnerApplication["status"],
+  adminNotes?: string
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(partnerApplications)
+    .set({ status, ...(adminNotes !== undefined ? { adminNotes } : {}) })
+    .where(eq(partnerApplications.id, id));
+}

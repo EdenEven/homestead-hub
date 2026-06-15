@@ -383,3 +383,35 @@ export const schoolDailyExpansions = mysqlTable("schoolDailyExpansions", {
 
 export type SchoolDailyExpansion = typeof schoolDailyExpansions.$inferSelect;
 export type InsertSchoolDailyExpansion = typeof schoolDailyExpansions.$inferInsert;
+
+/**
+ * Partner Applications — submitted via the /partners landing page.
+ * Stores seed supplier, advertiser, and affiliate partnership inquiries.
+ * Owner is notified via the built-in notification system on each submission.
+ */
+export const partnerApplications = mysqlTable("partnerApplications", {
+  id: int("id").autoincrement().primaryKey(),
+  // Applicant info
+  contactName: varchar("contactName", { length: 200 }).notNull(),
+  company: varchar("company", { length: 200 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  website: varchar("website", { length: 500 }),
+  phone: varchar("phone", { length: 50 }),
+  // Partnership type
+  partnerType: mysqlEnum("partnerType", [
+    "seed_supplier",
+    "product_advertiser",
+    "affiliate",
+    "sponsored_content",
+    "other",
+  ]).notNull(),
+  // Their pitch
+  message: text("message").notNull(),
+  // Internal workflow
+  status: mysqlEnum("status", ["new", "reviewing", "approved", "declined"]).default("new").notNull(),
+  adminNotes: text("adminNotes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type PartnerApplication = typeof partnerApplications.$inferSelect;
+export type InsertPartnerApplication = typeof partnerApplications.$inferInsert;
