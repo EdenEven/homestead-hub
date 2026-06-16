@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-014 — Campfire Night</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-014 Campfire Night">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Campfire night: a woman with coffee by the fire, her dog beside it, a man holding the pony's lead, a tent, and a moonlit stream in the foreground">
+
+    <!-- Night sky -->
+    <rect x="0" y="0" width="1280" height="720" fill="var(--night)"></rect>
+
+    <!-- Stars (pulse, staggered) -->
+    <g class="animate-pulse">
+      <use href="#prop-star" x="560" y="80" width="17" height="17"></use>
+      <use href="#prop-star" x="824" y="140" width="13" height="13" style="--star: var(--gold-light)"></use>
+      <use href="#prop-star" x="1080" y="70" width="16" height="16"></use>
+      <use href="#prop-star" x="380" y="180" width="12" height="12" style="--star: var(--gold-light)"></use>
+    </g>
+    <g class="animate-pulse d2">
+      <use href="#prop-star" x="700" y="50" width="14" height="14" style="--star: var(--gold-light)"></use>
+      <use href="#prop-star" x="960" y="220" width="15" height="15"></use>
+      <use href="#prop-star" x="1180" y="170" width="13" height="13"></use>
+    </g>
+
+    <!-- Gibbous moon, top left, with glow -->
+    <g class="animate-drift slow">
+      <use href="#prop-moon-gibbous" x="110" y="70" width="130" height="130" style="--moon: var(--cream); --moon-sky: var(--night)"></use>
+      <g class="animate-pulse">
+        <circle cx="175" cy="135" r="90" fill="var(--cream)" opacity="0.4"></circle>
+      </g>
+    </g>
+
+    <!-- Night hills -->
+    <ellipse cx="960" cy="900" rx="980" ry="350" fill="var(--night-green)" opacity="0.85"></ellipse>
+    <ellipse cx="300" cy="950" rx="1040" ry="370" fill="var(--night-green)"></ellipse>
+
+    <!-- Tent, back left -->
+    <g transform="translate(110,400)">
+      <use href="#prop-tent" width="300" height="206" style="--tent: var(--earth); --door: var(--night-deep)"></use>
+    </g>
+
+    <!-- Fire glow washes the camp (pulse) -->
+    <g class="animate-pulse">
+      <circle cx="617" cy="560" r="150" fill="var(--gold-light)" opacity="0.4"></circle>
+    </g>
+
+    <!-- The campfire -->
+    <g transform="translate(500,498)">
+      <use href="#prop-campfire" width="235" height="147"></use>
+    </g>
+
+    <!-- The woman, coffee in hand, in her chair by the fire -->
+    <g transform="translate(320,508)">
+      <use href="#prop-chair-camp" width="100" height="120"></use>
+    </g>
+    <g transform="translate(300,480)">
+      <use href="#prop-cowgirl-seated" width="120" height="150"></use>
+    </g>
+    <use href="#prop-mug" x="378" y="540" width="38" height="31"></use>
+    <!-- coffee steam -->
+    <g class="animate-pulse d1">
+      <ellipse cx="392" cy="522" rx="6" ry="9" fill="var(--cream)" opacity="0.4"></ellipse>
+      <ellipse cx="398" cy="504" rx="5" ry="8" fill="var(--cream)" opacity="0.3"></ellipse>
+    </g>
+
+    <!-- The dog, sitting across the fire, watching it -->
+    <g transform="translate(795,542) scale(-1,1)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-dog" width="100" height="98"></use>
+      </g>
+    </g>
+
+    <!-- The man, holding the pony's lead, facing camp -->
+    <g transform="translate(975,440) scale(-1,1)">
+      <use href="#prop-cowboy" width="105" height="200"></use>
+    </g>
+    <!-- Lead rope, sagging to the halter ring -->
+    <line x1="884" y1="563" x2="945" y2="605" stroke="var(--cream-deep)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"></line>
+    <line x1="945" y1="605" x2="1002" y2="597" stroke="var(--cream-deep)" stroke-width="3.5" stroke-linecap="round" opacity="0.85"></line>
+    <!-- The Shetland pony, settled for the night -->
+    <g transform="translate(1135,548) scale(-1,1)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-pony-shetland" width="150" height="100"></use>
+      </g>
+    </g>
+
+    <!-- The stream, crossing the foreground -->
+    <rect x="0" y="656" width="1280" height="64" fill="var(--water-deep)"></rect>
+    <rect x="0" y="656" width="1280" height="6" fill="var(--water-light)" opacity="0.5"></rect>
+    <!-- moonlight on the water -->
+    <ellipse cx="195" cy="686" rx="64" ry="9" fill="var(--cream)" opacity="0.3"></ellipse>
+    <!-- firelight on the water (pulse) -->
+    <g class="animate-pulse">
+      <ellipse cx="617" cy="690" rx="95" ry="10" fill="var(--gold-light)" opacity="0.35"></ellipse>
+    </g>
+    <!-- drifting glints -->
+    <g class="animate-drift slow">
+      <rect x="300" y="672" width="120" height="5" rx="2.5" fill="var(--water-light)" opacity="0.45"></rect>
+      <rect x="880" y="694" width="150" height="5" rx="2.5" fill="var(--water-light)" opacity="0.4"></rect>
+    </g>
+    <g class="animate-drift slower d4">
+      <rect x="560" y="704" width="130" height="5" rx="2.5" fill="var(--water-light)" opacity="0.35"></rect>
+      <rect x="1100" y="676" width="110" height="5" rx="2.5" fill="var(--water-light)" opacity="0.4"></rect>
+    </g>
+  </svg>
+
+  <!-- Layer 3: atmospheric glue (always last) — moonlight wash -->
+  <div class="sunbeam sunbeam--moon animate-pulse"></div>
+</div>
+</body>
+</html>

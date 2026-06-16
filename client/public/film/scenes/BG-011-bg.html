@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-011 — Jungle Falls</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-011 Jungle Falls">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Jungle hills with a blue waterfall: the river flows from the falls at the back down to the front of the scene, and a lion stands on a lone rock fallen from the tree-covered mountain">
+
+    <!-- Sun core + halo -->
+    <g class="animate-pulse">
+      <circle cx="1100" cy="100" r="110" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="1035" y="35" width="130" height="130"></use>
+
+    <!-- Cumulus drifting over the hills -->
+    <g class="animate-drift slow" opacity="0.8">
+      <use href="#prop-cloud-cumulus" x="150" y="50" width="260" height="130"></use>
+    </g>
+
+    <!-- Tree-covered mountain, left-center -->
+    <ellipse cx="430" cy="800" rx="640" ry="500" fill="var(--green)"></ellipse>
+    <!-- The mount itself — raised peak behind the falls so the temple sits against green, not sky -->
+    <ellipse cx="630" cy="790" rx="460" ry="590" fill="var(--green)"></ellipse>
+
+    <!-- The temple of the spring — ziggurat over the falls; water comes out of the
+         doorway and down the staircase channel, watering the gardens on every level -->
+    <use href="#prop-temple" x="540" y="215" width="150" height="117" style="--stair: var(--water-light); --door: var(--water-deep)"></use>
+
+    <!-- Hanging gardens — greenery spilling over each tier -->
+    <g class="animate-breathe gentle d2">
+      <ellipse cx="598" cy="233" rx="10" ry="6" fill="var(--green-deep)"></ellipse>
+      <ellipse cx="632" cy="233" rx="10" ry="6" fill="var(--green)"></ellipse>
+      <ellipse cx="578" cy="258" rx="14" ry="8" fill="var(--green)"></ellipse>
+      <ellipse cx="652" cy="258" rx="14" ry="8" fill="var(--green-deep)"></ellipse>
+      <ellipse cx="562" cy="283" rx="16" ry="9" fill="var(--green-deep)"></ellipse>
+      <ellipse cx="668" cy="283" rx="16" ry="9" fill="var(--green)"></ellipse>
+      <ellipse cx="546" cy="308" rx="18" ry="10" fill="var(--green)"></ellipse>
+      <ellipse cx="684" cy="308" rx="18" ry="10" fill="var(--green-deep)"></ellipse>
+    </g>
+
+    <!-- Water spilling over each level, watering the gardens -->
+    <g fill="var(--water-light)" opacity="0.85" class="animate-pulse">
+      <rect x="586" y="257" width="4" height="27" rx="2"></rect>
+      <rect x="644" y="257" width="4" height="27" rx="2"></rect>
+      <rect x="568" y="282" width="4" height="27" rx="2"></rect>
+      <rect x="662" y="282" width="4" height="27" rx="2"></rect>
+      <rect x="552" y="307" width="4" height="25" rx="2"></rect>
+      <rect x="678" y="307" width="4" height="25" rx="2"></rect>
+    </g>
+
+    <g style="--trunk: var(--green-deep)">
+      <use href="#prop-tree-jungle" x="150" y="320" width="110" height="140" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+      <use href="#prop-tree-jungle" x="400" y="280" width="120" height="152" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+      <use href="#prop-tree-jungle" x="250" y="300" width="100" height="127" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+      <use href="#prop-tree-jungle" x="60" y="380" width="95" height="120" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+      <use href="#prop-tree-jungle" x="700" y="330" width="90" height="114" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+    </g>
+
+    <!-- Jungle hill, right -->
+    <ellipse cx="1080" cy="880" rx="720" ry="400" fill="var(--green-deep)" opacity="0.92"></ellipse>
+    <g style="--trunk: var(--green-deep)">
+      <use href="#prop-tree-jungle" x="960" y="460" width="90" height="114" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+      <use href="#prop-tree-jungle" x="1110" y="490" width="84" height="106" style="--canopy: var(--green-deep); --canopy2: var(--green)"></use>
+    </g>
+
+    <!-- The blue waterfall — pouring from the temple's base down the mount -->
+    <rect x="580" y="327" width="70" height="183" fill="var(--water)" opacity="0.9"></rect>
+    <rect x="588" y="327" width="54" height="183" fill="var(--water-light)" opacity="0.6"></rect>
+    <g fill="var(--cream)">
+      <rect x="590" y="336" width="6" height="60" rx="3" class="animate-water-fall"></rect>
+      <rect x="608" y="336" width="6" height="70" rx="3" class="animate-water-fall" style="animation-delay: -0.8s;"></rect>
+      <rect x="624" y="336" width="6" height="56" rx="3" class="animate-water-fall" style="animation-delay: -1.6s;"></rect>
+      <rect x="638" y="336" width="6" height="64" rx="3" class="animate-water-fall" style="animation-delay: -2.1s;"></rect>
+    </g>
+
+    <!-- Plunge pool and the river, flowing back-to-front -->
+    <ellipse cx="615" cy="505" rx="78" ry="20" fill="var(--water)"></ellipse>
+    <polygon points="575,505 655,505 705,570 745,630 860,720 380,720 545,635 585,565" fill="var(--water)"></polygon>
+    <polygon points="600,505 640,505 685,575 720,635 800,720 470,720 565,640 600,570" fill="var(--water-deep)" opacity="0.35"></polygon>
+
+    <!-- Mist at the plunge pool -->
+    <g class="animate-pulse">
+      <ellipse cx="615" cy="500" rx="64" ry="15" fill="var(--cream)" opacity="0.7"></ellipse>
+    </g>
+
+    <!-- Flow highlights, traveling toward the viewer -->
+    <g fill="var(--water-light)">
+      <rect x="595" y="535" width="36" height="8" rx="4" class="animate-river-flow"></rect>
+      <rect x="640" y="590" width="46" height="9" rx="4.5" class="animate-river-flow" style="animation-delay: -1.2s;" transform="rotate(32 663 594)"></rect>
+      <rect x="700" y="650" width="56" height="10" rx="5" class="animate-river-flow" style="animation-delay: -2.6s;" transform="rotate(36 728 655)"></rect>
+      <rect x="520" y="665" width="50" height="10" rx="5" class="animate-river-flow" style="animation-delay: -3.8s;" transform="rotate(-28 545 670)"></rect>
+    </g>
+
+    <!-- The lone rock, fallen from the tree-covered mountain -->
+    <use href="#prop-stone" x="880" y="560" width="170" height="122" style="--stone: var(--earth-light)"></use>
+
+    <!-- The lion, surveying the falls from his rock (flipped to face the river) -->
+    <g transform="translate(1040,498) scale(-1,1)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-lion" width="150" height="102"></use>
+      </g>
+    </g>
+
+    <!-- Foreground framing tree, left edge -->
+    <g transform="translate(-30,240)">
+      <g class="animate-breathe slow">
+        <use href="#prop-tree-jungle" width="300" height="381"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: atmospheric glue — required final .sunbeam layer -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

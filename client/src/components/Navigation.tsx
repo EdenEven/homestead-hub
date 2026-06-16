@@ -27,6 +27,7 @@ import {
   Handshake,
   FileText,
   BarChart3,
+  Film,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -133,6 +134,13 @@ const NAV_GROUPS: NavGroup[] = [
         href: "/#ticker",
         icon: <BarChart3 className="w-4 h-4" />,
         desc: "Live commodity prices — corn, wheat, cattle, gold, and more",
+      },
+      {
+        label: "The Film",
+        href: "/film",
+        icon: <Film className="w-4 h-4" />,
+        desc: "SVG cinematic scenes — a full day on the homestead, trailer, and seed tutorial",
+        highlight: true,
       },
     ],
   },

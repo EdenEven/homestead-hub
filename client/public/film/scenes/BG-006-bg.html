@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-006 — Spring Shower &amp; Accordion Ripple</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-006 Spring Shower">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A spring sun-shower over the pasture: sunbeams radiate from the upper right while slow rain falls, and ripple rings spread across an opal puddle">
+
+    <defs>
+      <!-- Opal Puddle Shimmer — sun-yellow into organic green into cream -->
+      <linearGradient id="opal-shimmer" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#F5D061" stop-opacity="0.15"></stop>
+        <stop offset="0.5" stop-color="#8A9A6B" stop-opacity="0.2"></stop>
+        <stop offset="1" stop-color="#F4EDE1" stop-opacity="0.25"></stop>
+      </linearGradient>
+    </defs>
+
+    <!-- ===== Layer 1: Firmament Sunburst — 8 beams radiating from (1100,100) ===== -->
+    <g>
+      <polygon points="1100,100 1334,1582 1126,1600" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 995,1596 788,1567" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 662,1534 466,1459" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 350,1399 176,1282" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 77,1197 -66,1044" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 -144,939 -248,757" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 -301,637 -361,438" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+      <polygon points="1100,100 -385,309 -400,100" fill="var(--sun-yellow)" opacity="0.2"></polygon>
+    </g>
+    <!-- Sun core breaking through the shower -->
+    <g class="animate-pulse">
+      <circle cx="1100" cy="100" r="120" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="1030" y="30" width="140" height="140"></use>
+
+    <!-- Cumulus heaps — the curious clouds, drifting (rain falls in front of them) -->
+    <g class="animate-drift slow">
+      <use href="#prop-cloud-cumulus" x="110" y="50" width="320" height="160"></use>
+    </g>
+    <g class="animate-drift slower d3" opacity="0.7">
+      <use href="#prop-cloud-cumulus" x="560" y="130" width="220" height="110"></use>
+    </g>
+
+    <!-- A flock of three, gliding through the sun-shower -->
+    <g transform="translate(0,170)">
+      <g class="animate-roll">
+        <use href="#prop-bird" x="0" y="0" width="64" height="22"></use>
+        <use href="#prop-bird" x="78" y="34" width="52" height="18"></use>
+        <use href="#prop-bird" x="34" y="62" width="56" height="20"></use>
+      </g>
+    </g>
+
+    <!-- ===== Layer 2: Midground rain — 75° lines, staggered storm ===== -->
+    <g stroke="var(--green-light)" stroke-width="2.5" stroke-linecap="round">
+      <line x1="121" y1="-55" x2="130" y2="-20" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="251" y1="-15" x2="260" y2="20" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+      <line x1="341" y1="-70" x2="350" y2="-35" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="471" y1="-30" x2="480" y2="5" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+      <line x1="571" y1="-60" x2="580" y2="-25" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="691" y1="-10" x2="700" y2="25" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+      <line x1="811" y1="-45" x2="820" y2="-10" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="921" y1="-75" x2="930" y2="-40" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+      <line x1="1041" y1="-25" x2="1050" y2="10" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="1151" y1="-55" x2="1160" y2="-20" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+      <line x1="1231" y1="-35" x2="1240" y2="0" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="41" y1="-20" x2="50" y2="15" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+    </g>
+
+    <!-- Boundary fence — runs the backside of the hills, behind the barn; the front
+         line is the fourth wall (camera side), so the pasture opens toward us -->
+    <g opacity="0.85">
+      <use href="#prop-fence" x="-10" y="549" width="85" height="50"></use>
+      <use href="#prop-fence" x="75" y="541" width="85" height="50"></use>
+      <use href="#prop-fence" x="160" y="536" width="85" height="50"></use>
+      <use href="#prop-fence" x="245" y="535" width="85" height="50"></use>
+      <use href="#prop-fence" x="330" y="537" width="85" height="50"></use>
+      <use href="#prop-fence" x="415" y="542" width="85" height="50"></use>
+      <use href="#prop-fence" x="500" y="550" width="85" height="50"></use>
+      <use href="#prop-fence" x="585" y="563" width="85" height="50"></use>
+      <use href="#prop-fence" x="670" y="571" width="85" height="50"></use>
+      <use href="#prop-fence" x="755" y="560" width="85" height="50"></use>
+      <use href="#prop-fence" x="840" y="552" width="85" height="50"></use>
+      <use href="#prop-fence" x="925" y="547" width="85" height="50"></use>
+      <use href="#prop-fence" x="1010" y="545" width="85" height="50"></use>
+      <use href="#prop-fence" x="1095" y="546" width="85" height="50"></use>
+      <use href="#prop-fence" x="1180" y="550" width="85" height="50"></use>
+      <use href="#prop-fence" x="1265" y="558" width="85" height="50"></use>
+    </g>
+
+    <!-- Soaked hills and ground -->
+    <ellipse cx="240" cy="900" rx="860" ry="330" fill="var(--green-light)" opacity="0.7"></ellipse>
+    <ellipse cx="1020" cy="930" rx="920" ry="350" fill="var(--green)" opacity="0.85"></ellipse>
+    <ellipse cx="640" cy="1040" rx="1150" ry="400" fill="var(--green)"></ellipse>
+
+    <!-- Barn on the far rise, weathering the shower -->
+    <g transform="translate(880,420)" opacity="0.9">
+      <use href="#prop-barn" width="240" height="170"></use>
+    </g>
+
+    <!-- Tree at the right edge (breathe) -->
+    <g transform="translate(1130,330)">
+      <g class="animate-breathe">
+        <use href="#prop-tree" width="190" height="270"></use>
+      </g>
+    </g>
+
+    <!-- ===== Layer 3: The Opal Puddle — the earthly mirror ===== -->
+    <ellipse cx="400" cy="600" rx="175" ry="36" fill="var(--earth)"></ellipse>
+    <ellipse cx="400" cy="600" rx="160" ry="30" fill="url(#opal-shimmer)"></ellipse>
+
+    <!-- ===== Layer 4: Accordion impact — 4 nested rings, flattened into the water plane ===== -->
+    <g>
+      <ellipse cx="400" cy="600" rx="80" ry="16" stroke="#F5D061" fill="none" class="animate-ripple-ring" style="animation-delay: 5.8s;"></ellipse>
+      <ellipse cx="400" cy="600" rx="80" ry="16" stroke="#F4EDE1" fill="none" class="animate-ripple-ring" style="animation-delay: 5.4s;"></ellipse>
+      <ellipse cx="400" cy="600" rx="80" ry="16" stroke="#8A9A6B" fill="none" class="animate-ripple-ring" style="animation-delay: 5.0s;"></ellipse>
+      <ellipse cx="400" cy="600" rx="80" ry="16" stroke="#F5D061" fill="none" class="animate-ripple-ring" style="animation-delay: 4.6s;"></ellipse>
+    </g>
+
+    <!-- Outer wave — second ripple set carrying the burst out to the muddy rim -->
+    <g>
+      <ellipse cx="400" cy="600" rx="155" ry="31" stroke="#6B4A2E" fill="none" class="animate-ripple-ring" style="animation-delay: 6.0s;"></ellipse>
+      <ellipse cx="400" cy="600" rx="155" ry="31" stroke="#8A9A6B" fill="none" class="animate-ripple-ring" style="animation-delay: 5.6s;"></ellipse>
+      <ellipse cx="400" cy="600" rx="155" ry="31" stroke="#F4EDE1" fill="none" class="animate-ripple-ring" style="animation-delay: 5.2s;"></ellipse>
+    </g>
+
+    <!-- The lesson cow — laying down in the rain by the pond. When cows lay down,
+         the fish ain't biting… but rain makes fish bite and cows stand to graze.
+         Something ain't right in this picture — that's the lesson. -->
+    <g transform="translate(64,545)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-cow-resting" width="130" height="62"></use>
+      </g>
+    </g>
+
+    <!-- Foreground rain — heavy drops that vanish exactly at Y=600 -->
+    <g stroke="var(--green-deep)" stroke-width="4" stroke-linecap="round">
+      <line x1="387" y1="-50" x2="400" y2="0" class="animate-rain-slow" opacity="0.35"></line>
+      <line x1="167" y1="-50" x2="180" y2="0" class="animate-rain-slow" style="animation-delay: -1.5s;" opacity="0.35"></line>
+      <line x1="627" y1="-50" x2="640" y2="0" class="animate-rain-slow" style="animation-delay: -3s;" opacity="0.35"></line>
+      <line x1="947" y1="-50" x2="960" y2="0" class="animate-rain-slow" style="animation-delay: -4.5s;" opacity="0.35"></line>
+    </g>
+
+    <!-- Flowers drinking the rain (breathe, staggered) -->
+    <g transform="translate(640,622)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-flower" width="32" height="80"></use>
+      </g>
+    </g>
+    <g transform="translate(742,648)">
+      <g class="animate-breathe gentle d4">
+        <use href="#prop-flower" width="24" height="60" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(120,640)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-flower" width="28" height="70"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3 (atmospheric): Golden Hour glue — required final .sunbeam layer -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

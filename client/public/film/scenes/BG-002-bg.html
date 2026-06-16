@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-002 — Tractor Rolls Through</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-002 Tractor Rolls Through">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A tractor rolls across a plowed field past the barn">
+
+    <!-- Morning sun, high -->
+    <g class="animate-pulse">
+      <circle cx="220" cy="150" r="100" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="168" y="98" width="104" height="104"></use>
+
+    <!-- Clouds (drift) -->
+    <g class="animate-drift slow">
+      <use href="#prop-cloud" x="520" y="85" width="200" height="70"></use>
+    </g>
+    <g class="animate-drift slower d3">
+      <use href="#prop-cloud" x="950" y="165" width="140" height="49" opacity="0.8"></use>
+    </g>
+
+    <!-- Far hill -->
+    <ellipse cx="640" cy="780" rx="980" ry="300" fill="var(--green-light)" opacity="0.7"></ellipse>
+
+    <!-- Barn -->
+    <g transform="translate(970,330)">
+      <use href="#prop-barn" width="260" height="190"></use>
+    </g>
+
+    <!-- Field -->
+    <rect x="0" y="520" width="1280" height="200" fill="var(--green)"></rect>
+    <!-- Furrow rows -->
+    <rect x="-40" y="560" width="1360" height="10" rx="5" fill="var(--earth-light)" opacity="0.6"></rect>
+    <rect x="-40" y="600" width="1360" height="12" rx="6" fill="var(--earth-light)" opacity="0.7"></rect>
+    <rect x="-40" y="648" width="1360" height="14" rx="7" fill="var(--earth-light)" opacity="0.8"></rect>
+
+    <!-- Crop sprouts along the rows (breathe) -->
+    <g transform="translate(130,508)">
+      <g class="animate-breathe gentle">
+        <use href="#prop-flower" width="20" height="50" style="--stem: var(--green-deep); --bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(409,543)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-flower" width="22" height="55" style="--stem: var(--green-deep); --bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(828,586)">
+      <g class="animate-breathe gentle d4">
+        <use href="#prop-flower" width="24" height="60" style="--stem: var(--green-deep); --bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+
+    <!-- Tractor (roll-across) -->
+    <g transform="translate(0,455)">
+      <g class="animate-roll">
+        <use href="#prop-tractor" width="150" height="135"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

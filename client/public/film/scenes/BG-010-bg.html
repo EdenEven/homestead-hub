@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-010 — Jungle Canopy</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-010 Jungle Canopy">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A jungle clearing: monkeys hang by their tails from big many-topped trees, swaying and eating bananas">
+
+    <!-- Sun core + halo, high over the canopy -->
+    <g class="animate-pulse">
+      <circle cx="1100" cy="100" r="110" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="1035" y="35" width="130" height="130"></use>
+
+    <!-- One cumulus heap drifting above the treetops -->
+    <g class="animate-drift slow" opacity="0.8">
+      <use href="#prop-cloud-cumulus" x="420" y="40" width="260" height="130"></use>
+    </g>
+
+    <!-- Back tree (lighter, buried by the ground for depth) -->
+    <g transform="translate(480,250)">
+      <g class="animate-breathe slow d3">
+        <use href="#prop-tree-jungle" width="300" height="381" style="--canopy: var(--green); --canopy2: var(--green-light); --trunk: var(--earth-light)"></use>
+      </g>
+    </g>
+
+    <!-- Jungle floor -->
+    <ellipse cx="300" cy="900" rx="900" ry="330" fill="var(--green)" opacity="0.85"></ellipse>
+    <ellipse cx="1000" cy="940" rx="950" ry="350" fill="var(--green-deep)" opacity="0.9"></ellipse>
+    <ellipse cx="640" cy="1040" rx="1150" ry="400" fill="var(--green-deep)"></ellipse>
+
+    <!-- Big tree, left (lots of tops) -->
+    <g transform="translate(30,160)">
+      <g class="animate-breathe slow">
+        <use href="#prop-tree-jungle" width="420" height="533"></use>
+      </g>
+    </g>
+
+    <!-- Big tree, right -->
+    <g transform="translate(870,200)">
+      <g class="animate-breathe slow d2">
+        <use href="#prop-tree-jungle" width="380" height="482"></use>
+      </g>
+    </g>
+
+    <!-- Hanging vines -->
+    <g stroke="var(--green-deep)" stroke-width="5" stroke-linecap="round" opacity="0.8">
+      <line x1="500" y1="410" x2="500" y2="530"></line>
+      <line x1="1132" y1="470" x2="1132" y2="580"></line>
+    </g>
+
+    <!-- Giraffe — browsing the back tree's lower canopy -->
+    <g transform="translate(545,380)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-giraffe" width="140" height="215"></use>
+      </g>
+    </g>
+
+    <!-- Monkey 1 — hangs from the left tree's low canopy, banana in hand -->
+    <g transform="translate(340,448)">
+      <g class="animate-sway">
+        <use href="#prop-monkey-hanging" width="100" height="142"></use>
+      </g>
+    </g>
+    <use href="#prop-banana" x="342" y="546" width="42" height="22"></use>
+
+    <!-- Monkey 2 — right tree, mid-bite -->
+    <g transform="translate(866,470)">
+      <g class="animate-sway d2">
+        <use href="#prop-monkey-hanging" width="90" height="128"></use>
+      </g>
+    </g>
+    <use href="#prop-banana" x="916" y="558" width="38" height="20"></use>
+
+    <!-- Monkey 3 — the little one on the back tree -->
+    <g transform="translate(709,455)">
+      <g class="animate-sway d4">
+        <use href="#prop-monkey-hanging" width="76" height="108"></use>
+      </g>
+    </g>
+    <use href="#prop-banana" x="709" y="529" width="34" height="18"></use>
+
+    <!-- Elephant — foreground right, facing into the jungle (flipped) -->
+    <g transform="translate(1165,540) scale(-1,1)">
+      <g class="animate-breathe gentle d5">
+        <use href="#prop-elephant" width="200" height="150"></use>
+      </g>
+    </g>
+
+    <!-- The stash — a fanned bunch dropped at the left trunk -->
+    <g>
+      <use href="#prop-banana" x="160" y="668" width="46" height="24"></use>
+      <use href="#prop-banana" x="196" y="660" width="46" height="24" transform="rotate(14 219 672)"></use>
+      <use href="#prop-banana" x="180" y="678" width="46" height="24" transform="rotate(-12 203 690)"></use>
+    </g>
+
+    <!-- Jungle blooms (breathe, staggered) -->
+    <g transform="translate(560,628)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-flower" width="30" height="74"></use>
+      </g>
+    </g>
+    <g transform="translate(672,650)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-flower" width="24" height="60" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: atmospheric glue — required final .sunbeam layer -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

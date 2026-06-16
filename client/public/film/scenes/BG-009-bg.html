@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-009 — Desert Crossing</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-009 Desert Crossing">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A desert crossing: footprints in the sand lead toward a two-humped camel and a tent, while a great ark sits beached on a far dune under the same sun, cumulus clouds, and gliding birds">
+
+    <!-- Sun core + halo (same firmament as BG-006) -->
+    <g class="animate-pulse">
+      <circle cx="1100" cy="100" r="120" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="1030" y="30" width="140" height="140"></use>
+
+    <!-- Cumulus heaps — same curious clouds, drifting -->
+    <g class="animate-drift slow">
+      <use href="#prop-cloud-cumulus" x="110" y="50" width="320" height="160"></use>
+    </g>
+    <g class="animate-drift slower d3" opacity="0.7">
+      <use href="#prop-cloud-cumulus" x="560" y="130" width="220" height="110"></use>
+    </g>
+
+    <!-- The same flock of three, gliding over the dunes -->
+    <g transform="translate(0,170)">
+      <g class="animate-roll">
+        <use href="#prop-bird" x="0" y="0" width="64" height="22"></use>
+        <use href="#prop-bird" x="78" y="34" width="52" height="18"></use>
+        <use href="#prop-bird" x="34" y="62" width="56" height="20"></use>
+      </g>
+    </g>
+
+    <!-- Heat shimmer bands (drift) -->
+    <g class="animate-drift slower d2">
+      <rect x="180" y="330" width="520" height="24" rx="12" fill="var(--gold-light)" opacity="0.35"></rect>
+      <rect x="720" y="392" width="420" height="20" rx="10" fill="var(--cream-deep)" opacity="0.45"></rect>
+    </g>
+
+    <!-- Far dune, left -->
+    <ellipse cx="260" cy="880" rx="860" ry="320" fill="var(--cream-deep)" opacity="0.8"></ellipse>
+
+    <!-- The Ark — beached on the far side of the right dune, listing to port;
+         drawn before the dune so the hull is buried in sand -->
+    <g transform="translate(860,491) rotate(-8 100 55)" opacity="0.92">
+      <use href="#prop-ark" width="200" height="109"></use>
+    </g>
+
+    <!-- Far dune, right (buries the ark's hull) -->
+    <ellipse cx="1060" cy="900" rx="900" ry="330" fill="var(--gold-light)" opacity="0.6"></ellipse>
+
+    <!-- Near sand -->
+    <ellipse cx="640" cy="1030" rx="1150" ry="400" fill="var(--gold-light)"></ellipse>
+
+    <!-- Tent, pitched left of camp -->
+    <g transform="translate(140,480)">
+      <use href="#prop-tent" width="190" height="130"></use>
+    </g>
+
+    <!-- The Bactrian — two humps, resting breath -->
+    <g transform="translate(660,470)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-camel" width="190" height="134"></use>
+      </g>
+    </g>
+
+    <!-- Footprints in the sand — alternating left-right, shrinking toward the camel -->
+    <g fill="var(--earth-light)" opacity="0.5">
+      <ellipse cx="440" cy="700" rx="12" ry="6.5"></ellipse>
+      <ellipse cx="492" cy="686" rx="11" ry="6"></ellipse>
+      <ellipse cx="470" cy="668" rx="10" ry="5.5"></ellipse>
+      <ellipse cx="520" cy="654" rx="9" ry="5"></ellipse>
+      <ellipse cx="500" cy="638" rx="8" ry="4.5"></ellipse>
+      <ellipse cx="548" cy="626" rx="7.5" ry="4"></ellipse>
+      <ellipse cx="530" cy="612" rx="7" ry="3.5"></ellipse>
+      <ellipse cx="578" cy="602" rx="6" ry="3"></ellipse>
+    </g>
+
+    <!-- Flower's desert cousin? No — bare sand. Less is more out here. -->
+  </svg>
+
+  <!-- Layer 3: atmospheric glue — required final .sunbeam layer -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

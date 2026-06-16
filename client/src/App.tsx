@@ -33,6 +33,7 @@ import Features from "./pages/Features";
 import About from "./pages/About";
 import Partners from "./pages/Partners";
 import MediaKit from "./pages/MediaKit";
+import Film from "./pages/Film";
 
 function Router() {
   return (
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/partners" component={Partners} />
       <Route path="/media-kit" component={MediaKit} />
+      <Route path="/film" component={Film} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

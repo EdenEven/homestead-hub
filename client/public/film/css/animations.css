@@ -1,0 +1,302 @@
+/* A1 Homestead Hub Cinematic Library */
+@keyframes drift { 0% {transform:translateX(-50px)} 50% {transform:translateX(50px)} 100% {transform:translateX(-50px)} }
+@keyframes breathe { 0%, 100% {transform:scale(1)} 50% {transform:scale(1.05)} }
+@keyframes roll-across { 0% {transform:translateX(-200px); opacity:0} 15%, 85% {opacity:1} 100% {transform:translateX(1400px); opacity:0} }
+@keyframes pulse-light { 0%, 100% {opacity:0.3} 50% {opacity:0.6} }
+
+.animate-drift { animation: drift 20s ease-in-out infinite; }
+.animate-breathe { animation: breathe 5s ease-in-out infinite; }
+.animate-roll { animation: roll-across 15s linear infinite; }
+.animate-pulse { animation: pulse-light 4s ease-in-out infinite; }
+
+/* ------------------------------------------------------------------ */
+/* Additions below — do not modify the library above.                  */
+/* ------------------------------------------------------------------ */
+
+/* Palette — Golden Source earthy tones (no neon, no pure black/white) */
+:root {
+  --cream: #F4EDE1;            /* Base canvas */
+  --cream-deep: #E9DEC9;       /* Base, one step deeper */
+  --earth: #6B4A2E;            /* Wood / Earth */
+  --earth-light: #8C6845;      /* Earth tint — fences, light timber */
+  --earth-deep: #523823;       /* Earth shade — shadows, cow hide */
+  --green: #8A9A6B;            /* Organic / Green */
+  --green-light: #A6B389;      /* Green tint — far hills, haze */
+  --green-deep: #6E7D52;       /* Green shade — near ground, canopy depth */
+  --gold: #D8A24A;             /* Gold — sun, blooms, lantern light */
+  --gold-light: #E6BE7E;       /* Gold tint — halos, wheat */
+  --night: #342818;            /* Night sky — warm darkness, never pure black */
+  --night-deep: #271E12;       /* Deepest midnight sky */
+  --night-green: #46503C;      /* Night ground — desaturated dark green */
+}
+
+/* Scene stage — fixed 1280x720 (16:9), letterboxed to any viewport */
+.scene {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--cream);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.stage {
+  position: relative;
+  width: 100vw;
+  height: 56.25vw;          /* 16:9 */
+  max-height: 100vh;
+  max-width: 177.7778vh;
+  background: var(--cream);
+  overflow: hidden;
+}
+.stage svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Layer 3: Atmospheric Glue — always the final layer */
+.sunbeam {
+  position: absolute;
+  inset: -20px;                 /* bleed past edges so the blur has no seams */
+  pointer-events: none;
+  filter: blur(10px);
+  background: linear-gradient(115deg,
+    rgba(216, 162, 74, 0)    38%,
+    rgba(216, 162, 74, 0.28) 62%,
+    rgba(244, 237, 225, 0.55) 100%);
+}
+.sunbeam--strong {
+  background: linear-gradient(110deg,
+    rgba(216, 162, 74, 0.05) 20%,
+    rgba(216, 162, 74, 0.40) 58%,
+    rgba(107, 74, 46, 0.25) 100%);
+}
+/* Night variant — cool moonlight wash instead of golden hour */
+.sunbeam--moon {
+  background: linear-gradient(115deg,
+    rgba(244, 237, 225, 0)    45%,
+    rgba(244, 237, 225, 0.10) 70%,
+    rgba(244, 237, 225, 0.22) 100%);
+}
+
+/* Animated SVG groups scale/translate from their own footprint */
+g[class*="animate-"] {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+/* Tempo + stagger utilities */
+.slow   { animation-duration: 32s; }
+.slower { animation-duration: 45s; }
+.gentle { animation-duration: 7s; }
+.d1 { animation-delay: -1.5s; }
+.d2 { animation-delay: -3s; }
+.d3 { animation-delay: -4.5s; }
+.d4 { animation-delay: -6s; }
+.d5 { animation-delay: -9s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift, .animate-breathe, .animate-roll, .animate-pulse {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* BG-006 — Spring Shower & Accordion Ripple                          */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --sun-yellow: #F5D061;       /* Firmament sunbeams (BG-006) */
+}
+
+/* Slow-Motion Falling Drop (6 Seconds Descent) */
+@keyframes rain-fall-slow {
+  0% { transform: translateY(-100px); opacity: 0; }
+  10% { opacity: 0.4; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(600px); opacity: 0; }
+}
+
+/* Accordion Spring-Loaded Ripple (Burst fast, then slow down and fade) */
+@keyframes accordion-burst {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+    stroke-width: 4px;
+  }
+  15% {
+    transform: scale(0.3);
+    opacity: 0.9;
+    stroke-width: 3px;
+  }
+  60% {
+    transform: scale(0.8);
+    opacity: 0.4;
+    stroke-width: 1.5px;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+    stroke-width: 0.5px;
+  }
+}
+
+.animate-rain-slow {
+  animation: rain-fall-slow 6s linear infinite;
+}
+
+.animate-ripple-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;                   /* rings rest invisible between bursts */
+  animation: accordion-burst 6s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* BG-010 — Jungle: pendulum sway for tail-hanging monkeys             */
+/* ------------------------------------------------------------------ */
+
+@keyframes sway-hang {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.animate-sway {
+  animation: sway-hang 6s ease-in-out infinite;
+}
+g.animate-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;     /* hang from the tail, not the feet */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sway {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* BG-011 — Jungle Falls: river-blue palette + falling/flowing water   */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --water: #7E99A8;            /* River blue — desaturated to sit with the earth tones */
+  --water-light: #A9C0CB;      /* Foam, highlights, falls */
+  --water-deep: #5E7B8A;       /* Shaded water */
+}
+
+/* Waterfall streak — short fast descent down the falls face */
+@keyframes water-fall {
+  0% { transform: translateY(-10px); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.7; }
+  100% { transform: translateY(120px); opacity: 0; }
+}
+.animate-water-fall {
+  animation: water-fall 2.5s linear infinite;
+}
+
+/* River flow — highlights traveling from the back of the scene toward the front */
+@keyframes river-flow {
+  0% { transform: translateY(-40px); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: translateY(80px); opacity: 0; }
+}
+.animate-river-flow {
+  animation: river-flow 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-water-fall, .animate-river-flow {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Video 2 (Seeds) — tomato palette + tutorial motion                  */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --tomato: #A8523A;           /* Heirloom brick red — desaturated to sit with the earth tones */
+  --tomato-light: #C97A5E;     /* Cut-face flesh */
+  --tomato-deep: #84402D;      /* Shaded skin, gel pockets */
+  --seed-tan: #E2C893;         /* Tomato seed — between gold-light and cream */
+}
+
+/* Fermentation bubble — rises inside the jar and fades before the rim */
+@keyframes float-up {
+  0% { transform: translateY(0); opacity: 0; }
+  18% { opacity: 0.65; }
+  78% { opacity: 0.65; }
+  100% { transform: translateY(-150px); opacity: 0; }
+}
+.animate-float { animation: float-up 4.5s linear infinite; }
+
+/* Time-lapse reveal — plays once per cut (the iframe reload restarts it) */
+@keyframes fade-in-soft {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in-soft 1.4s ease-out both; }
+
+/* Knife slice — gentle rocking draw-cut */
+@keyframes slice-rock {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50% { transform: translate(-16px, 8px) rotate(-3deg); }
+}
+.animate-slice { animation: slice-rock 4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float, .animate-slice { animation: none; }
+  .animate-fade-in { animation: none; opacity: 1; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Schoolhouse L-001 — The Water's Skin (surface tension)              */
+/* ------------------------------------------------------------------ */
+
+/* The strider's gentle ride on the water's skin */
+@keyframes strider-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.animate-strider-bob { animation: strider-bob 3s ease-in-out infinite; }
+
+/* The boat: still, then the soap lets go and it scoots away */
+@keyframes boat-scoot {
+  0%, 28% { transform: translateX(0); opacity: 1; }
+  60% { transform: translateX(430px); }
+  92% { transform: translateX(470px); opacity: 1; }
+  100% { transform: translateX(470px); opacity: 0; }
+}
+.animate-boat-scoot { animation: boat-scoot 8s cubic-bezier(0.4, 0, 0.25, 1) infinite; }
+
+/* Molecules letting go of each other's hands (Design beat) */
+@keyframes let-go-left {
+  0%, 30% { transform: translateX(0); }
+  55%, 88% { transform: translateX(-30px); }
+  100% { transform: translateX(0); }
+}
+@keyframes let-go-right {
+  0%, 30% { transform: translateX(0); }
+  55%, 88% { transform: translateX(30px); }
+  100% { transform: translateX(0); }
+}
+.animate-let-go-left  { animation: let-go-left 8s ease-in-out infinite; }
+.animate-let-go-right { animation: let-go-right 8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-strider-bob, .animate-boat-scoot,
+  .animate-let-go-left, .animate-let-go-right {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rain-slow, .animate-ripple-ring {
+    animation: none;
+  }
+}

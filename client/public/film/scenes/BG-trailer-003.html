@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-trailer-003 — The Garden</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-trailer-003 The Garden">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="The garden: five raised beds breathing with new growth, flowers blooming, sun pulsing overhead">
+
+    <!-- Sun halo (pulse) high left -->
+    <g class="animate-pulse">
+      <circle cx="230" cy="150" r="160" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="170" y="90" width="120" height="120"></use>
+
+    <!-- One soft cloud -->
+    <g class="animate-drift slower">
+      <use href="#prop-cloud" x="780" y="80" width="230" height="80" opacity="0.8"></use>
+    </g>
+
+    <!-- Far hedge line -->
+    <ellipse cx="980" cy="540" rx="760" ry="200" fill="var(--green-light)" opacity="0.65"></ellipse>
+
+    <!-- Garden ground -->
+    <rect x="0" y="400" width="1280" height="320" fill="var(--green)"></rect>
+    <ellipse cx="640" cy="1060" rx="1180" ry="430" fill="var(--green-deep)"></ellipse>
+
+    <!-- Back row: two beds (breathe) -->
+    <g transform="translate(208,358)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-garden-bed" width="192" height="88" opacity="0.95"></use>
+      </g>
+    </g>
+    <g transform="translate(760,352)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-garden-bed" width="192" height="88" opacity="0.95" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+
+    <!-- Middle row: two beds, closer (breathe) -->
+    <g transform="translate(80,470)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-garden-bed" width="252" height="116" style="--bloom: var(--gold)"></use>
+      </g>
+    </g>
+    <g transform="translate(860,476)">
+      <g class="animate-breathe gentle d4">
+        <use href="#prop-garden-bed" width="252" height="116"></use>
+      </g>
+    </g>
+
+    <!-- Front center: the fifth bed, largest (breathe) -->
+    <g transform="translate(430,540)">
+      <g class="animate-breathe gentle">
+        <use href="#prop-garden-bed" width="320" height="147" style="--bloom: var(--gold)"></use>
+      </g>
+    </g>
+
+    <!-- Flowers blooming between the beds -->
+    <g transform="translate(380,452)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-flower" width="26" height="65" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(700,460)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-flower" width="28" height="70"></use>
+      </g>
+    </g>
+    <g transform="translate(150,628)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-flower" width="30" height="75"></use>
+      </g>
+    </g>
+    <g transform="translate(1130,620)">
+      <g class="animate-breathe gentle d5">
+        <use href="#prop-flower" width="28" height="70" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

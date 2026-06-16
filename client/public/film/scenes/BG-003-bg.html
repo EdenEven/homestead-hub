@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-003 — Cows Grazing Midday</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-003 Cows Grazing Midday">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Cows grazing in a fenced midday pasture beneath a big tree">
+
+    <!-- Midday sun -->
+    <g class="animate-pulse">
+      <circle cx="500" cy="110" r="90" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="454" y="64" width="92" height="92"></use>
+
+    <!-- Clouds (drift) -->
+    <g class="animate-drift slow d1">
+      <use href="#prop-cloud" x="90" y="130" width="160" height="56"></use>
+    </g>
+    <g class="animate-drift slower d4">
+      <use href="#prop-cloud" x="815" y="72" width="170" height="60" opacity="0.85"></use>
+    </g>
+
+    <!-- Hills -->
+    <ellipse cx="240" cy="820" rx="820" ry="300" fill="var(--green-light)" opacity="0.7"></ellipse>
+    <ellipse cx="980" cy="860" rx="900" ry="330" fill="var(--green)"></ellipse>
+    <ellipse cx="400" cy="980" rx="1050" ry="360" fill="var(--green)"></ellipse>
+
+    <!-- Big tree, right (breathe) -->
+    <g transform="translate(940,307)">
+      <g class="animate-breathe">
+        <use href="#prop-tree" width="240" height="343"></use>
+      </g>
+    </g>
+
+    <!-- Distant cow crossing the far field (roll, slow lane) -->
+    <g transform="translate(0,420)" opacity="0.75">
+      <g class="animate-roll slower">
+        <use href="#prop-cow" width="78" height="52"></use>
+      </g>
+    </g>
+
+    <!-- Grazing cow A (breathe, head down) -->
+    <g transform="translate(312,492)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-cow-grazing" width="180" height="116"></use>
+      </g>
+    </g>
+
+    <!-- Cow B, head up (breathe) -->
+    <g transform="translate(615,535)">
+      <g class="animate-breathe gentle d5">
+        <use href="#prop-cow" width="135" height="91" style="--hide: var(--earth)"></use>
+      </g>
+    </g>
+
+    <!-- Fence line, foreground -->
+    <g>
+      <rect x="40" y="600" width="14" height="92" fill="var(--earth-light)"></rect>
+      <rect x="300" y="606" width="14" height="92" fill="var(--earth-light)"></rect>
+      <rect x="560" y="612" width="14" height="92" fill="var(--earth-light)"></rect>
+      <rect x="820" y="618" width="14" height="92" fill="var(--earth-light)"></rect>
+      <rect x="0" y="622" width="880" height="10" rx="5" fill="var(--earth-light)"></rect>
+      <rect x="0" y="662" width="880" height="10" rx="5" fill="var(--earth-light)"></rect>
+    </g>
+
+    <!-- Fence-line flower (breathe) -->
+    <g transform="translate(106,642)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-flower" width="28" height="70" style="--stem: var(--green-deep)"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

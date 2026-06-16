@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-004 — Orchard Breeze</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-004 Orchard Breeze">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Rows of orchard trees breathing in an afternoon breeze">
+
+    <!-- Afternoon sun, drifting west -->
+    <g class="animate-pulse">
+      <circle cx="1020" cy="140" r="95" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="972" y="92" width="96" height="96"></use>
+
+    <!-- Clouds (drift) -->
+    <g class="animate-drift slow">
+      <use href="#prop-cloud" x="230" y="80" width="180" height="63"></use>
+    </g>
+
+    <!-- Ground bands, back to front -->
+    <ellipse cx="640" cy="760" rx="1000" ry="270" fill="var(--green-light)" opacity="0.65"></ellipse>
+    <ellipse cx="640" cy="850" rx="1080" ry="310" fill="var(--green)"></ellipse>
+    <ellipse cx="640" cy="1020" rx="1150" ry="360" fill="var(--green-deep)"></ellipse>
+
+    <!-- Back row of trees (small, breathe) -->
+    <g transform="translate(108,386)">
+      <g class="animate-breathe d3">
+        <use href="#prop-tree" width="84" height="120" style="--canopy: var(--green)" opacity="0.85"></use>
+      </g>
+    </g>
+    <g transform="translate(388,376)">
+      <g class="animate-breathe d1">
+        <use href="#prop-tree" width="84" height="120" style="--canopy: var(--green)" opacity="0.85"></use>
+      </g>
+    </g>
+    <g transform="translate(668,381)">
+      <g class="animate-breathe d4">
+        <use href="#prop-tree" width="84" height="120" style="--canopy: var(--green)" opacity="0.85"></use>
+      </g>
+    </g>
+    <g transform="translate(948,386)">
+      <g class="animate-breathe d2">
+        <use href="#prop-tree" width="84" height="120" style="--canopy: var(--green)" opacity="0.85"></use>
+      </g>
+    </g>
+
+    <!-- Front row of orchard trees (large, breathe, gold fruit) -->
+    <g transform="translate(148,470)">
+      <g class="animate-breathe d2">
+        <use href="#prop-tree-orchard" width="204" height="240"></use>
+      </g>
+    </g>
+    <g transform="translate(538,485)">
+      <g class="animate-breathe d5">
+        <use href="#prop-tree-orchard" width="204" height="240"></use>
+      </g>
+    </g>
+    <g transform="translate(928,475)">
+      <g class="animate-breathe d1">
+        <use href="#prop-tree-orchard" width="204" height="240"></use>
+      </g>
+    </g>
+
+    <!-- Loose petals on the breeze (drift) -->
+    <g class="animate-drift d2">
+      <circle cx="380" cy="330" r="6" fill="var(--gold-light)" opacity="0.85"></circle>
+      <circle cx="560" cy="280" r="5" fill="var(--gold-light)" opacity="0.7"></circle>
+      <circle cx="760" cy="360" r="6" fill="var(--gold-light)" opacity="0.8"></circle>
+    </g>
+    <g class="animate-drift slow d5">
+      <circle cx="900" cy="300" r="5" fill="var(--cream-deep)"></circle>
+      <circle cx="480" cy="410" r="5" fill="var(--cream-deep)" opacity="0.8"></circle>
+    </g>
+
+    <!-- Orchard-floor flowers (breathe) -->
+    <g transform="translate(447,649)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-flower" width="26" height="65"></use>
+      </g>
+    </g>
+    <g transform="translate(829,655)">
+      <g class="animate-breathe gentle d4">
+        <use href="#prop-flower" width="22" height="55" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

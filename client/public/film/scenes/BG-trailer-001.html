@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-trailer-001 — Dawn Pasture (Hook)</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-trailer-001 Dawn Pasture">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Golden hour pasture: a long horizon line, three trees breathing, clouds drifting past a low sun">
+
+    <!-- Low golden-hour sun, sitting on the horizon -->
+    <g class="animate-pulse">
+      <circle cx="400" cy="430" r="170" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="320" y="350" width="160" height="160"></use>
+
+    <!-- Drifting clouds (the hook's slow sky) -->
+    <g class="animate-drift slow">
+      <use href="#prop-cloud-cumulus" x="640" y="90" width="300" height="150" opacity="0.9"></use>
+    </g>
+    <g class="animate-drift slower d4">
+      <use href="#prop-cloud" x="120" y="70" width="240" height="84" opacity="0.75"></use>
+    </g>
+    <g class="animate-drift slower d2">
+      <use href="#prop-cloud" x="980" y="200" width="180" height="63" opacity="0.6"></use>
+    </g>
+
+    <!-- THE horizon line — one long clean stroke across the frame -->
+    <line x1="0" y1="430" x2="1280" y2="430" stroke="var(--earth-light)" stroke-width="4" opacity="0.7"></line>
+
+    <!-- Pasture below the horizon -->
+    <rect x="0" y="430" width="1280" height="290" fill="var(--green-light)"></rect>
+    <ellipse cx="640" cy="1010" rx="1100" ry="420" fill="var(--green)"></ellipse>
+
+    <!-- Three trees on the line (breathe) -->
+    <g transform="translate(880,260)">
+      <g class="animate-breathe">
+        <use href="#prop-tree" width="140" height="200"></use>
+      </g>
+    </g>
+    <g transform="translate(1060,310)">
+      <g class="animate-breathe d2">
+        <use href="#prop-tree" width="105" height="150" opacity="0.92"></use>
+      </g>
+    </g>
+    <g transform="translate(770,335)">
+      <g class="animate-breathe d3">
+        <use href="#prop-tree" width="84" height="120" opacity="0.85" style="--canopy: var(--green)"></use>
+      </g>
+    </g>
+
+    <!-- Foreground grass swell -->
+    <ellipse cx="640" cy="1130" rx="1200" ry="440" fill="var(--green-deep)"></ellipse>
+
+    <!-- A few blooms catching the light -->
+    <g transform="translate(170,620)">
+      <g class="animate-breathe gentle">
+        <use href="#prop-flower" width="28" height="70"></use>
+      </g>
+    </g>
+    <g transform="translate(228,640)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-flower" width="23" height="58" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(1110,632)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-flower" width="26" height="65"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>

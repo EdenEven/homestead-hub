@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-trailer-002 — The Work</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-trailer-002 The Work">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="The work: a tractor rolls across a worked field past the barn while two mason jars of preserves wait on a crate">
+
+    <!-- Glowing sunbeams from high right (pulse) -->
+    <g class="animate-pulse">
+      <circle cx="1080" cy="130" r="190" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="1010" y="60" width="140" height="140"></use>
+    <g class="animate-pulse d2" opacity="0.5">
+      <polygon points="1080,130 620,720 880,720" fill="var(--gold-light)"></polygon>
+      <polygon points="1080,130 1010,720 1240,720" fill="var(--gold-light)"></polygon>
+    </g>
+
+    <!-- Far tree line -->
+    <ellipse cx="200" cy="560" rx="620" ry="200" fill="var(--green-light)" opacity="0.6"></ellipse>
+
+    <!-- Barn on the rise -->
+    <g transform="translate(120,228)">
+      <use href="#prop-barn" width="286" height="209"></use>
+    </g>
+
+    <!-- Worked earth field -->
+    <ellipse cx="640" cy="980" rx="1080" ry="430" fill="var(--earth-light)"></ellipse>
+    <!-- Furrow rows -->
+    <g opacity="0.45" stroke="var(--earth)" stroke-width="7" stroke-linecap="round">
+      <line x1="80" y1="560" x2="1200" y2="545"></line>
+      <line x1="40" y1="606" x2="1240" y2="592"></line>
+      <line x1="70" y1="655" x2="1210" y2="642"></line>
+    </g>
+
+    <!-- The tractor enters frame and rolls through (roll) -->
+    <g transform="translate(0,368)">
+      <g class="animate-roll">
+        <use href="#prop-tractor" width="210" height="189"></use>
+      </g>
+    </g>
+
+    <!-- Fence along the field edge -->
+    <g opacity="0.95">
+      <use href="#prop-fence" x="850" y="430" width="120" height="70"></use>
+      <use href="#prop-fence" x="970" y="430" width="120" height="70"></use>
+      <use href="#prop-fence" x="1090" y="430" width="120" height="70"></use>
+    </g>
+
+    <!-- Foreground earth swell -->
+    <ellipse cx="640" cy="1130" rx="1220" ry="450" fill="var(--earth)"></ellipse>
+
+    <!-- The harvest crate, two mason jars waiting (stationary) -->
+    <g transform="translate(956,556)">
+      <use href="#prop-jar-mason" x="24" y="-86" width="66" height="94"></use>
+      <use href="#prop-jar-mason" x="96" y="-78" width="60" height="86" style="--contents: var(--earth-light)"></use>
+      <use href="#prop-crate" width="176" height="106"></use>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam sunbeam--strong animate-pulse"></div>
+</div>
+</body>
+</html>

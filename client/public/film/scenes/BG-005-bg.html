@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-005 — Golden-Hour Flowers</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-005 Golden-Hour Flowers">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="A flower meadow at golden hour, low sun behind the hill, lantern on the fence post">
+
+    <!-- Low golden sun + wide halo (pulse) -->
+    <g class="animate-pulse">
+      <circle cx="640" cy="470" r="240" fill="var(--gold-light)"></circle>
+    </g>
+    <use href="#prop-sun" x="525" y="355" width="230" height="230"></use>
+
+    <!-- Evening haze bands (drift) -->
+    <g class="animate-drift slower d2">
+      <rect x="160" y="300" width="520" height="26" rx="13" fill="var(--gold-light)" opacity="0.4"></rect>
+      <rect x="700" y="360" width="440" height="22" rx="11" fill="var(--cream-deep)" opacity="0.5"></rect>
+    </g>
+
+    <!-- Dusk hills, swallowing the sun -->
+    <ellipse cx="200" cy="850" rx="820" ry="320" fill="var(--green)" opacity="0.8"></ellipse>
+    <ellipse cx="1040" cy="880" rx="900" ry="340" fill="var(--green-deep)" opacity="0.9"></ellipse>
+    <ellipse cx="640" cy="1000" rx="1150" ry="380" fill="var(--green-deep)"></ellipse>
+
+    <!-- Tree silhouette, left (breathe) -->
+    <g transform="translate(63,351)">
+      <g class="animate-breathe">
+        <use href="#prop-tree" width="214" height="306" style="--trunk: var(--earth-deep); --canopy: var(--earth-deep)" opacity="0.92"></use>
+      </g>
+    </g>
+
+    <!-- Cow heading home, silhouette (roll) -->
+    <g transform="translate(0,505)" opacity="0.9">
+      <g class="animate-roll slower">
+        <use href="#prop-cow" width="120" height="80" style="--hide: var(--earth-deep); --patch: transparent"></use>
+      </g>
+    </g>
+
+    <!-- Fence post with lantern (pulse glow lives in the scene) -->
+    <g transform="translate(1060,490)">
+      <g class="animate-pulse">
+        <circle cx="20" cy="20" r="44" fill="var(--gold-light)"></circle>
+      </g>
+      <use href="#prop-lantern" width="40" height="190"></use>
+    </g>
+
+    <!-- Meadow of flowers (breathe, staggered) -->
+    <g transform="translate(72,610)">
+      <g class="animate-breathe gentle">
+        <use href="#prop-flower" width="36" height="90"></use>
+      </g>
+    </g>
+    <g transform="translate(212,651)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-flower" width="26" height="65" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(330,628)">
+      <g class="animate-breathe gentle d4">
+        <use href="#prop-flower" width="30" height="76"></use>
+      </g>
+    </g>
+    <g transform="translate(479,661)">
+      <g class="animate-breathe gentle d1">
+        <use href="#prop-flower" width="23" height="57" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(624,626)">
+      <g class="animate-breathe gentle d3">
+        <use href="#prop-flower" width="33" height="82"></use>
+      </g>
+    </g>
+    <g transform="translate(778,653)">
+      <g class="animate-breathe gentle d5">
+        <use href="#prop-flower" width="25" height="63" style="--bloom: var(--gold-light)"></use>
+      </g>
+    </g>
+    <g transform="translate(905,632)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-flower" width="30" height="74"></use>
+      </g>
+    </g>
+    <g transform="translate(1176,643)">
+      <g class="animate-breathe gentle d4">
+        <use href="#prop-flower" width="28" height="69"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last, strong at dusk) -->
+  <div class="sunbeam sunbeam--strong animate-pulse"></div>
+</div>
+</body>
+</html>

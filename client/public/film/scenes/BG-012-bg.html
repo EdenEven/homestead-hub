@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-012 — Valley of Kings</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-012 Valley of Kings">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Night in the Valley of Kings: the sphinx guards three pyramids while the great pyramid's apex sends amplified rays of light up to the Orion nebula">
+
+    <!-- Night sky -->
+    <rect x="0" y="0" width="1280" height="720" fill="var(--night-deep)"></rect>
+
+    <!-- Scattered stars (twinkle, staggered) -->
+    <g class="animate-pulse d1"><use href="#prop-star" x="110" y="70" width="14" height="14"></use></g>
+    <g class="animate-pulse d3"><use href="#prop-star" x="230" y="160" width="10" height="10"></use></g>
+    <g class="animate-pulse d2"><use href="#prop-star" x="340" y="90" width="12" height="12"></use></g>
+    <g class="animate-pulse d4"><use href="#prop-star" x="470" y="60" width="10" height="10"></use></g>
+    <g class="animate-pulse d1"><use href="#prop-star" x="800" y="80" width="12" height="12"></use></g>
+    <g class="animate-pulse d5"><use href="#prop-star" x="910" y="150" width="10" height="10"></use></g>
+    <g class="animate-pulse d2"><use href="#prop-star" x="1060" y="70" width="14" height="14"></use></g>
+    <g class="animate-pulse d3"><use href="#prop-star" x="1170" y="190" width="10" height="10"></use></g>
+    <g class="animate-pulse d4"><use href="#prop-star" x="1010" y="260" width="8" height="8"></use></g>
+    <g class="animate-pulse d5"><use href="#prop-star" x="160" y="260" width="8" height="8"></use></g>
+    <g class="animate-pulse d2"><use href="#prop-star" x="420" y="200" width="8" height="8"></use></g>
+
+    <!-- Crescent moon, low and small — Orion owns this sky -->
+    <g class="animate-drift slower">
+      <use href="#prop-moon-crescent" x="130" y="60" width="70" height="70" style="--moon-sky: var(--night-deep)"></use>
+    </g>
+
+    <!-- ===== Orion, the giant marker ===== -->
+    <!-- Shoulders -->
+    <g class="animate-pulse d1"><use href="#prop-star" x="565" y="70" width="26" height="26"></use></g>
+    <g class="animate-pulse d4"><use href="#prop-star" x="700" y="58" width="24" height="24"></use></g>
+    <!-- The belt, three in a row -->
+    <g class="animate-pulse d2"><use href="#prop-star" x="596" y="178" width="22" height="22"></use></g>
+    <g class="animate-pulse d3"><use href="#prop-star" x="638" y="158" width="22" height="22"></use></g>
+    <g class="animate-pulse d5"><use href="#prop-star" x="680" y="138" width="22" height="22"></use></g>
+    <!-- Feet -->
+    <g class="animate-pulse d3"><use href="#prop-star" x="548" y="250" width="20" height="20"></use></g>
+    <g class="animate-pulse d1"><use href="#prop-star" x="716" y="238" width="20" height="20"></use></g>
+    <!-- The nebula — the sword's glowing heart, below the belt -->
+    <g class="animate-pulse">
+      <ellipse cx="642" cy="212" rx="24" ry="15" fill="var(--gold-light)" opacity="0.25"></ellipse>
+      <ellipse cx="642" cy="212" rx="14" ry="9" fill="var(--cream)" opacity="0.35"></ellipse>
+    </g>
+
+    <!-- The amplified rays — apex to nebula -->
+    <g class="animate-pulse">
+      <polygon points="634,322 646,322 662,206 622,206" fill="var(--gold-light)" opacity="0.15"></polygon>
+      <polygon points="637,322 643,322 651,210 633,210" fill="var(--cream)" opacity="0.2"></polygon>
+    </g>
+
+    <!-- Night dunes -->
+    <ellipse cx="300" cy="920" rx="900" ry="340" fill="var(--night)"></ellipse>
+    <ellipse cx="1000" cy="940" rx="950" ry="350" fill="var(--night)" opacity="0.95"></ellipse>
+
+    <!-- The three pyramids — the great one aims at the nebula -->
+    <use href="#prop-pyramid" x="150" y="440" width="300" height="225" style="--face: var(--earth-deep); --shade: rgba(39,30,18,0.5)"></use>
+    <use href="#prop-pyramid" x="860" y="460" width="280" height="210" style="--face: var(--earth-deep); --shade: rgba(39,30,18,0.5)"></use>
+    <use href="#prop-pyramid" x="413" y="320" width="454" height="340" style="--face: var(--earth); --shade: rgba(39,30,18,0.45)"></use>
+
+    <!-- Near sand, moonlit -->
+    <ellipse cx="640" cy="1060" rx="1200" ry="420" fill="var(--night-green)" opacity="0.9"></ellipse>
+
+    <!-- The sphinx, guarding — moonlit limestone, facing the great pyramid -->
+    <g transform="translate(240,545)">
+      <use href="#prop-sphinx" width="250" height="125" style="--hide: var(--cream-deep); --patch: rgba(82,56,35,0.28)"></use>
+    </g>
+  </svg>
+
+  <!-- Layer 3: atmospheric glue — cool moonlight wash -->
+  <div class="sunbeam sunbeam--moon animate-pulse"></div>
+</div>
+</body>
+</html>

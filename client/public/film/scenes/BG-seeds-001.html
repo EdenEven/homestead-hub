@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BG-seeds-001 — The Tomato (Hook)</title>
+<link rel="stylesheet" href="/film/css/animations.css">
+</head>
+<body class="scene">
+<script src="/film/assets/props.js"></script>
+<div class="stage" data-screen-label="BG-seeds-001 The Tomato">
+  <svg viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Close-up: a knife rests beside a halved heirloom tomato on a cutting board, seed pockets glowing">
+
+    <!-- Kitchen wall, soft morning light -->
+    <rect x="0" y="0" width="1280" height="280" fill="var(--cream)"></rect>
+    <g class="animate-pulse">
+      <circle cx="1060" cy="80" r="180" fill="var(--gold-light)" opacity="0.8"></circle>
+    </g>
+
+    <!-- Worktable fills the close-up frame -->
+    <rect x="0" y="250" width="1280" height="470" fill="var(--earth)"></rect>
+    <g opacity="0.35" stroke="var(--earth-deep)" stroke-width="5">
+      <line x1="0" y1="330" x2="1280" y2="330"></line>
+      <line x1="0" y1="470" x2="1280" y2="470"></line>
+      <line x1="0" y1="610" x2="1280" y2="610"></line>
+    </g>
+
+    <!-- Cutting board -->
+    <ellipse cx="600" cy="640" rx="520" ry="60" fill="var(--earth-deep)" opacity="0.4"></ellipse>
+    <rect x="130" y="330" width="940" height="300" rx="34" fill="var(--earth-light)"></rect>
+    <rect x="160" y="356" width="880" height="248" rx="24" fill="var(--cream-deep)" opacity="0.25"></rect>
+
+    <!-- Pulsing halo on the hero cut face — "one tomato = 200 seeds" -->
+    <g class="animate-pulse">
+      <circle cx="470" cy="450" r="200" fill="var(--gold-light)" opacity="0.9"></circle>
+    </g>
+
+    <!-- The halved tomato, hero scale -->
+    <use href="#prop-tomato-half" x="320" y="300" width="300" height="300"></use>
+
+    <!-- The other half, whole-side up, behind right -->
+    <g transform="translate(660,300)">
+      <g class="animate-breathe gentle d2">
+        <use href="#prop-tomato" width="190" height="193"></use>
+      </g>
+    </g>
+
+    <!-- Loose seeds already escaping the cut -->
+    <use href="#prop-seed" x="610" y="540" width="30" height="22" transform="rotate(18 625 551)"></use>
+    <use href="#prop-seed" x="560" y="580" width="28" height="20" transform="rotate(-30 574 590)"></use>
+    <use href="#prop-seed" x="650" y="586" width="26" height="19" transform="rotate(52 663 595)"></use>
+
+    <!-- The knife, mid draw-cut (slice) -->
+    <g transform="translate(840,500) rotate(8)">
+      <g class="animate-slice">
+        <use href="#prop-knife" width="330" height="75"></use>
+      </g>
+    </g>
+  </svg>
+
+  <!-- Layer 3: Golden Hour atmospheric glue (always last) -->
+  <div class="sunbeam animate-pulse"></div>
+</div>
+</body>
+</html>
