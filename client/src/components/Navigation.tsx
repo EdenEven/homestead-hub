@@ -268,79 +268,47 @@ function DesktopDropdown({ group, location }: { group: NavGroup; location: strin
           <div className="py-2">
             {group.items.map((item) => {
               const isActive = !item.external && (location === item.href || location.startsWith(item.href.split("#")[0] + "/"));
-              const sharedProps = {
-                key: item.href,
-                onClick: () => setOpen(false),
-                className: "flex items-start gap-3 px-4 py-3 transition-all group",
-                style: { backgroundColor: isActive ? "oklch(0.26 0.08 145)" : "transparent" } as React.CSSProperties,
-                onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = "oklch(0.24 0.07 145)";
-                },
-                onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
-                  if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                },
-              };
-              return item.external ? (
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  {...sharedProps}
-                >
-                  <span
-                    className="flex-shrink-0 mt-0.5"
-                    style={{ color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.55 0.04 145)" }}
-                  >
+              const itemStyle: React.CSSProperties = { backgroundColor: isActive ? "oklch(0.26 0.08 145)" : "transparent" };
+              const itemClass = "flex items-start gap-3 px-4 py-3 transition-all";
+              const iconColor = item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.55 0.04 145)";
+              const labelColor = item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.88 0.02 85)";
+              const content = (
+                <>
+                  <span className="flex-shrink-0 mt-0.5" style={{ color: iconColor }}>
                     {item.icon}
                   </span>
                   <div>
-                    <p
-                      className="text-sm font-semibold leading-tight mb-0.5"
-                      style={{
-                        fontFamily: "'Playfair Display', Georgia, serif",
-                        color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.88 0.02 85)",
-                      }}
-                    >
+                    <p className="text-sm font-semibold leading-tight mb-0.5" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: labelColor }}>
                       {item.label}
                     </p>
-                    <p
-                      className="text-xs leading-snug"
-                      style={{ color: "oklch(0.58 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}
-                    >
+                    <p className="text-xs leading-snug" style={{ color: "oklch(0.58 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
                       {item.desc}
                     </p>
                   </div>
+                </>
+              );
+              return item.external ? (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setOpen(false)}
+                  className={itemClass}
+                  style={itemStyle}
+                >
+                  {content}
                 </a>
               ) : (
-                  <Link
-                    href={item.href}
-                    {...sharedProps}
-                  >
-                    <span
-                      className="flex-shrink-0 mt-0.5"
-                      style={{ color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.55 0.04 145)" }}
-                    >
-                      {item.icon}
-                    </span>
-                    <div>
-                      <p
-                        className="text-sm font-semibold leading-tight mb-0.5"
-                        style={{
-                          fontFamily: "'Playfair Display', Georgia, serif",
-                          color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.88 0.02 85)",
-                        }}
-                      >
-                        {item.label}
-                      </p>
-                      <p
-                        className="text-xs leading-snug"
-                        style={{ color: "oklch(0.58 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}
-                      >
-                        {item.desc}
-                      </p>
-                    </div>
-                  </Link>
-                )}
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={itemClass}
+                  style={itemStyle}
+                >
+                  {content}
+                </Link>
               );
             })}
           </div>
