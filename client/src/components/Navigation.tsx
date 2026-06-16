@@ -41,6 +41,7 @@ interface NavItem {
   icon: React.ReactNode;
   desc: string;
   highlight?: boolean;
+  external?: boolean;
 }
 
 interface NavGroup {
@@ -148,6 +149,14 @@ const NAV_GROUPS: NavGroup[] = [
         icon: <Film className="w-4 h-4" />,
         desc: "SVG cinematic scenes — a full day on the homestead, trailer, and seed tutorial",
         highlight: true,
+      },
+      {
+        label: "Prop Library",
+        href: "https://props.a1homesteadhub.com",
+        icon: <Leaf className="w-4 h-4" />,
+        desc: "48 SVG props — skinnable symbol catalog for scenes, lessons, and thumbnails",
+        highlight: true,
+        external: true,
       },
     ],
   },
@@ -258,22 +267,25 @@ function DesktopDropdown({ group, location }: { group: NavGroup; location: strin
           {/* Items */}
           <div className="py-2">
             {group.items.map((item) => {
-              const isActive = location === item.href || location.startsWith(item.href.split("#")[0] + "/");
-              return (
-                <Link
-                  key={item.href}
+              const isActive = !item.external && (location === item.href || location.startsWith(item.href.split("#")[0] + "/"));
+              const sharedProps = {
+                key: item.href,
+                onClick: () => setOpen(false),
+                className: "flex items-start gap-3 px-4 py-3 transition-all group",
+                style: { backgroundColor: isActive ? "oklch(0.26 0.08 145)" : "transparent" } as React.CSSProperties,
+                onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+                  if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = "oklch(0.24 0.07 145)";
+                },
+                onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+                  if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
+                },
+              };
+              return item.external ? (
+                <a
                   href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-start gap-3 px-4 py-3 transition-all group"
-                  style={{
-                    backgroundColor: isActive ? "oklch(0.26 0.08 145)" : "transparent",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = "oklch(0.24 0.07 145)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent";
-                  }}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  {...sharedProps}
                 >
                   <span
                     className="flex-shrink-0 mt-0.5"
@@ -298,7 +310,37 @@ function DesktopDropdown({ group, location }: { group: NavGroup; location: strin
                       {item.desc}
                     </p>
                   </div>
-                </Link>
+                </a>
+              ) : (
+                  <Link
+                    href={item.href}
+                    {...sharedProps}
+                  >
+                    <span
+                      className="flex-shrink-0 mt-0.5"
+                      style={{ color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.55 0.04 145)" }}
+                    >
+                      {item.icon}
+                    </span>
+                    <div>
+                      <p
+                        className="text-sm font-semibold leading-tight mb-0.5"
+                        style={{
+                          fontFamily: "'Playfair Display', Georgia, serif",
+                          color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.88 0.02 85)",
+                        }}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        className="text-xs leading-snug"
+                        style={{ color: "oklch(0.58 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}
+                      >
+                        {item.desc}
+                      </p>
+                    </div>
+                  </Link>
+                )}
               );
             })}
           </div>
@@ -307,7 +349,6 @@ function DesktopDropdown({ group, location }: { group: NavGroup; location: strin
     </div>
   );
 }
-
 // ─── Mobile Accordion Group ───────────────────────────────────────────────────
 
 function MobileGroup({
@@ -347,19 +388,33 @@ function MobileGroup({
       {open && (
         <div style={{ backgroundColor: "oklch(0.16 0.05 145)" }}>
           {group.items.map((item) => {
-            const isActive = location === item.href;
-            return (
+            const isActive = !item.external && location === item.href;
+            const mobileStyle = {
+              fontFamily: "'Playfair Display', Georgia, serif",
+              color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.75 0.02 85)",
+              backgroundColor: isActive ? "oklch(0.22 0.07 145)" : "transparent",
+              fontWeight: isActive ? "700" : "600",
+            } as React.CSSProperties;
+            return item.external ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onNavigate}
+                className="flex items-center gap-3 px-6 py-3 text-sm transition-all"
+                style={mobileStyle}
+              >
+                <span style={{ color: item.highlight ? "oklch(0.68 0.12 65)" : "oklch(0.50 0.04 145)" }}>{item.icon}</span>
+                {item.label} ↗
+              </a>
+            ) : (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={onNavigate}
                 className="flex items-center gap-3 px-6 py-3 text-sm transition-all"
-                style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  color: item.highlight ? "oklch(0.68 0.12 65)" : isActive ? "oklch(0.68 0.12 65)" : "oklch(0.75 0.02 85)",
-                  backgroundColor: isActive ? "oklch(0.22 0.07 145)" : "transparent",
-                  fontWeight: isActive ? "700" : "600",
-                }}
+                style={mobileStyle}
               >
                 <span style={{ color: item.highlight ? "oklch(0.68 0.12 65)" : "oklch(0.50 0.04 145)" }}>
                   {item.icon}
