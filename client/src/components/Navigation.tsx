@@ -27,7 +27,11 @@ import {
   Handshake,
   FileText,
   BarChart3,
+<<<<<<< Updated upstream
   Film,
+=======
+  CalendarDays,
+>>>>>>> Stashed changes
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -117,6 +121,12 @@ const NAV_GROUPS: NavGroup[] = [
         href: "/map",
         icon: <Map className="w-4 h-4" />,
         desc: "Interactive map of homesteaders, land listings, and resources",
+      },
+      {
+        label: "Community Events",
+        href: "/events",
+        icon: <CalendarDays className="w-4 h-4" />,
+        desc: "Upcoming fairs, markets, workshops, and homestead gatherings",
       },
     ],
   },

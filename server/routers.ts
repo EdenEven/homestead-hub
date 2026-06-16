@@ -63,6 +63,12 @@ import {
   createPartnerApplication,
   getPartnerApplications,
   updatePartnerApplicationStatus,
+  getUpcomingEvents,
+  getAllEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent,
 } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { callDataApi } from "./_core/dataApi";
@@ -1400,6 +1406,89 @@ Your personality:
       .input(z.object({ courseId: z.number(), limit: z.number().min(1).max(10).default(5) }))
       .query(async ({ input }) => {
         return getCourseExpansions(input.courseId, input.limit);
+      }),
+  }),
+
+  // ─── Community Events ───────────────────────────────────────────────────────
+  events: router({
+    // Public: upcoming events only (past events are hidden)
+    getUpcoming: publicProcedure.query(async () => {
+      return getUpcomingEvents();
+    }),
+
+    // Public: single event by id
+    getById: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return getEventById(input.id);
+      }),
+
+    // Admin: all events regardless of date
+    getAll: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") throw new Error("Admin only");
+      return getAllEvents();
+    }),
+
+    // Admin: create a new event
+    create: protectedProcedure
+      .input(
+        z.object({
+          title: z.string().min(1).max(255),
+          description: z.string().min(1),
+          eventDate: z.date(),
+          endDate: z.date().optional(),
+          location: z.string().min(1).max(255),
+          address: z.string().max(500).optional(),
+          category: z.enum(["festival", "market", "workshop", "swap_meet", "community", "homestead_tour", "other"]).default("community"),
+          imageUrl: z.string().url().optional().or(z.literal("")),
+          externalUrl: z.string().url().optional().or(z.literal("")),
+          isFeatured: z.boolean().default(false),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin only");
+        const id = await createEvent({
+          ...input,
+          endDate: input.endDate ?? null,
+          address: input.address ?? null,
+          imageUrl: input.imageUrl || null,
+          externalUrl: input.externalUrl || null,
+          createdBy: ctx.user.name ?? ctx.user.openId,
+        });
+        return { id };
+      }),
+
+    // Admin: update an event
+    update: protectedProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          title: z.string().min(1).max(255).optional(),
+          description: z.string().min(1).optional(),
+          eventDate: z.date().optional(),
+          endDate: z.date().nullable().optional(),
+          location: z.string().min(1).max(255).optional(),
+          address: z.string().max(500).nullable().optional(),
+          category: z.enum(["festival", "market", "workshop", "swap_meet", "community", "homestead_tour", "other"]).optional(),
+          imageUrl: z.string().nullable().optional(),
+          externalUrl: z.string().nullable().optional(),
+          isFeatured: z.boolean().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin only");
+        const { id, ...data } = input;
+        await updateEvent(id, data as any);
+        return { success: true };
+      }),
+
+    // Admin: delete an event
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin only");
+        await deleteEvent(input.id);
+        return { success: true };
       }),
   }),
 });

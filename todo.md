@@ -207,3 +207,13 @@
 - [x] Build /media-kit page — platform overview, audience stats, content categories, ad formats, pricing philosophy, contact CTA
 - [x] Wire /media-kit route in App.tsx
 - [x] Add "Media Kit" link to Partners page and navigation
+
+## Community Events System
+- [ ] Add communityEvents table to DB schema (title, description, eventDate, endDate, location, address, category, imageUrl, externalUrl, isFeatured, createdBy, createdAt)
+- [ ] Add events tRPC procedures: getUpcomingEvents (public), getEventById (public), createEvent (admin), updateEvent (admin), deleteEvent (admin)
+- [ ] Build /events page — upcoming events grid, auto-hides past events, category filter
+- [ ] Build admin event create/edit form (modal or inline, admin-only)
+- [ ] Add "Events" to Community nav group dropdown
+- [ ] Wire /events route in App.tsx
+- [ ] Seed the Scott City 4th of July 2026 event as the first entry
+- [ ] Add expired event cleanup to weekly-cleanup scheduled job

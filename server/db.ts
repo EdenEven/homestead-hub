@@ -760,3 +760,76 @@ export async function updatePartnerApplicationStatus(
     .set({ status, ...(adminNotes !== undefined ? { adminNotes } : {}) })
     .where(eq(partnerApplications.id, id));
 }
+
+// ─── Community Events ─────────────────────────────────────────────────────────
+
+import { communityEvents, type InsertCommunityEvent } from "../drizzle/schema";
+import { gte } from "drizzle-orm";
+
+/** Return all events whose eventDate is today or in the future (UTC). */
+export async function getUpcomingEvents() {
+  const db = await getDb();
+  if (!db) return [];
+  const now = new Date();
+  return db
+    .select()
+    .from(communityEvents)
+    .where(gte(communityEvents.eventDate, now))
+    .orderBy(communityEvents.eventDate);
+}
+
+/** Return ALL events regardless of date (for admin management). */
+export async function getAllEvents() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(communityEvents)
+    .orderBy(communityEvents.eventDate);
+}
+
+/** Return a single event by id. */
+export async function getEventById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db
+    .select()
+    .from(communityEvents)
+    .where(eq(communityEvents.id, id))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** Insert a new event. Returns the new row id. */
+export async function createEvent(data: InsertCommunityEvent) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(communityEvents).values(data);
+  return (result as { insertId: number }).insertId;
+}
+
+/** Update an existing event. */
+export async function updateEvent(id: number, data: Partial<InsertCommunityEvent>) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(communityEvents).set(data).where(eq(communityEvents.id, id));
+}
+
+/** Hard-delete a single event (admin action). */
+export async function deleteEvent(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(communityEvents).where(eq(communityEvents.id, id));
+}
+
+/**
+ * Cleanup: hard-delete events whose eventDate is more than 7 days in the past.
+ * Called by the weekly cleanup scheduled job.
+ */
+export async function purgeExpiredEvents() {
+  const db = await getDb();
+  if (!db) return 0;
+  const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const result = await db.delete(communityEvents).where(lt(communityEvents.eventDate, cutoff));
+  return (result[0] as { affectedRows: number }).affectedRows ?? 0;
+}

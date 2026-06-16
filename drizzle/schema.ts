@@ -415,3 +415,38 @@ export const partnerApplications = mysqlTable("partnerApplications", {
 });
 export type PartnerApplication = typeof partnerApplications.$inferSelect;
 export type InsertPartnerApplication = typeof partnerApplications.$inferInsert;
+
+// ─── Community Events ─────────────────────────────────────────────────────────
+// Events are visible only while eventDate >= today (UTC midnight).
+// The weekly cleanup job hard-deletes rows where eventDate < NOW() - 7 days,
+// giving a 7-day grace window so recent events remain accessible briefly.
+export const communityEvents = mysqlTable("communityEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  // Primary event date — events hide after this passes
+  eventDate: timestamp("eventDate").notNull(),
+  // Optional end date for multi-day events
+  endDate: timestamp("endDate"),
+  location: varchar("location", { length: 255 }).notNull(),
+  address: varchar("address", { length: 500 }),
+  category: mysqlEnum("category", [
+    "festival",
+    "market",
+    "workshop",
+    "swap_meet",
+    "community",
+    "homestead_tour",
+    "other",
+  ])
+    .default("community")
+    .notNull(),
+  imageUrl: varchar("imageUrl", { length: 1000 }),
+  externalUrl: varchar("externalUrl", { length: 1000 }),
+  isFeatured: boolean("isFeatured").default(false).notNull(),
+  createdBy: varchar("createdBy", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type CommunityEvent = typeof communityEvents.$inferSelect;
+export type InsertCommunityEvent = typeof communityEvents.$inferInsert;
