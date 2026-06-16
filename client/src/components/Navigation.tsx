@@ -287,19 +287,22 @@ function DesktopDropdown({ group, location }: { group: NavGroup; location: strin
                   </div>
                 </>
               );
-              return item.external ? (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className={itemClass}
-                  style={itemStyle}
-                >
-                  {content}
-                </a>
-              ) : (
+              if (item.external) {
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setOpen(false)}
+                    className={itemClass}
+                    style={itemStyle}
+                  >
+                    {content}
+                  </a>
+                );
+              }
+              return (
                 <Link
                   key={item.href}
                   href={item.href}
