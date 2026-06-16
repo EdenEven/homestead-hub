@@ -33,11 +33,8 @@ import Features from "./pages/Features";
 import About from "./pages/About";
 import Partners from "./pages/Partners";
 import MediaKit from "./pages/MediaKit";
-<<<<<<< Updated upstream
 import Film from "./pages/Film";
-=======
 import Events from "./pages/Events";
->>>>>>> Stashed changes
 
 function Router() {
   return (
@@ -64,11 +61,8 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/partners" component={Partners} />
       <Route path="/media-kit" component={MediaKit} />
-<<<<<<< Updated upstream
       <Route path="/film" component={Film} />
-=======
       <Route path="/events" component={Events} />
->>>>>>> Stashed changes
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
