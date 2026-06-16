@@ -21,6 +21,8 @@
 
 import type { Request, Response } from "express";
 import { invokeLLM } from "./_core/llm";
+import { generateImage } from "./_core/imageGeneration";
+import { storagePut } from "./storage";
 import {
   createBlogPost,
   expireOldBarterListings,
@@ -151,6 +153,26 @@ Return ONLY valid JSON in this exact shape:
     const baseSlug = slugify(parsed.title);
     const slug = `${baseSlug}-${Date.now().toString(36)}`;
 
+    // Generate a featured image for the post
+    let featuredImageUrl: string | undefined;
+    try {
+      const imagePrompt = `A beautiful, realistic homesteading photograph for a blog post about: ${topic}. 
+Photographic style, natural lighting, rural American farm setting, warm earthy tones. 
+No text, no watermarks, no people's faces. High quality editorial photography.`;
+      const { url: generatedUrl } = await generateImage({ prompt: imagePrompt });
+      if (!generatedUrl) throw new Error("generateImage returned no URL");
+      // Fetch and re-upload to our own S3 so the URL is stable
+      const imgRes = await fetch(generatedUrl as string);
+      if (imgRes.ok) {
+        const imgBuffer = Buffer.from(await imgRes.arrayBuffer());
+        const imgKey = `blog-images/${slug}.webp`;
+        const { url: s3Url } = await storagePut(imgKey, imgBuffer, "image/webp");
+        featuredImageUrl = s3Url;
+      }
+    } catch (imgErr) {
+      console.warn("[Scheduled] Image generation failed, publishing without image:", imgErr);
+    }
+
     await createBlogPost({
       title: parsed.title,
       slug,
@@ -159,6 +181,7 @@ Return ONLY valid JSON in this exact shape:
       author: "A1 Homestead Hub",
       tags: parsed.tags.join(","),
       category: parsed.category,
+      heroImageUrl: featuredImageUrl,
       isPublished: true,
       publishedAt: new Date(),
     });

@@ -71,6 +71,7 @@ import {
   deleteEvent,
 } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { sendWelcomeEmail, sendPartnerApplicationEmail } from "./email";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
 import Stripe from "stripe";
@@ -198,6 +199,10 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
             firstName: input.firstName?.trim(),
             source: input.source || "welcome-popup",
           });
+          // Send welcome email — fire-and-forget, don't block the response
+          sendWelcomeEmail(input.email.toLowerCase().trim(), input.firstName).catch(
+            (e) => console.error("[Email] Welcome email failed:", e)
+          );
           return { success: true, message: "Welcome to the community!" };
         } catch (err: any) {
           // Duplicate email — treat as success so we don't leak info
@@ -689,7 +694,7 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
         modelId: z.string().default("eleven_flash_v2_5"),
       }))
       .mutation(async ({ input }) => {
-        const apiKey = process.env.ELEVENLABS_API_KEY;
+        const apiKey = process.env.Eleven_Labs_Api_key;
         if (!apiKey) throw new Error("ElevenLabs API key not configured on server.");
         const response = await fetch(
           `https://api.elevenlabs.io/v1/text-to-speech/${input.voiceId}`,
@@ -1349,11 +1354,18 @@ Your personality:
           partnerType: input.partnerType,
           message: input.message,
         });
-        // Notify the site owner immediately
+        // Notify the site owner via Manus notification + email
         await notifyOwner({
           title: `New Partner Application: ${input.company}`,
           content: `**${input.contactName}** from **${input.company}** submitted a partnership inquiry.\n\n**Type:** ${input.partnerType.replace(/_/g, " ")}\n**Email:** ${input.email}\n**Website:** ${input.website || "—"}\n\n**Message:**\n${input.message}`,
         });
+        sendPartnerApplicationEmail({
+          name: input.contactName,
+          company: input.company,
+          email: input.email,
+          partnerType: input.partnerType.replace(/_/g, " "),
+          message: input.message,
+        }).catch((e) => console.error("[Email] Partner notification failed:", e));
         return { id, success: true };
       }),
 

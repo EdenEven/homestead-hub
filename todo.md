@@ -217,3 +217,12 @@
 - [ ] Wire /events route in App.tsx
 - [ ] Seed the Scott City 4th of July 2026 event as the first entry
 - [ ] Add expired event cleanup to weekly-cleanup scheduled job
+
+## Core Operational Fixes (June 2026)
+- [x] Create all 5 Heartbeat cron jobs (blog, skill-tip, course-expansion, homestead-feed, weekly-cleanup)
+- [x] Fix ElevenLabs env var name mismatch (ELEVENLABS_API_KEY → Eleven_Labs_Api_key)
+- [x] Add AI-generated hero image to daily blog post generator (generateImage → S3 upload → heroImageUrl)
+- [x] Connect Resend email service (API key validated, sendEmail helper built)
+- [x] Wire welcome email on subscriber signup (fire-and-forget, non-blocking)
+- [x] Wire partner application email notification to nikki@a1homesteadhub.com
+- [ ] Verify a1homesteadhub.com domain in Resend dashboard (DNS TXT record) to send from noreply@a1homesteadhub.com
