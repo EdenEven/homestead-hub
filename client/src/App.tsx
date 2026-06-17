@@ -35,6 +35,7 @@ import Partners from "./pages/Partners";
 import MediaKit from "./pages/MediaKit";
 import Film from "./pages/Film";
 import Events from "./pages/Events";
+import Join from "./pages/Join";
 
 function Router() {
   return (
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/media-kit" component={MediaKit} />
       <Route path="/film" component={Film} />
       <Route path="/events" component={Events} />
+      <Route path="/join" component={Join} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

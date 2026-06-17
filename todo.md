@@ -226,3 +226,11 @@
 - [x] Wire welcome email on subscriber signup (fire-and-forget, non-blocking)
 - [x] Wire partner application email notification to nikki@a1homesteadhub.com
 - [ ] Verify a1homesteadhub.com domain in Resend dashboard (DNS TXT record) to send from noreply@a1homesteadhub.com
+
+## Subscriber Conversion Landing Page (/join)
+- [ ] Build /join dedicated landing page — hero with strong CTA, 6 value prop cards, feature previews, email capture form, social proof section
+- [ ] Wire /join route in App.tsx
+- [ ] Ensure subscribe mutation sends welcome email on form submit
+
+## Google Business Profile
+- [ ] Write complete Google Business Profile listing document (business name, category, description, hours, attributes, services, photos checklist, Q&A seeds)
