@@ -29,6 +29,8 @@ import {
   BarChart3,
   Film,
   CalendarDays,
+  WifiOff,
+  Download,
 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -136,6 +138,19 @@ const NAV_GROUPS: NavGroup[] = [
         href: "/features",
         icon: <LayoutGrid className="w-4 h-4" />,
         desc: "Everything A1 Homestead Hub offers — all in one place",
+      },
+      {
+        label: "Offline Kit",
+        href: "/offline-kit",
+        icon: <WifiOff className="w-4 h-4" />,
+        desc: "Raspberry Pi pre-loaded with the full library — no internet required",
+        highlight: true,
+      },
+      {
+        label: "Cherry Pick",
+        href: "/cherry-pick",
+        icon: <Download className="w-4 h-4" />,
+        desc: "Select the guides you want and download a custom offline PDF bundle",
       },
       {
         label: "Market Ticker",

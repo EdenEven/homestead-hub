@@ -1,6 +1,6 @@
 import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion, offlineKitWaitlist, InsertOfflineKitWaitlist } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -832,4 +832,30 @@ export async function purgeExpiredEvents() {
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const result = await db.delete(communityEvents).where(lt(communityEvents.eventDate, cutoff));
   return (result[0] as { affectedRows: number }).affectedRows ?? 0;
+}
+
+// ─── Offline Kit Waitlist ────────────────────────────────────────────────────
+
+export async function addToOfflineKitWaitlist(data: {
+  name: string;
+  email: string;
+  zipCode?: string;
+  interestedIn?: string;
+  message?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(offlineKitWaitlist).values({
+    name: data.name,
+    email: data.email,
+    zipCode: data.zipCode ?? null,
+    interestedIn: data.interestedIn ?? "full-kit",
+    message: data.message ?? null,
+  });
+}
+
+export async function getOfflineKitWaitlist() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(offlineKitWaitlist).orderBy(desc(offlineKitWaitlist.createdAt));
 }

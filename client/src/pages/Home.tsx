@@ -192,29 +192,29 @@ const skills = [
 const features = [
   {
     icon: <Users className="w-6 h-6" />,
-    title: "Connect with Homesteaders",
-    desc: "Find and link with like-minded people in your region. Build your tribe before you need it.",
+    title: "Find Your People",
+    desc: "Connect with intentional living folks in your region. The Alaskan off-grid family and the suburban backyard gardener are both here.",
     href: "/community",
     cta: "Find Your People",
   },
   {
     icon: <Repeat2 className="w-6 h-6" />,
     title: "Barter & Trade Board",
-    desc: "Post goods and skills. Trade in a resilient economy that doesn't depend on dollars.",
+    desc: "Trade seeds, skills, tools, and time. A parallel economy that runs on trust, not just dollars.",
     href: "/barter",
     cta: "Start Trading",
   },
   {
     icon: <MapPin className="w-6 h-6" />,
     title: "Map Explorer",
-    desc: "Terrain maps, demographics, water sources, and homesteader locations near you.",
+    desc: "Find land, water sources, homesteader communities, and terrain data near you — on your phone, in the field.",
     href: "/map",
     cta: "Open the Map",
   },
   {
     icon: <TreePine className="w-6 h-6" />,
     title: "Land Access",
-    desc: "Land trusts, conservation programs, and agricultural land opportunities across America.",
+    desc: "Land trusts, conservation programs, and agricultural opportunities. You don't need 40 acres to start — you need a plan.",
     href: "/land-access",
     cta: "Find Land",
   },
@@ -380,12 +380,12 @@ export default function Home() {
 
         <div className="relative container pb-16 pt-32">
           <div className="max-w-2xl">
-            <p className="section-label mb-4">Your Self-Reliant Living Community</p>
+            <p className="section-label mb-4">Home Instead — Intentional Living for 2026</p>
             <h1 className="text-5xl md:text-7xl font-black leading-tight mb-6" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.96 0.025 85)" }}>
               The Homestead Hub
             </h1>
             <p className="text-lg md:text-xl leading-relaxed mb-8" style={{ color: "oklch(0.82 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
-              Master the skills your grandparents knew. Connect with your community. Build a life that doesn't depend on a fragile system. From butchering to solar power — everything you need to thrive on your own land.
+              You still have a smartphone. You still live in 2026. You just decided that Walmart, McDonald's, and a fragile supply chain aren't the only answer. Home Instead is the choice to know how to feed yourself, build what you need, and connect with people who think the same way.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link
@@ -469,12 +469,12 @@ export default function Home() {
         />
         <div className="absolute inset-0" style={{ background: "oklch(0.15 0.06 145 / 0.82)" }} />
         <div className="relative container text-center">
-          <p className="section-label mb-3" style={{ color: "oklch(0.68 0.12 65)" }}>The Homesteader's Creed</p>
+          <p className="section-label mb-3" style={{ color: "oklch(0.68 0.12 65)" }}>The Home Instead Creed</p>
           <blockquote className="text-3xl md:text-5xl font-black italic leading-tight max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.96 0.025 85)" }}>
-            "Know your land. Know your food. Know your neighbors."
+            "Your home is not a liability. It is the answer."
           </blockquote>
           <p className="mt-6 text-base" style={{ color: "oklch(0.72 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
-            Self-reliance isn't about going it alone — it's about building something that lasts.
+            You have a smartphone and a Raspberry Pi and a seed catalog. You live in 2026. You just choose differently.
           </p>
         </div>
       </section>

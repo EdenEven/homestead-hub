@@ -69,6 +69,8 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  addToOfflineKitWaitlist,
+  getOfflineKitWaitlist,
 } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { sendWelcomeEmail, sendPartnerApplicationEmail } from "./email";
@@ -1501,6 +1503,31 @@ Your personality:
         if (ctx.user.role !== "admin") throw new Error("Admin only");
         await deleteEvent(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ─── Offline Kit Waitlist ───────────────────────────────────────────────────
+  offlineKit: router({
+    joinWaitlist: publicProcedure
+      .input(z.object({
+        name: z.string().min(1),
+        email: z.string().email(),
+        zipCode: z.string().optional(),
+        interestedIn: z.enum(["full-kit", "sd-card-only", "plans-only", "not-sure"]).optional(),
+        message: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await addToOfflineKitWaitlist(input);
+        await notifyOwner({
+          title: "New Offline Kit Waitlist Signup",
+          content: `${input.name} (${input.email}) joined the Offline Kit waitlist.\nInterested in: ${input.interestedIn ?? "full-kit"}\nZip: ${input.zipCode ?? "not provided"}\nMessage: ${input.message ?? "none"}`,
+        });
+        return { success: true };
+      }),
+    getWaitlist: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== "admin") throw new Error("Admin only");
+        return getOfflineKitWaitlist();
       }),
   }),
 });

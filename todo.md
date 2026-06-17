@@ -228,9 +228,25 @@
 - [ ] Verify a1homesteadhub.com domain in Resend dashboard (DNS TXT record) to send from noreply@a1homesteadhub.com
 
 ## Subscriber Conversion Landing Page (/join)
-- [ ] Build /join dedicated landing page — hero with strong CTA, 6 value prop cards, feature previews, email capture form, social proof section
-- [ ] Wire /join route in App.tsx
-- [ ] Ensure subscribe mutation sends welcome email on form submit
+- [x] Build /join dedicated landing page — hero with strong CTA, 6 value prop cards, feature previews, email capture form, social proof section
+- [x] Wire /join route in App.tsx
+- [x] Ensure subscribe mutation sends welcome email on form submit
 
 ## Google Business Profile
-- [ ] Write complete Google Business Profile listing document (business name, category, description, hours, attributes, services, photos checklist, Q&A seeds)
+- [x] Write complete Google Business Profile listing document (business name, category, description, hours, attributes, services, photos checklist, Q&A seeds)
+
+## Home Instead Rebranding & New Features (June 17)
+- [x] Rebrand homepage hero copy — "Home Instead" framing, new tagline, updated subheadline
+- [x] Update homepage feature cards to reflect 2026 modern homesteader (smartphone, Raspberry Pi, intentional living)
+- [x] Build /offline-kit waitlist page — product description, what's included, pricing, pre-order form
+- [x] Add offlineKitWaitlist table to DB schema (name, email, zipCode, interestedIn, createdAt)
+- [x] Add offlineKit tRPC router (joinWaitlist, getWaitlist) — saves to DB, notifies owner
+- [x] Build Cherry Pick Your Knowledge feature — /cherry-pick page with interactive bundle builder
+- [x] Add /cherry-pick page — checklist UI, select skills/courses, generate download
+- [x] Add "Offline Kit" and "Cherry Pick" links to navigation under Features group
+- [x] Wire /offline-kit and /cherry-pick routes in App.tsx
+
+## Known Gaps — Next Session
+- [ ] Cherry Pick: implement real server-side PDF bundle generation (tRPC procedure + S3 upload + email delivery) — current UI is interactive but download is placeholder
+- [ ] /join page: add a social proof section (subscriber count, community stats, or trust badges)
+- [ ] Verify a1homesteadhub.com domain in Resend dashboard (DNS TXT record) so emails send from noreply@a1homesteadhub.com instead of Resend's domain

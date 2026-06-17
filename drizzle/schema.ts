@@ -450,3 +450,16 @@ export const communityEvents = mysqlTable("communityEvents", {
 });
 export type CommunityEvent = typeof communityEvents.$inferSelect;
 export type InsertCommunityEvent = typeof communityEvents.$inferInsert;
+
+// ─── Offline Kit Waitlist ────────────────────────────────────────────────────
+export const offlineKitWaitlist = mysqlTable("offlineKitWaitlist", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  zipCode: varchar("zipCode", { length: 20 }),
+  interestedIn: varchar("interestedIn", { length: 100 }).default("full-kit").notNull(),
+  message: text("message"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type OfflineKitWaitlist = typeof offlineKitWaitlist.$inferSelect;
+export type InsertOfflineKitWaitlist = typeof offlineKitWaitlist.$inferInsert;

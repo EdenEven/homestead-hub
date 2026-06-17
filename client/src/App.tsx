@@ -36,6 +36,8 @@ import MediaKit from "./pages/MediaKit";
 import Film from "./pages/Film";
 import Events from "./pages/Events";
 import Join from "./pages/Join";
+import OfflineKit from "./pages/OfflineKit";
+import CherryPick from "./pages/CherryPick";
 
 function Router() {
   return (
@@ -65,6 +67,8 @@ function Router() {
       <Route path="/film" component={Film} />
       <Route path="/events" component={Events} />
       <Route path="/join" component={Join} />
+      <Route path="/offline-kit" component={OfflineKit} />
+      <Route path="/cherry-pick" component={CherryPick} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
