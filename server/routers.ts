@@ -71,7 +71,9 @@ import {
   deleteEvent,
   addToOfflineKitWaitlist,
   getOfflineKitWaitlist,
+  getSiteStats,
 } from "./db";
+import { skills as serverSkills, renderSkillToMarkdown } from "./skillsData";
 import { notifyOwner } from "./_core/notification";
 import { sendWelcomeEmail, sendPartnerApplicationEmail } from "./email";
 import { callDataApi } from "./_core/dataApi";
@@ -1503,6 +1505,123 @@ Your personality:
         if (ctx.user.role !== "admin") throw new Error("Admin only");
         await deleteEvent(input.id);
         return { success: true };
+      }),
+  }),
+
+  // ─── Site Stats (for /join social proof) ────────────────────────────────────
+  stats: router({
+    getSiteStats: publicProcedure.query(async () => {
+      return getSiteStats();
+    }),
+  }),
+
+  // ─── Cherry Pick Bundle Generator ────────────────────────────────────────────
+  cherryPick: router({
+    generateBundle: publicProcedure
+      .input(z.object({
+        skillSlugs: z.array(z.string()).max(20),
+        courseIds: z.array(z.number()).max(10),
+        email: z.string().email().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        if (input.skillSlugs.length === 0 && input.courseIds.length === 0) {
+          throw new Error("Select at least one guide to include in your bundle.");
+        }
+
+        const sections: string[] = [];
+
+        // ── Cover page ──────────────────────────────────────────────────────
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+        sections.push(`# A1 Homestead Hub — Knowledge Bundle`);
+        sections.push(`*Generated ${dateStr} | a1homesteadhub.com*`);
+        sections.push("");
+        sections.push("This bundle was assembled from the A1 Homestead Hub Skills Library.");
+        sections.push("Keep it offline. Share it freely. Own your knowledge.");
+        sections.push("");
+        sections.push("---");
+        sections.push("");
+
+        // ── Table of contents ────────────────────────────────────────────────
+        const tocLines: string[] = ["## Contents", ""];
+        let itemNum = 1;
+
+        // Skills
+        const selectedSkills = serverSkills.filter(s => input.skillSlugs.includes(s.slug));
+        for (const skill of selectedSkills) {
+          tocLines.push(`${itemNum}. ${skill.icon} ${skill.title} Guide`);
+          itemNum++;
+        }
+
+        // Courses
+        const courseData: Array<{ id: number; title: string; description: string; lessons: Array<{ title: string; content: string | null }> }> = [];
+        for (const courseId of input.courseIds) {
+          const course = await getSchoolCourseById(courseId);
+          if (!course) continue;
+          const lessons = await getLessonsByCourse(courseId);
+          courseData.push({ id: courseId, title: course.title, description: course.description, lessons });
+          tocLines.push(`${itemNum}. 🎓 ${course.title} (Schoolhouse Course)`);
+          itemNum++;
+        }
+
+        sections.push(...tocLines);
+        sections.push("");
+        sections.push("---");
+        sections.push("");
+
+        // ── Skill sections ───────────────────────────────────────────────────
+        for (const skill of selectedSkills) {
+          sections.push(renderSkillToMarkdown(skill));
+        }
+
+        // ── Course sections ──────────────────────────────────────────────────
+        for (const course of courseData) {
+          sections.push(`# 🎓 ${course.title}`);
+          sections.push(`*Schoolhouse Course — A1 Homestead Hub*`);
+          sections.push("");
+          sections.push(course.description);
+          sections.push("");
+          if (course.lessons.length === 0) {
+            sections.push("*No lessons have been added to this course yet.*");
+          } else {
+            for (const lesson of course.lessons) {
+              sections.push(`## ${lesson.title}`);
+              if (lesson.content) {
+                sections.push(lesson.content);
+              } else {
+                sections.push("*Lesson content coming soon.*");
+              }
+              sections.push("");
+            }
+          }
+          sections.push("---");
+          sections.push("");
+        }
+
+        // ── Footer ──────────────────────────────────────────────────────────
+        sections.push("---");
+        sections.push("");
+        sections.push("*A1 Homestead Hub — Home Instead*");
+        sections.push("*https://a1homesteadhub.com*");
+        sections.push("");
+        sections.push("*This document is free to share, print, and use offline.*");
+        sections.push("*Content is for educational purposes. Always consult local experts and authorities for safety-critical decisions.*");
+
+        const bundleContent = sections.join("\n");
+        const fileBuffer = Buffer.from(bundleContent, "utf-8");
+
+        // Upload to S3 with a random suffix so URLs are not guessable
+        const randomSuffix = Math.random().toString(36).slice(2, 10);
+        const timestamp = Date.now();
+        const fileKey = `cherry-pick-bundles/bundle-${timestamp}-${randomSuffix}.md`;
+        const { url } = await storagePut(fileKey, fileBuffer, "text/markdown; charset=utf-8");
+
+        return {
+          url,
+          filename: `homestead-bundle-${timestamp}.md`,
+          skillCount: selectedSkills.length,
+          courseCount: courseData.length,
+        };
       }),
   }),
 

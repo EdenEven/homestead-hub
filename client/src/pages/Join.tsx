@@ -23,6 +23,9 @@ import {
   Shield,
   Zap,
   ChevronDown,
+  FileText,
+  GraduationCap,
+  Newspaper,
 } from "lucide-react";
 
 // ─── Value Propositions ───────────────────────────────────────────────────────
@@ -97,6 +100,129 @@ const FAQS = [
     a: "Every single day. The platform runs an automated content engine that publishes a new blog post, adds a skill tip to a rotating skill page, expands a course with new material, and refreshes the homepage feed — all before 11am UTC daily.",
   },
 ];
+
+// ─── Social Proof Section ─────────────────────────────────────────────────────
+
+function SocialProofSection() {
+  const { data: stats } = trpc.stats.getSiteStats.useQuery();
+
+  // Platform stats — real DB counts where available, otherwise honest platform facts
+  const statCards = [
+    {
+      icon: <Users className="w-6 h-6" />,
+      value: stats?.subscribers != null ? `${stats.subscribers.toLocaleString()}+` : "Growing",
+      label: "Community Members",
+      sub: "Homesteaders who joined the list",
+      color: "oklch(0.38 0.09 140)",
+    },
+    {
+      icon: <FileText className="w-6 h-6" />,
+      value: "9",
+      label: "Skill Libraries",
+      sub: "Butchering, foraging, building, and 6 more",
+      color: "oklch(0.45 0.10 65)",
+    },
+    {
+      icon: <GraduationCap className="w-6 h-6" />,
+      value: stats?.courses != null && stats.courses > 0 ? `${stats.courses}` : "K–12",
+      label: stats?.courses != null && stats.courses > 0 ? "Courses Available" : "Grade Coverage",
+      sub: "Homeschool STEM + AP prep curriculum",
+      color: "oklch(0.52 0.16 260)",
+    },
+    {
+      icon: <Newspaper className="w-6 h-6" />,
+      value: stats?.blogPosts != null ? `${stats.blogPosts}+` : "Daily",
+      label: "Blog Posts",
+      sub: "New homesteading content every morning",
+      color: "oklch(0.40 0.10 220)",
+    },
+  ];
+
+  return (
+    <section
+      className="py-16"
+      style={{
+        background: "linear-gradient(180deg, oklch(0.13 0.05 145) 0%, oklch(0.15 0.06 140) 100%)",
+        borderTop: "1px solid oklch(0.24 0.06 145)",
+        borderBottom: "1px solid oklch(0.24 0.06 145)",
+      }}
+    >
+      <div className="container">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-10">
+            <p
+              className="text-xs font-bold uppercase tracking-widest mb-3"
+              style={{ color: "oklch(0.68 0.12 65)" }}
+            >
+              By the Numbers
+            </p>
+            <h2
+              className="text-2xl md:text-3xl font-bold"
+              style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.88 0.02 85)" }}
+            >
+              A Platform That's Already Working
+            </h2>
+            <p
+              className="mt-3 text-sm max-w-xl mx-auto"
+              style={{ color: "oklch(0.58 0.04 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}
+            >
+              Real numbers. No inflated claims. This is where the platform stands today.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            {statCards.map((card) => (
+              <div
+                key={card.label}
+                className="rounded-sm p-5 text-center"
+                style={{
+                  backgroundColor: "oklch(0.17 0.06 145)",
+                  border: "1px solid oklch(0.26 0.06 145)",
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-sm flex items-center justify-center mx-auto mb-3"
+                  style={{ backgroundColor: card.color + "33", color: card.color }}
+                >
+                  {card.icon}
+                </div>
+                <div
+                  className="text-2xl font-black mb-1"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "oklch(0.88 0.02 85)" }}
+                >
+                  {card.value}
+                </div>
+                <div
+                  className="text-xs font-bold uppercase tracking-wider mb-1"
+                  style={{ color: "oklch(0.68 0.12 65)" }}
+                >
+                  {card.label}
+                </div>
+                <div className="text-xs" style={{ color: "oklch(0.52 0.03 85)" }}>
+                  {card.sub}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Platform trust badges */}
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            {[
+              { icon: <Shield className="w-4 h-4" />, text: "Free forever — no paywall on core content" },
+              { icon: <Zap className="w-4 h-4" />, text: "Updated automatically every day" },
+              { icon: <CheckCircle2 className="w-4 h-4" />, text: "No ads, no tracking, no algorithm" },
+            ].map(({ icon, text }) => (
+              <div key={text} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.58 0.04 85)" }}>
+                <span style={{ color: "oklch(0.68 0.12 65)" }}>{icon}</span>
+                {text}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
 
 // ─── FAQ Item ─────────────────────────────────────────────────────────────────
 
@@ -294,6 +420,9 @@ export default function Join() {
           </div>
         </div>
       </section>
+
+      {/* ── Social Proof / Platform Stats ── */}
+      <SocialProofSection />
 
       {/* ── Email Capture Form ── */}
       <section

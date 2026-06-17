@@ -229,6 +229,28 @@ export async function getAllEmailSubscribers() {
   return db.select().from(emailSubscribers).orderBy(emailSubscribers.createdAt).limit(1000);
 }
 
+export async function getSubscriberCount(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` }).from(emailSubscribers);
+  return Number(result[0]?.count ?? 0);
+}
+
+export async function getSiteStats() {
+  const db = await getDb();
+  if (!db) return { subscribers: 0, courses: 0, blogPosts: 0 };
+  const [subResult, courseResult, postResult] = await Promise.all([
+    db.select({ count: sql<number>`count(*)` }).from(emailSubscribers),
+    db.select({ count: sql<number>`count(*)` }).from(schoolCourses).where(eq(schoolCourses.isPublished, true)),
+    db.select({ count: sql<number>`count(*)` }).from(blogPosts).where(eq(blogPosts.isPublished, true)),
+  ]);
+  return {
+    subscribers: Number(subResult[0]?.count ?? 0),
+    courses: Number(courseResult[0]?.count ?? 0),
+    blogPosts: Number(postResult[0]?.count ?? 0),
+  };
+}
+
 // ---- Site announcement helpers ----
 
 export async function getActiveAnnouncement() {

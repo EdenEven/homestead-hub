@@ -190,7 +190,7 @@
 - [x] Add "Tip of the Day" UI card to each SkillDetail page
 - [x] Add schoolDailyExpansions table to DB schema (courseId, content, type, createdAt)
 - [x] Add /api/scheduled/expand-course Heartbeat endpoint — adds 1 new quiz question or lesson note to a random course daily
-- [ ] Surface new lesson expansions on the Course Viewer page (tRPC procedure built, UI pending)
+- [x] Surface new lesson expansions on the Course Viewer page — Daily Course Additions panel with quiz questions, fun facts, and activities
 - [x] Add homesteadFeed table to DB schema (type, headline, body, source, createdAt)
 - [x] Add /api/scheduled/refresh-homestead-feed Heartbeat endpoint — generates daily homesteading insight (seasonal/market/tip/news)
 - [x] Build "This Week in Homesteading" section on homepage — live feed cards from homesteadFeed table
@@ -247,6 +247,10 @@
 - [x] Wire /offline-kit and /cherry-pick routes in App.tsx
 
 ## Known Gaps — Next Session
-- [ ] Cherry Pick: implement real server-side PDF bundle generation (tRPC procedure + S3 upload + email delivery) — current UI is interactive but download is placeholder
-- [ ] /join page: add a social proof section (subscriber count, community stats, or trust badges)
+- [x] Cherry Pick: implement real server-side bundle generation (tRPC procedure + S3 upload + real download) — generates a formatted Markdown bundle from actual skill content
+- [x] /join page: add a social proof section (subscriber count, community stats, trust badges) — pulls live DB counts via trpc.stats.getSiteStats
 - [ ] Verify a1homesteadhub.com domain in Resend dashboard (DNS TXT record) so emails send from noreply@a1homesteadhub.com instead of Resend's domain
+
+## Upcoming Improvements
+- [ ] Cherry Pick: upgrade from Markdown bundle to PDF generation (server-side PDF via html-to-pdf or reportlab, email delivery option)
+- [ ] Daily Course Additions: add graceful fallback for malformed expansion payloads (empty card guard)

@@ -3,7 +3,7 @@ import { useParams, Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2, GraduationCap, MessageCircle, X, Volume2, VolumeX, Pause, Play } from "lucide-react";
+import { ArrowLeft, BookOpen, CheckCircle, Circle, ChevronRight, ChevronDown, Printer, Youtube, Package, Sparkles, Trash2, ChevronUp, FileText, Loader2, Share2, GraduationCap, MessageCircle, X, Volume2, VolumeX, Pause, Play, Zap, HelpCircle, Lightbulb, Activity } from "lucide-react";
 import { AIChatBox, Message } from "@/components/AIChatBox";
 import { useAuth } from "@/_core/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
@@ -237,6 +237,12 @@ export default function SchoolCourse() {
   });
 
   const activeGuide = studyGuides.find(g => g.id === activeGuideId) ?? null;
+
+  // Daily Freshness Expansions
+  const { data: expansions = [] } = trpc.freshness.getCourseExpansions.useQuery(
+    { courseId },
+    { enabled: courseId > 0 }
+  );
 
   function handleQuizSubmit(studentId: number) {
     if (!quiz) return;
@@ -750,6 +756,86 @@ export default function SchoolCourse() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Daily Freshness Expansions */}
+      {expansions.length > 0 && (
+        <div className="border-t border-[oklch(0.88_0.03_80)] bg-[oklch(0.96_0.02_80)]">
+          <div className="container py-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-5 h-5 text-[oklch(0.65_0.18_80)]" />
+              <h2 className="font-bold text-[oklch(0.25_0.05_50)] text-lg">Daily Course Additions</h2>
+              <span className="text-xs font-semibold bg-[oklch(0.88_0.05_80)] text-[oklch(0.35_0.08_50)] rounded-full px-2 py-0.5">{expansions.length} new</span>
+            </div>
+            <p className="text-sm text-[oklch(0.55_0.05_50)] mb-5">Fresh content added automatically every day — quiz questions, fun facts, and hands-on activities.</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {expansions.map((exp) => {
+                let parsed: Record<string, string> = {};
+                try { parsed = JSON.parse(exp.content); } catch {}
+                const isQuiz = exp.type === "quiz_question";
+                const isFact = exp.type === "fun_fact";
+                const isActivity = exp.type === "activity";
+                return (
+                  <div
+                    key={exp.id}
+                    className="bg-white rounded-xl border border-[oklch(0.88_0.03_80)] p-5"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      {isQuiz && <HelpCircle className="w-4 h-4 text-[oklch(0.52_0.16_260)]" />}
+                      {isFact && <Lightbulb className="w-4 h-4 text-[oklch(0.65_0.18_80)]" />}
+                      {isActivity && <Activity className="w-4 h-4 text-[oklch(0.52_0.16_140)]" />}
+                      <span className="text-xs font-bold uppercase tracking-wider text-[oklch(0.55_0.05_50)]">
+                        {isQuiz ? "Quiz Question" : isFact ? "Fun Fact" : "Hands-On Activity"}
+                      </span>
+                      <span className="ml-auto text-xs text-[oklch(0.65_0.03_80)]">
+                        {new Date(exp.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {isQuiz && (
+                      <div>
+                        <p className="text-sm font-semibold text-[oklch(0.25_0.05_50)] mb-2">{parsed.question}</p>
+                        {["A", "B", "C", "D"].map(opt => parsed[`option${opt}`] ? (
+                          <div key={opt} className={`text-xs px-3 py-1.5 rounded-lg mb-1 ${
+                            parsed.correctAnswer === opt
+                              ? "bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold"
+                              : "bg-[oklch(0.96_0.01_80)] text-[oklch(0.45_0.05_50)]"
+                          }`}>
+                            {opt}. {parsed[`option${opt}`]}
+                            {parsed.correctAnswer === opt && " ✓"}
+                          </div>
+                        ) : null)}
+                        {parsed.explanation && (
+                          <p className="mt-2 text-xs text-[oklch(0.55_0.05_50)] italic">{parsed.explanation}</p>
+                        )}
+                      </div>
+                    )}
+                    {isFact && (
+                      <div>
+                        <p className="text-sm font-bold text-[oklch(0.25_0.05_50)] mb-1">{parsed.headline}</p>
+                        <p className="text-sm text-[oklch(0.45_0.05_50)] leading-relaxed">{parsed.body}</p>
+                        {parsed.source && (
+                          <p className="mt-2 text-xs text-[oklch(0.55_0.05_50)]">Source: {parsed.source}</p>
+                        )}
+                      </div>
+                    )}
+                    {isActivity && (
+                      <div>
+                        <p className="text-sm font-bold text-[oklch(0.25_0.05_50)] mb-1">{parsed.title}</p>
+                        <p className="text-sm text-[oklch(0.45_0.05_50)] leading-relaxed mb-2">{parsed.description}</p>
+                        {parsed.materials && (
+                          <p className="text-xs text-[oklch(0.55_0.05_50)]"><span className="font-semibold">Materials:</span> {parsed.materials}</p>
+                        )}
+                        {parsed.duration && (
+                          <p className="text-xs text-[oklch(0.55_0.05_50)] mt-0.5"><span className="font-semibold">Time:</span> {parsed.duration}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
