@@ -132,18 +132,18 @@
 - [x] Add Stripe checkout for Schoolhouse Pro tier ($9/month)
 - [x] Add isPro flag to user session / auth context
 - [x] Build Upgrade modal — shown when free user tries to access Pro features
-- [ ] Pro feature gate: ElevenLabs voice tutor (Miss Hazel speaks the lesson aloud)
-- [ ] Pro feature gate: Voice Q&A — student asks question by voice, Miss Hazel responds in voice
+- [x] Pro feature gate: ElevenLabs voice tutor (Miss Hazel speaks the lesson aloud)
+- [x] Pro feature gate: Voice Q&A — student asks question by voice, Miss Hazel responds in voice
 - [ ] Pro feature gate: AI-generated course cover images (image generation per course)
 - [ ] Pro feature gate: Unlimited AI course generation (free tier = 3 courses/month)
 - [x] Build Schoolhouse Pro landing section on The Schoolhouse page (feature comparison table)
 
 ### ElevenLabs Voice Integration (Pro feature)
-- [ ] Add ElevenLabs API key to secrets (ELEVENLABS_API_KEY)
-- [ ] Add tRPC procedure: generateSpeech — takes text, returns audio URL (stored in S3)
-- [ ] Build voice playback UI on Course Viewer — "Listen to Lesson" button (Pro only)
-- [ ] Build voice tutor response — Miss Hazel's text reply is also spoken aloud (Pro only)
-- [ ] Voice Q&A: mic button in tutor panel → transcribe via Whisper → send to tutor → speak response
+- [x] Add ElevenLabs API key to secrets (ELEVENLABS_API_KEY)
+- [x] Add tRPC procedure: generateSpeech — takes text, returns audio URL (stored in S3)
+- [x] Build voice playback UI on Course Viewer — "Listen to Lesson" button (Pro only)
+- [x] Build voice tutor response — Miss Hazel's text reply is also spoken aloud (Pro only)
+- [x] Voice Q&A: mic button in tutor panel → transcribe via Whisper → send to tutor → speak response
 
 ## BYOK ElevenLabs + Pro Voice Activation
 - [x] Add userElevenLabsKey column to users table (encrypted, nullable)
@@ -151,7 +151,7 @@
 - [x] Build ElevenLabs onboarding modal — step 1: affiliate link to get account, step 2: paste API key, step 3: validate key with test call, step 4: success
 - [x] Validate key server-side before saving (test TTS call with 1 character)
 - [x] Wire Miss Hazel read-aloud button on course viewer — uses user's own ElevenLabs key, gated behind Pro
-- [ ] Voice Q&A in Miss Hazel chat — microphone input → transcription → Miss Hazel text response → ElevenLabs TTS reply
+- [x] Voice Q&A in Miss Hazel chat — microphone input → transcription → Miss Hazel text response → ElevenLabs TTS reply
 - [x] Show "Activate Voice" prompt in Miss Hazel panel when Pro user has no key saved
 - [x] Affiliate link used throughout: https://try.elevenlabs.io/lhgu4tpm0stc
 - [x] Add ElevenLabs key management to user Profile/Settings page
@@ -215,7 +215,7 @@
 - [x] Build admin event create/edit form (modal or inline, admin-only)
 - [x] Add "Events" to Community nav group dropdown
 - [x] Wire /events route in App.tsx
-- [ ] Seed the Scott City 4th of July 2026 event as the first entry
+- [x] Seed the Scott City 4th of July 2026 event as the first entry
 - [x] Add expired event cleanup to weekly-cleanup scheduled job
 
 ## Core Operational Fixes (June 2026)

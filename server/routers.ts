@@ -79,6 +79,8 @@ import { sendWelcomeEmail, sendPartnerApplicationEmail } from "./email";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
 import { sendPushToAll } from "./webpush";
+import { transcribeAudio } from "./_core/voiceTranscription";
+import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 
 export const appRouter = router({
@@ -730,6 +732,56 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
         const audioBuffer = await response.arrayBuffer();
         const base64Audio = Buffer.from(audioBuffer).toString("base64");
         return { audioBase64: base64Audio, mimeType: "audio/mpeg" as const, voiceId: input.voiceId, affiliateLink: "https://try.elevenlabs.io/lhgu4tpm0stc" };
+      }),
+  }),
+
+  // ---- Voice Transcription (Whisper) ----
+  voice: router({
+    /**
+     * Upload a base64-encoded audio blob to S3 and return the URL.
+     * Called first; then the URL is passed to `transcribe`.
+     */
+    uploadAudio: protectedProcedure
+      .input(
+        z.object({
+          dataBase64: z.string(),
+          mimeType: z.enum(["audio/webm", "audio/mp4", "audio/mpeg", "audio/wav", "audio/ogg"]),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const buffer = Buffer.from(input.dataBase64, "base64");
+        if (buffer.byteLength > 16 * 1024 * 1024) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Audio must be under 16 MB" });
+        }
+        const ext = input.mimeType.split("/")[1].split(";")[0]; // e.g. "webm"
+        const key = `voice-qa/user-${ctx.user.id}-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        return { audioUrl: url };
+      }),
+
+    /**
+     * Transcribe an audio file URL to text using Whisper.
+     * The client uploads audio to S3 first, then passes the URL here.
+     * Protected so only logged-in users can call it.
+     */
+    transcribe: protectedProcedure
+      .input(
+        z.object({
+          audioUrl: z.string().url(),
+          language: z.string().optional(),
+          prompt: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const result = await transcribeAudio({
+          audioUrl: input.audioUrl,
+          language: input.language,
+          prompt: input.prompt ?? "Transcribe the homesteader's question accurately.",
+        });
+        if ("error" in result) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: result.error });
+        }
+        return { text: result.text, language: result.language, duration: result.duration };
       }),
   }),
 

@@ -101,8 +101,21 @@ export default function SchoolCourse() {
   const tutorChatMutation = trpc.schoolhouse.tutorChat.useMutation({
     onSuccess: (data) => {
       setTutorMessages(prev => [...prev, { role: "assistant", content: data.reply }]);
+      // If this reply was triggered by a voice question, speak it aloud
+      if (pendingVoiceReplyRef.current && hasElevenLabsKey) {
+        pendingVoiceReplyRef.current = false;
+        const plainReply = data.reply
+          .replace(/#{1,6}\s/g, '')
+          .replace(/\*\*/g, '')
+          .replace(/\*/g, '')
+          .replace(/`[^`]+`/g, '')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .slice(0, 2000);
+        speakReplyMutation.mutate({ text: plainReply });
+      }
     },
     onError: () => {
+      pendingVoiceReplyRef.current = false;
       setTutorMessages(prev => [...prev, { role: "assistant", content: "I'm sorry, I had a little trouble there. Could you try asking again?" }]);
     },
   });
@@ -145,6 +158,10 @@ export default function SchoolCourse() {
   );
   const hasElevenLabsKey = hasKeyData?.hasKey ?? false;
 
+  // Pro status check (gates voice features)
+  const { data: proStatus } = trpc.schoolhouse.checkPro.useQuery(undefined, { enabled: !!user });
+  const isPro = proStatus?.isPro ?? false;
+
   const speakMutation = trpc.elevenLabs.speak.useMutation({
     onSuccess: (data) => {
       // Stop any current audio
@@ -183,6 +200,7 @@ export default function SchoolCourse() {
       return;
     }
     if (!user) { toast.error('Sign in to use voice features.'); return; }
+    if (!isPro) { toast.error('Upgrade to Schoolhouse Pro to unlock voice features.'); return; }
     if (!hasElevenLabsKey) { setShowVoiceSetup(true); return; }
     // Strip markdown for cleaner TTS
     const plainText = (currentLesson.content || '')
@@ -194,6 +212,106 @@ export default function SchoolCourse() {
       .slice(0, 4500);
     speakMutation.mutate({ text: plainText });
   }
+
+  // ── Voice Q&A (mic → Whisper → Miss Hazel → ElevenLabs) ──────────────────
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const replyAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const uploadAudioMutation = trpc.voice.uploadAudio.useMutation();
+  const transcribeMutation = trpc.voice.transcribe.useMutation();
+
+  // After Miss Hazel replies to a voice question, speak the reply aloud
+  const speakReplyMutation = trpc.elevenLabs.speak.useMutation({
+    onSuccess: (data) => {
+      if (replyAudioRef.current) {
+        replyAudioRef.current.pause();
+        URL.revokeObjectURL(replyAudioRef.current.src);
+      }
+      const byteChars = atob(data.audioBase64);
+      const bytes = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([bytes], { type: data.mimeType });
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      replyAudioRef.current = audio;
+      audio.onended = () => URL.revokeObjectURL(url);
+      audio.play();
+    },
+    onError: () => { /* non-fatal — reply is already shown as text */ },
+  });
+
+  async function handleMicPress() {
+    if (!user) { toast.error('Sign in to use Voice Q&A.'); return; }
+    if (!isPro) { toast.error('Upgrade to Schoolhouse Pro to unlock Voice Q&A.'); return; }
+    if (!hasElevenLabsKey) { setShowVoiceSetup(true); return; }
+
+    if (isRecording) {
+      // Stop recording
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+      const recorder = new MediaRecorder(stream, { mimeType });
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        setIsRecording(false);
+        setIsProcessingVoice(true);
+
+        try {
+          const blob = new Blob(audioChunksRef.current, { type: mimeType });
+          // Convert to base64
+          const arrayBuffer = await blob.arrayBuffer();
+          const base64 = btoa(Array.from(new Uint8Array(arrayBuffer), b => String.fromCharCode(b)).join(''));
+
+          // 1. Upload to S3
+          const { audioUrl } = await uploadAudioMutation.mutateAsync({
+            dataBase64: base64,
+            mimeType: mimeType as 'audio/webm' | 'audio/mp4',
+          });
+
+          // 2. Transcribe via Whisper
+          const { text: transcribedText } = await transcribeMutation.mutateAsync({ audioUrl });
+          if (!transcribedText.trim()) {
+            toast.error("Couldn't hear that. Please try again.");
+            return;
+          }
+
+          // 3. Send to Miss Hazel as a regular chat message
+          handleTutorSend(transcribedText);
+
+          // 4. After Miss Hazel replies, speak it (handled in tutorChatMutation.onSuccess below)
+          // We set a flag so the next assistant message gets spoken
+          pendingVoiceReplyRef.current = true;
+        } catch (err: any) {
+          toast.error('Voice Q&A failed. Please try again.');
+          console.error('[VoiceQA]', err);
+        } finally {
+          setIsProcessingVoice(false);
+        }
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch {
+      toast.error('Microphone access denied. Please allow mic access in your browser.');
+    }
+  }
+
+  // Flag: speak the next Miss Hazel reply aloud (set after voice Q&A transcription)
+  const pendingVoiceReplyRef = useRef(false);
 
   // Study guide state
   const [showGuidePanel, setShowGuidePanel] = useState(false);
@@ -892,6 +1010,34 @@ export default function SchoolCourse() {
                     "Why is this important for homesteading?",
                   ]}
                 />
+              </div>
+              {/* Voice Q&A mic bar (Pro + ElevenLabs key required) */}
+              <div className="shrink-0 border-t border-[oklch(0.88_0.03_80)] px-4 py-2.5 bg-[oklch(0.97_0.01_80)] flex items-center gap-3">
+                <button
+                  onClick={handleMicPress}
+                  disabled={isProcessingVoice || tutorChatMutation.isPending}
+                  title={isRecording ? 'Tap to stop recording' : 'Ask Miss Hazel by voice'}
+                  className={[
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all",
+                    isRecording
+                      ? "bg-red-500 text-white animate-pulse shadow-md"
+                      : isProcessingVoice
+                      ? "bg-[oklch(0.88_0.03_80)] text-[oklch(0.55_0.05_50)] cursor-wait"
+                      : "bg-[oklch(0.28_0.06_50)] hover:bg-[oklch(0.35_0.08_60)] text-white",
+                  ].join(' ')}
+                >
+                  {isProcessingVoice ? (
+                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Processing…</>
+                  ) : isRecording ? (
+                    <><span className="w-2.5 h-2.5 rounded-sm bg-white" /> Stop
+                    </>
+                  ) : (
+                    <><MessageCircle className="w-3.5 h-3.5" /> Ask by Voice</>
+                  )}
+                </button>
+                <span className="text-[0.65rem] text-[oklch(0.60_0.04_50)] leading-tight">
+                  {isRecording ? 'Listening… tap Stop when done' : 'Tap mic, speak your question, Miss Hazel will reply in voice'}
+                </span>
               </div>
             </div>
           )}
