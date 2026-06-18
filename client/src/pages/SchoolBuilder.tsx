@@ -3,7 +3,8 @@ import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, Plus, Trash2, Save, BookOpen, GraduationCap, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, BookOpen, GraduationCap, ChevronDown, ChevronUp, ImageIcon, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 
@@ -50,6 +51,20 @@ export default function SchoolBuilder() {
 
   const createCourse = trpc.schoolhouse.createCourse.useMutation();
   const createLesson = trpc.schoolhouse.createLesson.useMutation();
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const generateCoverMutation = trpc.schoolhouse.generateCourseCover.useMutation({
+    onSuccess: (data) => {
+      setCoverImageUrl(data.coverImageUrl ?? null);
+      toast.success('Course cover generated!');
+    },
+    onError: (err: { message: string }) => {
+      if (err.message === 'Schoolhouse Pro required') {
+        toast.error('Upgrade to Schoolhouse Pro to generate course covers.');
+      } else {
+        toast.error('Cover generation failed. Please try again.');
+      }
+    },
+  });
 
   if (loading) return null;
   if (!user) {
@@ -322,7 +337,28 @@ export default function SchoolBuilder() {
               <BookOpen className="w-8 h-8 text-emerald-600" />
             </div>
             <h2 className="text-2xl font-bold text-[oklch(0.25_0.05_50)] mb-2">Course Published!</h2>
-            <p className="text-[oklch(0.45_0.05_50)] mb-6">Your course is now live in The Schoolhouse and available to all Hub members.</p>
+            <p className="text-[oklch(0.45_0.05_50)] mb-4">Your course is now live in The Schoolhouse and available to all Hub members.</p>
+            {/* AI Cover Image (Pro) */}
+            {coverImageUrl ? (
+              <div className="mb-6 rounded-xl overflow-hidden border border-[oklch(0.88_0.03_80)] max-w-sm mx-auto">
+                <img src={coverImageUrl} alt="Course cover" className="w-full h-40 object-cover" />
+                <p className="text-xs text-center text-[oklch(0.55_0.05_50)] py-2 bg-[oklch(0.97_0.01_80)]">AI-generated course cover saved</p>
+              </div>
+            ) : courseId ? (
+              <div className="mb-6">
+                <button
+                  onClick={() => generateCoverMutation.mutate({ courseId: courseId!, title, subject, description })}
+                  disabled={generateCoverMutation.isPending}
+                  className="inline-flex items-center gap-2 border-2 border-dashed border-[oklch(0.75_0.08_80)] text-[oklch(0.45_0.08_80)] hover:border-[oklch(0.55_0.12_80)] hover:text-[oklch(0.35_0.12_80)] hover:bg-[oklch(0.97_0.02_80)] font-semibold py-2.5 px-5 rounded-xl transition-all"
+                >
+                  {generateCoverMutation.isPending ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Generating cover…</>
+                  ) : (
+                    <><ImageIcon className="w-4 h-4" /> Generate AI Cover <span className="text-xs bg-[oklch(0.75_0.15_80)] text-[oklch(0.25_0.05_50)] px-1.5 py-0.5 rounded-full font-bold ml-1">Pro</span></>
+                  )}
+                </button>
+              </div>
+            ) : null}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href={`/schoolhouse/course/${courseId}`}>
                 <button className="px-6 py-3 bg-[oklch(0.35_0.08_50)] text-white rounded-lg font-semibold hover:bg-[oklch(0.28_0.07_50)] transition-colors">
@@ -330,7 +366,7 @@ export default function SchoolBuilder() {
                 </button>
               </Link>
               <button
-                onClick={() => { setStep("course"); setCourseId(null); setTitle(""); setDescription(""); setLessons([emptyLesson()]); }}
+                onClick={() => { setStep("course"); setCourseId(null); setTitle(""); setDescription(""); setLessons([emptyLesson()]); setCoverImageUrl(null); }}
                 className="px-6 py-3 border border-[oklch(0.88_0.03_80)] text-[oklch(0.35_0.05_50)] rounded-lg font-semibold hover:bg-[oklch(0.96_0.02_80)] transition-colors"
               >
                 Build Another Course

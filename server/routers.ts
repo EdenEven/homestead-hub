@@ -52,6 +52,7 @@ import {
   getTutorSession,
   upsertTutorSession,
   isUserPro,
+  getProSubscription,
   upsertProSubscription,
   saveElevenLabsKey,
   getElevenLabsKey,
@@ -80,6 +81,7 @@ import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
 import { sendPushToAll } from "./webpush";
 import { transcribeAudio } from "./_core/voiceTranscription";
+import { generateImage } from "./_core/imageGeneration";
 import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 
@@ -1392,6 +1394,34 @@ Your personality:
       .query(async ({ ctx }) => {
         const pro = await isUserPro(ctx.user.id);
         return { isPro: pro };
+      }),
+
+    // ---- AI Course Cover Image (Pro) ----
+    generateCourseCover: protectedProcedure
+      .input(z.object({
+        courseId: z.number(),
+        title: z.string(),
+        subject: z.string().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        // Pro gate
+        const proSub = await getProSubscription(ctx.user.id);
+        const isPro = proSub?.status === 'active' || proSub?.status === 'trialing';
+        if (!isPro) throw new TRPCError({ code: 'FORBIDDEN', message: 'Schoolhouse Pro required' });
+
+        const prompt = [
+          `A beautiful, hand-painted watercolor illustration for a homeschool course cover.`,
+          `Course title: "${input.title}".`,
+          input.subject ? `Subject: ${input.subject}.` : '',
+          input.description ? `Theme: ${input.description.slice(0, 120)}.` : '',
+          `Style: warm, rustic, Americana farmstead aesthetic. Soft earth tones, natural light.`,
+          `No text or letters in the image. Suitable for a children's educational workbook cover.`,
+        ].filter(Boolean).join(' ');
+
+        const { url } = await generateImage({ prompt });
+        await updateSchoolCourse(input.courseId, { coverImageUrl: url });
+        return { coverImageUrl: url };
       }),
   }),
   // ---- Partner Applications ----

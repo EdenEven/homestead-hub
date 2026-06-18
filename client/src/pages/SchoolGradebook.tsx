@@ -3,7 +3,7 @@ import { Link, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { ArrowLeft, BookOpen, GraduationCap, Printer, TrendingUp } from "lucide-react";
+import { ArrowLeft, BookOpen, Download, GraduationCap, Printer, TrendingUp } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 
@@ -57,6 +57,35 @@ export default function SchoolGradebook() {
     return Math.round(scored.reduce((sum, g) => sum + (g.quizScore ?? 0), 0) / scored.length);
   };
 
+  function exportCSV() {
+    if (!selectedStudent || grades.length === 0) return;
+    const rows: string[][] = [
+      ["Student", "Course", "Lesson", "Quiz Score", "Letter Grade", "Completed", "Date"],
+    ];
+    for (const g of grades) {
+      const course = courses.find(c => c.id === g.courseId);
+      const score = g.quizScore ?? "";
+      const letter = typeof score === "number" ? letterGrade(score).letter : "";
+      rows.push([
+        selectedStudent.name,
+        course?.title ?? `Course ${g.courseId}`,
+        g.lessonTitle ?? `Lesson ${g.lessonId}`,
+        String(score),
+        letter,
+        g.isCompleted ? "Yes" : "No",
+        g.completedAt ? new Date(g.completedAt).toLocaleDateString() : "",
+      ]);
+    }
+    const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `gradebook-${selectedStudent.name.replace(/\s+/g, "-").toLowerCase()}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   if (loading) return null;
   if (!user) {
     return (
@@ -91,12 +120,22 @@ export default function SchoolGradebook() {
             <p className="text-sm text-[oklch(0.45_0.05_50)] mt-0.5">Track quiz scores and lesson completion.</p>
           </div>
           {selectedStudent && (
-            <button
-              onClick={() => window.print()}
-              className="flex items-center gap-2 text-sm border border-[oklch(0.88_0.03_80)] text-[oklch(0.45_0.05_50)] px-3 py-2 rounded-lg hover:bg-[oklch(0.96_0.02_80)] transition-colors"
-            >
-              <Printer className="w-4 h-4" /> Print Report
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={exportCSV}
+                disabled={grades.length === 0}
+                className="flex items-center gap-2 text-sm border border-[oklch(0.88_0.03_80)] text-[oklch(0.45_0.05_50)] px-3 py-2 rounded-lg hover:bg-[oklch(0.96_0.02_80)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                title="Export grades as CSV"
+              >
+                <Download className="w-4 h-4" /> Export CSV
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-2 text-sm border border-[oklch(0.88_0.03_80)] text-[oklch(0.45_0.05_50)] px-3 py-2 rounded-lg hover:bg-[oklch(0.96_0.02_80)] transition-colors"
+              >
+                <Printer className="w-4 h-4" /> Print Report
+              </button>
+            </div>
           )}
         </div>
 

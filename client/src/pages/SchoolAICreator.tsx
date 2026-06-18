@@ -8,8 +8,9 @@ import { getLoginUrl } from "@/const";
 import {
   Sparkles, BookOpen, GraduationCap, ChevronRight,
   Loader2, CheckCircle, AlertCircle, Wand2, ArrowRight,
-  Lightbulb, Clock, Layers
+  Lightbulb, Clock, Layers, ImageIcon
 } from "lucide-react";
+import { toast } from "sonner";
 
 const GRADE_OPTIONS = [
   { value: "K-2", label: "K–2nd Grade (Ages 5–8)" },
@@ -58,6 +59,21 @@ export default function SchoolAICreator() {
   const [gradeLevel, setGradeLevel] = useState("3-5");
   const [subject, setSubject] = useState("Homesteading & Self-Reliant Living");
   const [lessonCount, setLessonCount] = useState(5);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+
+  const generateCoverMutation = trpc.schoolhouse.generateCourseCover.useMutation({
+    onSuccess: (data) => {
+      setCoverImageUrl(data.coverImageUrl ?? null);
+      toast.success('Course cover generated!');
+    },
+    onError: (err) => {
+      if (err.message === 'Schoolhouse Pro required') {
+        toast.error('Upgrade to Schoolhouse Pro to generate course covers.');
+      } else {
+        toast.error('Cover generation failed. Please try again.');
+      }
+    },
+  });
   const [result, setResult] = useState<GenerateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -326,6 +342,32 @@ export default function SchoolAICreator() {
                   Grade {gradeLevel}
                 </span>
               </div>
+              {/* AI Cover Image (Pro) */}
+              {coverImageUrl ? (
+                <div className="mb-5 rounded-xl overflow-hidden border border-[oklch(0.88_0.03_80)]">
+                  <img src={coverImageUrl} alt="Course cover" className="w-full h-48 object-cover" />
+                  <p className="text-xs text-center text-[oklch(0.55_0.05_50)] py-2 bg-[oklch(0.97_0.01_80)]">AI-generated course cover · saved to your course</p>
+                </div>
+              ) : (
+                <div className="mb-5">
+                  <button
+                    onClick={() => generateCoverMutation.mutate({
+                      courseId: result.courseId,
+                      title: result.title,
+                      subject,
+                      description: result.description,
+                    })}
+                    disabled={generateCoverMutation.isPending}
+                    className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-[oklch(0.75_0.08_80)] text-[oklch(0.45_0.08_80)] hover:border-[oklch(0.55_0.12_80)] hover:text-[oklch(0.35_0.12_80)] hover:bg-[oklch(0.97_0.02_80)] font-semibold py-3 rounded-xl transition-all"
+                  >
+                    {generateCoverMutation.isPending ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Generating cover…</>
+                    ) : (
+                      <><ImageIcon className="w-4 h-4" /> Generate AI Cover Image <span className="text-xs bg-[oklch(0.75_0.15_80)] text-[oklch(0.25_0.05_50)] px-1.5 py-0.5 rounded-full font-bold ml-1">Pro</span></>
+                    )}
+                  </button>
+                </div>
+              )}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={() => navigate(`/schoolhouse/course/${result.courseId}`)}
@@ -340,7 +382,7 @@ export default function SchoolAICreator() {
                   Back to Schoolhouse
                 </button>
                 <button
-                  onClick={() => { setResult(null); setPrompt(""); }}
+                  onClick={() => { setResult(null); setPrompt(""); setCoverImageUrl(null); }}
                   className="flex-1 flex items-center justify-center gap-2 border border-[oklch(0.85_0.03_80)] text-[oklch(0.45_0.05_50)] hover:bg-[oklch(0.96_0.02_80)] font-semibold py-3 rounded-xl transition-colors"
                 >
                   <Sparkles className="w-4 h-4" />

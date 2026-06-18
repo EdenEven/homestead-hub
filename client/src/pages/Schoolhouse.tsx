@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { BookOpen, GraduationCap, Users, Pencil, ChevronRight, Star, Sprout, Sparkles, Zap } from "lucide-react";
+import { BookOpen, GraduationCap, Users, Pencil, ChevronRight, Star, Sprout, Sparkles, Zap, Volume2 } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 const GRADE_LABELS: Record<number, string> = {
@@ -87,6 +87,15 @@ export default function Schoolhouse() {
               <Star className="w-4 h-4 text-[oklch(0.75_0.15_80)]" />
               <span>Free for Hub Members</span>
             </div>
+            <a
+              href="https://try.elevenlabs.io/lhgu4tpm0stc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full px-3 py-1 transition-all"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-[oklch(0.85_0.15_65)]" />
+              <span className="text-white/90">AI Voice by ElevenLabs</span>
+            </a>
           </div>
         </div>
       </section>
@@ -224,19 +233,36 @@ export default function Schoolhouse() {
             {filtered.map(course => (
               <Link key={course.id} href={`/schoolhouse/course/${course.id}`}>
                 <div className="bg-white rounded-2xl border border-[oklch(0.88_0.03_80)] overflow-hidden hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer h-full flex flex-col">
-                  {/* Card header */}
-                  <div className="bg-[oklch(0.25_0.05_50)] p-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 text-6xl opacity-10 leading-none mt-2 mr-2">
-                      {SUBJECT_ICONS[course.subject] || "📚"}
+                  {/* Card header — show AI-generated cover if available */}
+                  {course.coverImageUrl ? (
+                    <div className="relative h-40 overflow-hidden">
+                      <img
+                        src={course.coverImageUrl}
+                        alt={course.title}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[oklch(0.15_0.05_50)/80] to-transparent" />
+                      {course.isPrebuilt && (
+                        <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-[oklch(0.75_0.15_80)] text-[oklch(0.25_0.05_50)] text-xs font-bold px-2 py-0.5 rounded-full">
+                          <Star className="w-3 h-3" /> A1HSH Curated
+                        </span>
+                      )}
+                      <h3 className="absolute bottom-3 left-4 right-4 text-white font-bold text-base leading-snug drop-shadow">{course.title}</h3>
                     </div>
-                    <div className="text-4xl mb-3">{SUBJECT_ICONS[course.subject] || "📚"}</div>
-                    {course.isPrebuilt && (
-                      <span className="inline-flex items-center gap-1 bg-[oklch(0.75_0.15_80)] text-[oklch(0.25_0.05_50)] text-xs font-bold px-2 py-0.5 rounded-full mb-2">
-                        <Star className="w-3 h-3" /> A1HSH Curated
-                      </span>
-                    )}
-                    <h3 className="text-white font-bold text-lg leading-snug">{course.title}</h3>
-                  </div>
+                  ) : (
+                    <div className="bg-[oklch(0.25_0.05_50)] p-6 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 text-6xl opacity-10 leading-none mt-2 mr-2">
+                        {SUBJECT_ICONS[course.subject] || "📚"}
+                      </div>
+                      <div className="text-4xl mb-3">{SUBJECT_ICONS[course.subject] || "📚"}</div>
+                      {course.isPrebuilt && (
+                        <span className="inline-flex items-center gap-1 bg-[oklch(0.75_0.15_80)] text-[oklch(0.25_0.05_50)] text-xs font-bold px-2 py-0.5 rounded-full mb-2">
+                          <Star className="w-3 h-3" /> A1HSH Curated
+                        </span>
+                      )}
+                      <h3 className="text-white font-bold text-lg leading-snug">{course.title}</h3>
+                    </div>
+                  )}
                   {/* Card body */}
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex items-center gap-2 mb-3">

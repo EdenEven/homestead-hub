@@ -895,6 +895,13 @@ export default function SchoolCourse() {
                 const isQuiz = exp.type === "quiz_question";
                 const isFact = exp.type === "fun_fact";
                 const isActivity = exp.type === "activity";
+                // Graceful fallback: skip cards with no meaningful content
+                const hasContent = (
+                  (isQuiz && parsed.question) ||
+                  (isFact && (parsed.headline || parsed.body)) ||
+                  (isActivity && (parsed.title || parsed.description))
+                );
+                if (!hasContent) return null;
                 return (
                   <div
                     key={exp.id}

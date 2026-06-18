@@ -89,8 +89,22 @@ export default function SchoolhousePro() {
             Miss Hazel doesn't just answer questions — she reads your lessons aloud, listens to your voice, and teaches the way a real tutor would. Powered by ElevenLabs, the world's most natural AI voice.
           </p>
 
+          {/* ElevenLabs affiliate badge */}
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <a
+              href="https://try.elevenlabs.io/lhgu4tpm0stc"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-full px-4 py-1.5 text-white/80 hover:text-white text-sm font-medium transition-all"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-[oklch(0.85_0.15_65)]" />
+              Voice powered by ElevenLabs
+              <ArrowRight className="w-3 h-3 opacity-60" />
+            </a>
+          </div>
+
           {proStatus?.isPro && (
-            <div className="mt-8 inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/40 rounded-full px-5 py-2 text-emerald-300 font-semibold">
+            <div className="mt-6 inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/40 rounded-full px-5 py-2 text-emerald-300 font-semibold">
               <CheckCircle className="w-5 h-5" />
               You're already on Schoolhouse Pro!
             </div>

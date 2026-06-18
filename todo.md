@@ -89,8 +89,8 @@
 - [x] Build Course Builder Studio (lesson editor, quiz builder, media library)
 - [x] Build Student Profiles page (photo, grade level, progress bars, mood log)
 - [x] Build GradeBook view (table, student selector, quiz scores, letter grades)
-- [ ] Build Printable Lesson Packet (PDF-ready branded output)
-- [ ] Add CSV export to GradeBook
+- [x] Build Printable Lesson Packet (PDF-ready branded output)
+- [x] Add CSV export to GradeBook
 - [x] Write vitest tests for Schoolhouse router helpers
 - [x] Add Schoolhouse link to main navigation
 - [x] Write vitest tests for Schoolhouse router
@@ -134,7 +134,7 @@
 - [x] Build Upgrade modal — shown when free user tries to access Pro features
 - [x] Pro feature gate: ElevenLabs voice tutor (Miss Hazel speaks the lesson aloud)
 - [x] Pro feature gate: Voice Q&A — student asks question by voice, Miss Hazel responds in voice
-- [ ] Pro feature gate: AI-generated course cover images (image generation per course)
+- [x] Pro feature gate: AI-generated course cover images (image generation per course)
 - [ ] Pro feature gate: Unlimited AI course generation (free tier = 3 courses/month)
 - [x] Build Schoolhouse Pro landing section on The Schoolhouse page (feature comparison table)
 
@@ -180,8 +180,8 @@
 - [x] Add FAQPage JSON-LD schema to homepage and features page
 - [x] Add FAQ section to homepage with 8 key questions about the platform
 - [x] Build /about page — platform story, tech partnerships (ElevenLabs), mission
-- [ ] Add ElevenLabs affiliate badge/partnership callout on Schoolhouse pages
-- [ ] Update meta description tags on all pages to include "ElevenLabs", "AI tutor", "homeschool"
+- [x] Add ElevenLabs affiliate badge/partnership callout on Schoolhouse pages
+- [x] Update meta description tags on all pages to include "ElevenLabs", "AI tutor", "homeschool"
 
 ## Daily Site Freshness Engine (Phase 2 Automation)
 - [x] Add skillTips table to DB schema (skillSlug, tip text, createdAt)
@@ -253,4 +253,7 @@
 
 ## Upcoming Improvements
 - [ ] Cherry Pick: upgrade from Markdown bundle to PDF generation (server-side PDF via html-to-pdf or reportlab, email delivery option)
-- [ ] Daily Course Additions: add graceful fallback for malformed expansion payloads (empty card guard)
+- [x] Daily Course Additions: add graceful fallback for malformed expansion payloads (empty card guard)
+- [x] Add AI cover generation button to Course Builder (for existing/manually created courses)
+- [x] Add ElevenLabs callout to Schoolhouse catalog page (Schoolhouse.tsx) and Course Viewer (SchoolCourse.tsx)
+- [ ] Implement per-page document.title updates in key pages (Blog, Schoolhouse, Skills Hub, Barter)
