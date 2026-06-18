@@ -6,7 +6,8 @@ import { getLoginUrl } from "@/const";
 import { toast } from "sonner";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import { User, MapPin, Globe, Wrench, Save, Lock, Camera, CheckCircle2, Circle, Users } from "lucide-react";
+import { User, MapPin, Globe, Wrench, Save, Lock, Camera, CheckCircle2, Circle, Users, Volume2, Trash2, ExternalLink, KeyRound } from "lucide-react";
+import ElevenLabsSetupModal from "@/components/ElevenLabsSetupModal";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -162,6 +163,21 @@ export default function Profile() {
   };
 
   const initials = (form.displayName || user?.name || "?").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+  // ElevenLabs BYOK state
+  const [showVoiceSetup, setShowVoiceSetup] = useState(false);
+  const { data: hasKeyData, refetch: refetchHasKey } = trpc.elevenLabs.hasKey.useQuery(
+    undefined,
+    { enabled: isAuthenticated }
+  );
+  const hasElevenLabsKey = hasKeyData?.hasKey ?? false;
+  const clearKey = trpc.elevenLabs.removeKey.useMutation({
+    onSuccess: () => {
+      refetchHasKey();
+      toast.success("ElevenLabs voice disconnected.");
+    },
+    onError: () => toast.error("Failed to disconnect. Please try again."),
+  });
 
   if (loading || profileLoading) {
     return (
@@ -430,7 +446,87 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* ElevenLabs Voice Settings */}
+      <div className="max-w-3xl mx-auto px-4 pb-12">
+        <div className="rounded-2xl p-8" style={{ background: "white", border: "1px solid oklch(0.88 0.04 80)" }}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "oklch(0.93 0.04 65)" }}>
+              <Volume2 size={20} style={{ color: "oklch(0.45 0.12 65)" }} />
+            </div>
+            <div>
+              <h2 className="font-bold text-lg" style={{ color: "oklch(0.25 0.05 50)" }}>Voice Settings</h2>
+              <p className="text-sm" style={{ color: "oklch(0.55 0.04 50)" }}>Miss Hazel read-aloud in The Schoolhouse</p>
+            </div>
+          </div>
+
+          {hasElevenLabsKey ? (
+            <div>
+              <div className="flex items-center gap-3 p-4 rounded-xl mb-4" style={{ background: "oklch(0.95 0.04 140)", border: "1px solid oklch(0.82 0.08 140)" }}>
+                <CheckCircle2 size={18} style={{ color: "oklch(0.42 0.12 140)" }} />
+                <div className="flex-1">
+                  <p className="font-semibold text-sm" style={{ color: "oklch(0.28 0.08 140)" }}>ElevenLabs Connected</p>
+                  <p className="text-xs" style={{ color: "oklch(0.45 0.06 140)" }}>Miss Hazel can read lessons aloud using your account.</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => setShowVoiceSetup(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors"
+                  style={{ borderColor: "oklch(0.82 0.04 80)", color: "oklch(0.35 0.06 50)" }}
+                >
+                  <KeyRound size={14} /> Replace API Key
+                </button>
+                <button
+                  onClick={() => { if (confirm("Disconnect ElevenLabs? Miss Hazel will no longer read lessons aloud.")) clearKey.mutate(); }}
+                  disabled={clearKey.isPending}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border transition-colors"
+                  style={{ borderColor: "oklch(0.85 0.08 20)", color: "oklch(0.50 0.12 20)" }}
+                >
+                  <Trash2 size={14} /> {clearKey.isPending ? "Disconnecting..." : "Disconnect"}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <p className="text-sm mb-4" style={{ color: "oklch(0.45 0.04 50)" }}>
+                Connect your free ElevenLabs account to let Miss Hazel read lessons aloud in The Schoolhouse.
+                ElevenLabs offers a generous free tier — no credit card required to get started.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => setShowVoiceSetup(true)}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-colors"
+                  style={{ background: "oklch(0.45 0.12 65)" }}
+                >
+                  <Volume2 size={15} /> Connect ElevenLabs
+                </button>
+                <a
+                  href="https://try.elevenlabs.io/lhgu4tpm0stc"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors"
+                  style={{ borderColor: "oklch(0.82 0.04 80)", color: "oklch(0.35 0.06 50)" }}
+                >
+                  <ExternalLink size={14} /> Get a Free Account
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
       <Footer />
+
+      {showVoiceSetup && (
+        <ElevenLabsSetupModal
+          onClose={() => setShowVoiceSetup(false)}
+          onSuccess={() => {
+            setShowVoiceSetup(false);
+            refetchHasKey();
+            toast.success("Miss Hazel's voice is ready! Open any course to listen.");
+          }}
+        />
+      )}
     </div>
   );
 }

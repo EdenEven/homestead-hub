@@ -28,11 +28,13 @@ import {
   expireOldBarterListings,
   purgeOldTutorSessions,
   purgeExpiredProSubscriptions,
+  purgeExpiredEvents,
   addSkillTip,
   addHomesteadFeedItem,
   addSchoolDailyExpansion,
   getAllPublishedCourseIds,
 } from "./db";
+import { sendPushToAll } from "./webpush";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -185,6 +187,17 @@ No text, no watermarks, no people's faces. High quality editorial photography.`;
       isPublished: true,
       publishedAt: new Date(),
     });
+
+    // Notify push subscribers about the new post
+    try {
+      await sendPushToAll({
+        title: "New Post on A1 Homestead Hub",
+        body: parsed.title,
+        url: `https://a1homesteadhub.com/blog/${slug}`,
+      });
+    } catch (pushErr) {
+      console.warn("[Scheduled] Push notification failed (non-fatal):", pushErr);
+    }
 
     console.log(`[Scheduled] Blog post published: "${parsed.title}"`);
     return res.json({ ok: true, title: parsed.title, slug });
@@ -471,6 +484,10 @@ export async function weeklyCleanupHandler(req: Request, res: Response) {
     const purgedSubs = await purgeExpiredProSubscriptions();
     console.log(`[Scheduled] Expired Pro subscriptions removed: ${purgedSubs}`);
 
+    // 4. Purge community events more than 7 days past their event date
+    const purgedEvents = await purgeExpiredEvents();
+    console.log(`[Scheduled] Expired community events purged: ${purgedEvents}`);
+
     const summary = {
       ok: true,
       startedAt,
@@ -479,6 +496,7 @@ export async function weeklyCleanupHandler(req: Request, res: Response) {
         barterListingsExpired: expiredListings,
         tutorSessionsPurged: purgedSessions,
         expiredProSubscriptionsRemoved: purgedSubs,
+        expiredEventsPurged: purgedEvents,
       },
     };
 

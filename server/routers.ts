@@ -78,6 +78,7 @@ import { notifyOwner } from "./_core/notification";
 import { sendWelcomeEmail, sendPartnerApplicationEmail } from "./email";
 import { callDataApi } from "./_core/dataApi";
 import { storagePut } from "./storage";
+import { sendPushToAll } from "./webpush";
 import Stripe from "stripe";
 
 export const appRouter = router({
@@ -308,6 +309,12 @@ For all other topics, you give practical, no-nonsense advice grounded in real ho
           offeringType: "offer",
           isActive: true,
         });
+        // Notify push subscribers about the new barter listing (fire-and-forget)
+        sendPushToAll({
+          title: "New Barter Listing on A1 Homestead Hub",
+          body: input.title,
+          url: "https://a1homesteadhub.com/barter",
+        }).catch((e) => console.warn("[Push] barter notification failed:", e));
         return { success: true };
       }),
 

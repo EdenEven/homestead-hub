@@ -77,7 +77,7 @@
 - [x] Add new blog post toast notification when a post is published
 - [x] Add new barter listing toast notification when a trade is posted
 - [x] Add browser push notification opt-in system
-- [ ] Implement server-side web push delivery (VAPID keys + send on new blog post / new barter listing)
+- [x] Implement server-side web push delivery (VAPID keys + send on new blog post / new barter listing)
 
 ## The Schoolhouse — Homeschool Course Studio
 - [x] Add Schoolhouse DB tables (courses, lessons, quizzes, students, progress, grades)
@@ -154,7 +154,7 @@
 - [ ] Voice Q&A in Miss Hazel chat — microphone input → transcription → Miss Hazel text response → ElevenLabs TTS reply
 - [x] Show "Activate Voice" prompt in Miss Hazel panel when Pro user has no key saved
 - [x] Affiliate link used throughout: https://try.elevenlabs.io/lhgu4tpm0stc
-- [ ] Add ElevenLabs key management to user Profile/Settings page
+- [x] Add ElevenLabs key management to user Profile/Settings page
 
 ## Clickable Ticker — Historical Chart Modal
 - [x] Add tRPC procedure to fetch historical price data for a given symbol (1W, 1M, 3M, 1Y ranges)
@@ -209,14 +209,14 @@
 - [x] Add "Media Kit" link to Partners page and navigation
 
 ## Community Events System
-- [ ] Add communityEvents table to DB schema (title, description, eventDate, endDate, location, address, category, imageUrl, externalUrl, isFeatured, createdBy, createdAt)
-- [ ] Add events tRPC procedures: getUpcomingEvents (public), getEventById (public), createEvent (admin), updateEvent (admin), deleteEvent (admin)
-- [ ] Build /events page — upcoming events grid, auto-hides past events, category filter
-- [ ] Build admin event create/edit form (modal or inline, admin-only)
-- [ ] Add "Events" to Community nav group dropdown
-- [ ] Wire /events route in App.tsx
+- [x] Add communityEvents table to DB schema (title, description, eventDate, endDate, location, address, category, imageUrl, externalUrl, isFeatured, createdBy, createdAt)
+- [x] Add events tRPC procedures: getUpcomingEvents (public), getEventById (public), createEvent (admin), updateEvent (admin), deleteEvent (admin)
+- [x] Build /events page — upcoming events grid, auto-hides past events, category filter
+- [x] Build admin event create/edit form (modal or inline, admin-only)
+- [x] Add "Events" to Community nav group dropdown
+- [x] Wire /events route in App.tsx
 - [ ] Seed the Scott City 4th of July 2026 event as the first entry
-- [ ] Add expired event cleanup to weekly-cleanup scheduled job
+- [x] Add expired event cleanup to weekly-cleanup scheduled job
 
 ## Core Operational Fixes (June 2026)
 - [x] Create all 5 Heartbeat cron jobs (blog, skill-tip, course-expansion, homestead-feed, weekly-cleanup)
