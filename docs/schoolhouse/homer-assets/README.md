@@ -5,10 +5,12 @@
 
 ## Asset Inventory
 
-| File | Description | Deployment Target |
-|------|-------------|------------------|
-| `homer-banner-math-science.svg` | Full-width banner: Math & Science theme with "ASK HOMER" search bar, DNA helix, beakers, calculator, chemistry labels. Colorful, kid-friendly, high energy. | Schoolhouse STEM module header (grades 3–12), Mr. Homer character introduction page |
-| `homer-ai-intro-slide.svg` | AI introduction lesson slide: Gradient text explaining AI to kids ("like a super-smart robot friend..."). Pink/blue gradient typography on white. | K-8 AI literacy module, Mr. Homer's first lesson slide, course intro screen |
+| File | S3 Storage Path | Description | Deployment Target |
+|------|-----------------|-------------|------------------|
+| `homer-banner-math-science.svg` | `/manus-storage/homer-banner-math-science_6955e83a.svg` | Full-width banner: Math & Science theme with "ASK HOMER" search bar, DNA helix, beakers, calculator, chemistry labels. Colorful, kid-friendly, high energy. | Schoolhouse STEM module header (grades 3–12), Mr. Homer character introduction page |
+| `homer-ai-intro-slide.svg` | `/manus-storage/homer-ai-intro-slide_e00c83db.svg` | AI introduction lesson slide: Gradient text explaining AI to kids ("like a super-smart robot friend..."). Pink/blue gradient typography on white. | K-8 AI literacy module, Mr. Homer's first lesson slide, course intro screen |
+
+> **Note:** The original SVG files are stored in `/home/ubuntu/webdev-static-assets/homer-assets/` in the sandbox. Use the S3 storage paths above in any code that references these assets.
 
 ---
 

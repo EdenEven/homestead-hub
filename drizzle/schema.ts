@@ -463,3 +463,21 @@ export const offlineKitWaitlist = mysqlTable("offlineKitWaitlist", {
 });
 export type OfflineKitWaitlist = typeof offlineKitWaitlist.$inferSelect;
 export type InsertOfflineKitWaitlist = typeof offlineKitWaitlist.$inferInsert;
+
+// ─── Social Queue ────────────────────────────────────────────────────────────
+export const socialQueue = mysqlTable("socialQueue", {
+  id: int("id").autoincrement().primaryKey(),
+  blogPostId: int("blogPostId"), // nullable — can be manually created without a blog post
+  platform: mysqlEnum("platform", ["facebook", "instagram", "twitter"]).default("facebook").notNull(),
+  caption: text("caption").notNull(),
+  hashtags: varchar("hashtags", { length: 500 }),
+  status: mysqlEnum("status", ["pending", "approved", "posted", "failed"]).default("pending").notNull(),
+  scheduledAt: timestamp("scheduledAt"),
+  postedAt: timestamp("postedAt"),
+  fbPostId: varchar("fbPostId", { length: 255 }), // Facebook post ID returned after successful post
+  errorMessage: text("errorMessage"), // store error details if posting fails
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SocialQueueItem = typeof socialQueue.$inferSelect;
+export type InsertSocialQueueItem = typeof socialQueue.$inferInsert;

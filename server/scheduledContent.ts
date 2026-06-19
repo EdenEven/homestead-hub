@@ -33,6 +33,7 @@ import {
   addHomesteadFeedItem,
   addSchoolDailyExpansion,
   getAllPublishedCourseIds,
+  createSocialQueueItem,
 } from "./db";
 import { sendPushToAll } from "./webpush";
 
@@ -200,6 +201,53 @@ No text, no watermarks, no people's faces. High quality editorial photography.`;
     }
 
     console.log(`[Scheduled] Blog post published: "${parsed.title}"`);
+
+    // Auto-generate a Facebook caption for the new post and add it to the social queue
+    try {
+      const siteUrl = "https://a1homesteadhub.com";
+      const postUrl = `${siteUrl}/blog/${slug}`;
+      const fbResponse = await invokeLLM({
+        messages: [
+          {
+            role: "system",
+            content: `You are a social media manager for A1 Homestead Hub, a homesteading education platform. Write an engaging Facebook post that feels authentic and community-driven. The audience is modern homesteaders, preppers, rural families, and self-sufficiency enthusiasts. Return JSON with "caption" (2-4 short paragraphs, no hashtags) and "hashtags" (8-12 relevant hashtags as a single string).`,
+          },
+          {
+            role: "user",
+            content: `Write a Facebook post for this blog article:\n\nTitle: ${parsed.title}\n\nExcerpt: ${parsed.excerpt}\n\nFull article: ${postUrl}`,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "facebook_post",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                caption: { type: "string" },
+                hashtags: { type: "string" },
+              },
+              required: ["caption", "hashtags"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const fbContent = fbResponse.choices[0]?.message?.content ?? "{}";
+      const fbParsed = JSON.parse(typeof fbContent === "string" ? fbContent : JSON.stringify(fbContent)) as { caption: string; hashtags: string };
+      await createSocialQueueItem({
+        blogPostId: null,
+        platform: "facebook",
+        caption: fbParsed.caption ?? `Check out our latest post: ${parsed.title}\n\n${postUrl}`,
+        hashtags: fbParsed.hashtags ?? "#homesteading #selfsufficiency #a1homesteadhub",
+        status: "pending",
+      });
+      console.log(`[Scheduled] Facebook caption queued for: "${parsed.title}"`);
+    } catch (fbErr) {
+      console.warn("[Scheduled] Social queue generation failed (non-fatal):", fbErr);
+    }
+
     return res.json({ ok: true, title: parsed.title, slug });
   } catch (err: any) {
     console.error("[Scheduled] generateBlogPost error:", err);

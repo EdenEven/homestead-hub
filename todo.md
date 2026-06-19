@@ -257,3 +257,13 @@
 - [x] Add AI cover generation button to Course Builder (for existing/manually created courses)
 - [x] Add ElevenLabs callout to Schoolhouse catalog page (Schoolhouse.tsx) and Course Viewer (SchoolCourse.tsx)
 - [ ] Implement per-page document.title updates in key pages (Blog, Schoolhouse, Skills Hub, Barter)
+
+## Facebook Social Queue
+- [x] Add socialQueue DB table (id, blogPostId, platform, caption, hashtags, status: pending/approved/posted/failed, scheduledAt, postedAt, fbPostId, createdAt)
+- [x] Add tRPC procedures: getSocialQueue (admin), generateCaption (admin), approvePost (admin), deleteQueueItem (admin)
+- [x] Auto-generate Facebook caption when daily blog cron publishes a new post
+- [x] Build /admin/social-queue page — review, edit, approve, delete queued posts
+- [x] Wire Facebook Graph API posting on approval (POST to /{page-id}/feed)
+- [ ] Add FACEBOOK_PAGE_ID and FACEBOOK_PAGE_TOKEN secrets (requires user to provide from Facebook Developer portal)
+- [ ] Add "Generate Facebook Post" button on individual blog post admin view
+- [x] Show post status badge (pending / approved / posted / failed) in the queue

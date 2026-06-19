@@ -73,6 +73,11 @@ import {
   addToOfflineKitWaitlist,
   getOfflineKitWaitlist,
   getSiteStats,
+  getSocialQueueItems,
+  createSocialQueueItem,
+  updateSocialQueueItem,
+  deleteSocialQueueItem,
+  getSocialQueueItemById,
 } from "./db";
 import { skills as serverSkills, renderSkillToMarkdown } from "./skillsData";
 import { notifyOwner } from "./_core/notification";
@@ -83,6 +88,7 @@ import { sendPushToAll } from "./webpush";
 import { transcribeAudio } from "./_core/voiceTranscription";
 import { generateImage } from "./_core/imageGeneration";
 import { TRPCError } from "@trpc/server";
+import { socialQueueRouter } from "./routers/socialQueue";
 import Stripe from "stripe";
 
 export const appRouter = router({
@@ -1738,5 +1744,6 @@ Your personality:
         return getOfflineKitWaitlist();
       }),
   }),
+  socialQueue: socialQueueRouter,
 });
 export type AppRouter = typeof appRouter;

@@ -1,6 +1,6 @@
 import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion, offlineKitWaitlist, InsertOfflineKitWaitlist } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion, offlineKitWaitlist, InsertOfflineKitWaitlist, socialQueue, InsertSocialQueueItem } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -880,4 +880,48 @@ export async function getOfflineKitWaitlist() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(offlineKitWaitlist).orderBy(desc(offlineKitWaitlist.createdAt));
+}
+
+// ============================================================
+// SOCIAL QUEUE — DB helpers
+// ============================================================
+
+export async function getSocialQueueItems(status?: "pending" | "approved" | "posted" | "failed") {
+  const db = await getDb();
+  if (!db) return [];
+  if (status) {
+    return db.select().from(socialQueue)
+      .where(eq(socialQueue.status, status))
+      .orderBy(desc(socialQueue.createdAt))
+      .limit(100);
+  }
+  return db.select().from(socialQueue)
+    .orderBy(desc(socialQueue.createdAt))
+    .limit(100);
+}
+
+export async function createSocialQueueItem(data: InsertSocialQueueItem) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(socialQueue).values(data);
+  return result[0].insertId as number;
+}
+
+export async function updateSocialQueueItem(id: number, data: Partial<InsertSocialQueueItem>) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(socialQueue).set(data).where(eq(socialQueue.id, id));
+}
+
+export async function deleteSocialQueueItem(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(socialQueue).where(eq(socialQueue.id, id));
+}
+
+export async function getSocialQueueItemById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const result = await db.select().from(socialQueue).where(eq(socialQueue.id, id)).limit(1);
+  return result.length > 0 ? result[0] : null;
 }
