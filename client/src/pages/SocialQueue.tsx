@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { toast } from "sonner";
 import {
   Facebook,
+  Instagram,
   Plus,
   Pencil,
   Trash2,
@@ -35,6 +36,9 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  MessageSquare,
+  CalendarClock,
+  Image,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -173,14 +177,22 @@ function GenerateModal({
 
 // ─── Queue Item Card ──────────────────────────────────────────────────────────
 
+function PlatformIcon({ platform }: { platform: string }) {
+  if (platform === "instagram") return <Instagram className="w-4 h-4 text-pink-600" />;
+  return <Facebook className="w-4 h-4 text-blue-600" />;
+}
+
 function QueueCard({
   item,
   onRefresh,
 }: {
   item: {
     id: number;
+    platform: string;
     caption: string;
     hashtags: string | null;
+    mediaUrl: string | null;
+    scheduledAt: Date | null;
     status: string;
     postedAt: Date | null;
     fbPostId: string | null;
@@ -206,9 +218,9 @@ function QueueCard({
   const approveMutation = trpc.socialQueue.approvePost.useMutation({
     onSuccess: (data) => {
       if (data.posted) {
-        toast.success("Posted to Facebook! 🎉", { description: `Post ID: ${data.fbPostId}` });
+        toast.success("Post published!", { description: `Post ID: ${data.fbPostId}` });
       } else {
-        toast.success("Marked as approved", { description: "Connect Facebook credentials to enable auto-posting." });
+        toast.success("Marked as approved", { description: "Add Meta credentials to enable auto-posting." });
       }
       onRefresh();
     },
@@ -230,12 +242,23 @@ function QueueCard({
     <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
-        <div className="flex items-center gap-2">
-          <Facebook className="w-4 h-4 text-blue-600" />
+        <div className="flex items-center gap-2 flex-wrap">
+          <PlatformIcon platform={item.platform} />
           <span className="text-xs text-muted-foreground">
             {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </span>
           <StatusBadge status={status} />
+          {item.scheduledAt && status === "pending" && (
+            <span className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+              <CalendarClock className="w-3 h-3" />
+              {new Date(item.scheduledAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+            </span>
+          )}
+          {item.mediaUrl && (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <Image className="w-3 h-3" /> media
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-1">
           {(status === "pending" || status === "failed") && (
@@ -388,10 +411,154 @@ function QueueCard({
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+// ─── Manual Create Modal ──────────────────────────────────────────────────────
+
+function CreateModal({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: () => void }) {
+  const [platform, setPlatform] = useState<"facebook" | "instagram">("facebook");
+  const [caption, setCaption] = useState("");
+  const [hashtags, setHashtags] = useState("");
+  const [mediaUrl, setMediaUrl] = useState("");
+  const [mediaType, setMediaType] = useState<"image" | "video">("image");
+  const [scheduledAt, setScheduledAt] = useState("");
+
+  const createMutation = trpc.socialQueue.createItem.useMutation({
+    onSuccess: () => {
+      toast.success("Post added to queue");
+      onCreated();
+      onClose();
+      setCaption(""); setHashtags(""); setMediaUrl(""); setScheduledAt("");
+    },
+    onError: (err) => toast.error("Failed to create post", { description: err.message }),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Create Post</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-2">
+          <div className="flex gap-2">
+            <button
+              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium transition-colors ${platform === "facebook" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-border text-muted-foreground hover:border-foreground/50"}`}
+              onClick={() => setPlatform("facebook")}
+            >
+              <Facebook className="w-4 h-4" /> Facebook
+            </button>
+            <button
+              className={`flex-1 flex items-center justify-center gap-2 rounded-lg border py-2 text-sm font-medium transition-colors ${platform === "instagram" ? "border-pink-600 bg-pink-50 text-pink-700" : "border-border text-muted-foreground hover:border-foreground/50"}`}
+              onClick={() => setPlatform("instagram")}
+            >
+              <Instagram className="w-4 h-4" /> Instagram
+            </button>
+          </div>
+
+          <Textarea
+            value={caption}
+            onChange={(e) => setCaption(e.target.value)}
+            rows={5}
+            placeholder="Caption text…"
+            className="text-sm resize-none"
+          />
+          <Input
+            value={hashtags}
+            onChange={(e) => setHashtags(e.target.value)}
+            placeholder="#homesteading #selfsufficiency …"
+            className="text-sm font-mono"
+          />
+          <div className="space-y-2">
+            <Input
+              value={mediaUrl}
+              onChange={(e) => setMediaUrl(e.target.value)}
+              placeholder="Media URL (image or video, required for Instagram)"
+              className="text-sm"
+            />
+            {mediaUrl && (
+              <div className="flex gap-2">
+                <button
+                  className={`flex-1 rounded border py-1.5 text-xs font-medium ${mediaType === "image" ? "border-foreground bg-muted" : "border-border text-muted-foreground"}`}
+                  onClick={() => setMediaType("image")}
+                >Image</button>
+                <button
+                  className={`flex-1 rounded border py-1.5 text-xs font-medium ${mediaType === "video" ? "border-foreground bg-muted" : "border-border text-muted-foreground"}`}
+                  onClick={() => setMediaType("video")}
+                >Video / Reel</button>
+              </div>
+            )}
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Schedule (optional — leave blank to post immediately on approve)</label>
+            <Input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              className="text-sm"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button
+            disabled={!caption.trim() || createMutation.isPending}
+            onClick={() => createMutation.mutate({
+              platform,
+              caption: caption.trim(),
+              hashtags: hashtags.trim() || undefined,
+              mediaUrl: mediaUrl.trim() || undefined,
+              mediaType: mediaUrl.trim() ? mediaType : undefined,
+              scheduledAt: scheduledAt ? new Date(scheduledAt).toISOString() : undefined,
+            })}
+          >
+            {createMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Add to Queue"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Engagement Tab ───────────────────────────────────────────────────────────
+
+function EngagementTab() {
+  const { data: comments, isLoading } = trpc.socialQueue.getEngagement.useQuery();
+
+  if (isLoading) return <div className="py-12 text-center text-muted-foreground text-sm">Loading…</div>;
+  if (!comments || comments.length === 0) {
+    return (
+      <div className="rounded-xl border bg-muted/30 py-16 text-center">
+        <MessageSquare className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+        <p className="text-muted-foreground font-medium">No comments captured yet</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Comments are pulled automatically every 15 minutes from posted Facebook content.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {comments.map((c) => (
+        <div key={c.id} className="rounded-xl border bg-card px-4 py-3 space-y-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-medium text-sm">{c.commenterName ?? "Anonymous"}</span>
+            <span className="text-xs text-muted-foreground">{new Date(c.createdAt).toLocaleString()}</span>
+          </div>
+          <p className="text-sm text-muted-foreground">{c.message}</p>
+          <p className="text-xs text-muted-foreground/60">Post: {c.sourcePostId}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
+
 export default function SocialQueue() {
   const { user, loading } = useAuth();
   const [statusFilter, setStatusFilter] = useState<QueueStatus | "all">("all");
+  const [activeTab, setActiveTab] = useState<"queue" | "engagement">("queue");
   const [generateOpen, setGenerateOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const {
     data: queue,
@@ -445,11 +612,34 @@ export default function SocialQueue() {
               Review and approve AI-generated Facebook posts before they go live.
             </p>
           </div>
-          <Button onClick={() => setGenerateOpen(true)} className="gap-2">
-            <Plus className="w-4 h-4" />
-            New Post
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setCreateOpen(true)} className="gap-2">
+              <Plus className="w-4 h-4" />
+              Manual
+            </Button>
+            <Button onClick={() => setGenerateOpen(true)} className="gap-2">
+              <Plus className="w-4 h-4" />
+              AI Generate
+            </Button>
+          </div>
         </div>
+
+        {/* Tab switcher */}
+        <div className="flex gap-1 mb-6 border-b">
+          {(["queue", "engagement"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${activeTab === tab ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              {tab === "queue" ? "Post Queue" : <span className="flex items-center gap-1.5"><MessageSquare className="w-3.5 h-3.5" /> Engagement</span>}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "engagement" && <EngagementTab />}
+
+        {activeTab === "queue" && <>
 
         {/* Status filter tabs */}
         <div className="flex gap-2 flex-wrap mb-6">
@@ -512,7 +702,10 @@ export default function SocialQueue() {
                 key={item.id}
                 item={{
                   ...item,
+                  platform: item.platform,
                   status: item.status as QueueStatus,
+                  mediaUrl: item.mediaUrl ?? null,
+                  scheduledAt: item.scheduledAt ?? null,
                   postedAt: item.postedAt ?? null,
                   fbPostId: item.fbPostId ?? null,
                   errorMessage: item.errorMessage ?? null,
@@ -522,6 +715,7 @@ export default function SocialQueue() {
             ))}
           </div>
         )}
+        </>}
       </main>
 
       <Footer />
@@ -530,6 +724,11 @@ export default function SocialQueue() {
         open={generateOpen}
         onClose={() => setGenerateOpen(false)}
         onGenerated={() => refetch()}
+      />
+      <CreateModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={() => refetch()}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { eq, desc, sql, and, lt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion, offlineKitWaitlist, InsertOfflineKitWaitlist, socialQueue, InsertSocialQueueItem } from "../drizzle/schema";
+import { InsertUser, users, profiles, InsertProfile, barterListings, InsertBarterListing, blogPosts, InsertBlogPost, emailSubscribers, InsertEmailSubscriber, siteAnnouncements, InsertSiteAnnouncement, pushSubscriptions, InsertPushSubscription, schoolStudyGuides, InsertSchoolStudyGuide, skillTips, InsertSkillTip, homesteadFeed, InsertHomesteadFeedItem, schoolDailyExpansions, InsertSchoolDailyExpansion, offlineKitWaitlist, InsertOfflineKitWaitlist, socialQueue, InsertSocialQueueItem, socialEngagement, InsertSocialEngagementItem } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -924,4 +924,60 @@ export async function getSocialQueueItemById(id: number) {
   if (!db) return null;
   const result = await db.select().from(socialQueue).where(eq(socialQueue.id, id)).limit(1);
   return result.length > 0 ? result[0] : null;
+}
+
+export async function getPendingScheduledQueueItems() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialQueue)
+    .where(and(
+      eq(socialQueue.status, "pending"),
+      lt(socialQueue.scheduledAt, new Date())
+    ))
+    .orderBy(socialQueue.scheduledAt)
+    .limit(10);
+}
+
+export async function getRecentPostedQueueItems(limitCount = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(socialQueue)
+    .where(eq(socialQueue.status, "posted"))
+    .orderBy(desc(socialQueue.postedAt))
+    .limit(limitCount);
+}
+
+// ============================================================
+// SOCIAL ENGAGEMENT — comment/DM capture
+// ============================================================
+
+export async function createSocialEngagementItem(data: InsertSocialEngagementItem) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(socialEngagement).values(data);
+  return result[0].insertId as number;
+}
+
+export async function getSocialEngagementItems(sourcePostId?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  if (sourcePostId) {
+    return db.select().from(socialEngagement)
+      .where(eq(socialEngagement.sourcePostId, sourcePostId))
+      .orderBy(desc(socialEngagement.createdAt))
+      .limit(200);
+  }
+  return db.select().from(socialEngagement)
+    .orderBy(desc(socialEngagement.createdAt))
+    .limit(200);
+}
+
+export async function engagementCommentExists(commentId: string) {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.select({ id: socialEngagement.id })
+    .from(socialEngagement)
+    .where(eq(socialEngagement.commentId, commentId))
+    .limit(1);
+  return result.length > 0;
 }

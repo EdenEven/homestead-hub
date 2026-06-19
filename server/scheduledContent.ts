@@ -34,8 +34,73 @@ import {
   addSchoolDailyExpansion,
   getAllPublishedCourseIds,
   createSocialQueueItem,
+  getPendingScheduledQueueItems,
+  updateSocialQueueItem,
+  getRecentPostedQueueItems,
+  createSocialEngagementItem,
+  engagementCommentExists,
 } from "./db";
+import { ENV } from "./_core/env";
 import { sendPushToAll } from "./webpush";
+
+const META_VERSION = "v21.0";
+
+async function postToFacebookFeed(caption: string, hashtags: string | null | undefined, mediaUrl: string | null | undefined): Promise<string> {
+  const pageId = ENV.facebookPageId;
+  const token = ENV.facebookPageToken;
+  const message = hashtags ? `${caption}\n\n${hashtags}` : caption;
+
+  if (mediaUrl) {
+    const res = await fetch(`https://graph.facebook.com/${META_VERSION}/${pageId}/photos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: mediaUrl, caption: message, access_token: token }),
+    });
+    const data = await res.json() as { id?: string; post_id?: string; error?: { message: string } };
+    if (data.error) throw new Error(data.error.message);
+    return data.id ?? data.post_id ?? "";
+  }
+
+  const res = await fetch(`https://graph.facebook.com/${META_VERSION}/${pageId}/feed`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, access_token: token }),
+  });
+  const data = await res.json() as { id?: string; error?: { message: string } };
+  if (data.error) throw new Error(data.error.message);
+  return data.id ?? "";
+}
+
+async function postToInstagram(caption: string, hashtags: string | null | undefined, mediaUrl: string, mediaType: "image" | "video"): Promise<string> {
+  const igId = ENV.instagramBusinessId;
+  const token = ENV.facebookPageToken;
+  const fullCaption = hashtags ? `${caption}\n\n${hashtags}` : caption;
+
+  const containerBody: Record<string, string> = { caption: fullCaption, access_token: token };
+  if (mediaType === "video") {
+    containerBody.video_url = mediaUrl;
+    containerBody.media_type = "REELS";
+  } else {
+    containerBody.image_url = mediaUrl;
+  }
+
+  const createRes = await fetch(`https://graph.facebook.com/${META_VERSION}/${igId}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(containerBody),
+  });
+  const createData = await createRes.json() as { id?: string; error?: { message: string } };
+  if (createData.error) throw new Error(createData.error.message);
+
+  const publishRes = await fetch(`https://graph.facebook.com/${META_VERSION}/${igId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creation_id: createData.id, access_token: token }),
+  });
+  const publishData = await publishRes.json() as { id?: string; error?: { message: string } };
+  if (publishData.error) throw new Error(publishData.error.message);
+  return publishData.id ?? "";
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -557,5 +622,128 @@ export async function weeklyCleanupHandler(req: Request, res: Response) {
       startedAt,
       timestamp: new Date().toISOString(),
     });
+  }
+}
+
+// ─── 6. Social Queue — Auto-Poster ───────────────────────────────────────────
+
+/**
+ * POST /api/scheduled/post-social-queue
+ * Picks up to 5 pending queue items whose scheduledAt is in the past and
+ * posts them to Facebook or Instagram via the Graph API.
+ * Called every 15 minutes by the Heartbeat cron.
+ */
+export async function postSocialQueueHandler(req: Request, res: Response) {
+  try {
+    if (!isCronRequest(req)) {
+      return res.status(403).json({ error: "cron-only endpoint" });
+    }
+
+    if (!ENV.facebookPageToken || !ENV.facebookPageId) {
+      return res.json({ ok: true, message: "Meta credentials not configured — skipping" });
+    }
+
+    const jobs = await getPendingScheduledQueueItems();
+    if (jobs.length === 0) {
+      return res.json({ ok: true, posted: 0, message: "No scheduled posts due" });
+    }
+
+    const results: Array<{ id: number; platform: string; status: string; postId?: string; error?: string }> = [];
+
+    for (const job of jobs) {
+      try {
+        let postId: string;
+
+        if (job.platform === "facebook") {
+          postId = await postToFacebookFeed(job.caption, job.hashtags, null);
+        } else if (job.platform === "instagram") {
+          if (!job.mediaUrl || !ENV.instagramBusinessId) {
+            throw new Error("Instagram posts require a media URL and INSTAGRAM_BUSINESS_ID");
+          }
+          postId = await postToInstagram(job.caption, job.hashtags, job.mediaUrl, (job.mediaType as "image" | "video") ?? "image");
+        } else {
+          throw new Error(`Unsupported platform: ${job.platform}`);
+        }
+
+        await updateSocialQueueItem(job.id, { status: "posted", postedAt: new Date(), fbPostId: postId });
+        results.push({ id: job.id, platform: job.platform, status: "posted", postId });
+        console.log(`[Scheduled] Posted ${job.platform} queue item ${job.id}: ${postId}`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        await updateSocialQueueItem(job.id, { status: "failed", errorMessage: msg });
+        results.push({ id: job.id, platform: job.platform, status: "failed", error: msg });
+        console.error(`[Scheduled] Failed to post queue item ${job.id}:`, msg);
+      }
+    }
+
+    return res.json({ ok: true, posted: results.filter(r => r.status === "posted").length, results });
+  } catch (err: any) {
+    console.error("[Scheduled] postSocialQueue error:", err);
+    return res.status(500).json({ error: err.message, timestamp: new Date().toISOString() });
+  }
+}
+
+// ─── 7. Facebook Comment Puller ───────────────────────────────────────────────
+
+/**
+ * POST /api/scheduled/pull-fb-comments
+ * Loops over recently posted Facebook queue items and fetches new comments
+ * from the Graph API, storing them in socialEngagement for moderation and
+ * FAQ pattern analysis. De-duplicates by commentId.
+ * Called every 15 minutes by the Heartbeat cron.
+ */
+export async function pullFbCommentsHandler(req: Request, res: Response) {
+  try {
+    if (!isCronRequest(req)) {
+      return res.status(403).json({ error: "cron-only endpoint" });
+    }
+
+    if (!ENV.facebookPageToken) {
+      return res.json({ ok: true, message: "Meta credentials not configured — skipping" });
+    }
+
+    const postedItems = await getRecentPostedQueueItems(20);
+    const fbItems = postedItems.filter(i => i.platform === "facebook" && i.fbPostId);
+
+    let newComments = 0;
+
+    for (const item of fbItems) {
+      try {
+        const res2 = await fetch(
+          `https://graph.facebook.com/${META_VERSION}/${item.fbPostId}/comments?fields=id,from,message,created_time&access_token=${ENV.facebookPageToken}`
+        );
+        const data = await res2.json() as {
+          data?: Array<{ id: string; from?: { name: string }; message?: string; created_time?: string }>;
+          error?: { message: string };
+        };
+
+        if (data.error) {
+          console.warn(`[Scheduled] FB comment fetch error for post ${item.fbPostId}:`, data.error.message);
+          continue;
+        }
+
+        for (const comment of data.data ?? []) {
+          if (await engagementCommentExists(comment.id)) continue;
+          await createSocialEngagementItem({
+            platform: "facebook",
+            sourcePostId: item.fbPostId!,
+            commenterName: comment.from?.name ?? null,
+            commentId: comment.id,
+            message: comment.message ?? null,
+            rawPayload: JSON.stringify(comment),
+            replied: false,
+          });
+          newComments++;
+        }
+      } catch (err) {
+        console.warn(`[Scheduled] Could not fetch comments for post ${item.fbPostId}:`, err);
+      }
+    }
+
+    console.log(`[Scheduled] FB comment pull complete — ${newComments} new comments stored`);
+    return res.json({ ok: true, newComments, postsChecked: fbItems.length });
+  } catch (err: any) {
+    console.error("[Scheduled] pullFbComments error:", err);
+    return res.status(500).json({ error: err.message, timestamp: new Date().toISOString() });
   }
 }

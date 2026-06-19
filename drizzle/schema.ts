@@ -472,12 +472,29 @@ export const socialQueue = mysqlTable("socialQueue", {
   caption: text("caption").notNull(),
   hashtags: varchar("hashtags", { length: 500 }),
   status: mysqlEnum("status", ["pending", "approved", "posted", "failed"]).default("pending").notNull(),
+  mediaUrl: varchar("mediaUrl", { length: 2048 }),
+  mediaType: mysqlEnum("mediaType", ["image", "video"]),
   scheduledAt: timestamp("scheduledAt"),
   postedAt: timestamp("postedAt"),
-  fbPostId: varchar("fbPostId", { length: 255 }), // Facebook post ID returned after successful post
-  errorMessage: text("errorMessage"), // store error details if posting fails
+  fbPostId: varchar("fbPostId", { length: 255 }),
+  errorMessage: text("errorMessage"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 export type SocialQueueItem = typeof socialQueue.$inferSelect;
 export type InsertSocialQueueItem = typeof socialQueue.$inferInsert;
+
+// ─── Social Engagement (comment/DM capture) ──────────────────────────────────
+export const socialEngagement = mysqlTable("socialEngagement", {
+  id: int("id").autoincrement().primaryKey(),
+  platform: mysqlEnum("platform", ["facebook", "instagram"]).notNull(),
+  sourcePostId: varchar("sourcePostId", { length: 255 }).notNull(),
+  commenterName: varchar("commenterName", { length: 255 }),
+  commentId: varchar("commentId", { length: 255 }),
+  message: text("message"),
+  rawPayload: text("rawPayload"), // JSON string
+  replied: boolean("replied").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type SocialEngagementItem = typeof socialEngagement.$inferSelect;
+export type InsertSocialEngagementItem = typeof socialEngagement.$inferInsert;

@@ -7,4 +7,8 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // Meta / Facebook Graph API
+  facebookPageId: process.env.FACEBOOK_PAGE_ID ?? "",
+  facebookPageToken: process.env.FACEBOOK_PAGE_TOKEN ?? "",
+  instagramBusinessId: process.env.INSTAGRAM_BUSINESS_ID ?? "",
 };

@@ -8,7 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { stripeWebhookRouter } from "../stripeWebhook";
-import { generateBlogPostHandler, generateSkillTipHandler, expandCourseHandler, refreshHomesteadFeedHandler, weeklyCleanupHandler } from "../scheduledContent";
+import { generateBlogPostHandler, generateSkillTipHandler, expandCourseHandler, refreshHomesteadFeedHandler, weeklyCleanupHandler, postSocialQueueHandler, pullFbCommentsHandler } from "../scheduledContent";
 import { sitemapHandler, robotsHandler } from "../sitemap";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -46,6 +46,8 @@ async function startServer() {
   app.post("/api/scheduled/expand-course", expandCourseHandler);
   app.post("/api/scheduled/refresh-homestead-feed", refreshHomesteadFeedHandler);
   app.post("/api/scheduled/weekly-cleanup", weeklyCleanupHandler);
+  app.post("/api/scheduled/post-social-queue", postSocialQueueHandler);
+  app.post("/api/scheduled/pull-fb-comments", pullFbCommentsHandler);
   // SEO: dynamic sitemap and robots.txt
   app.get("/sitemap.xml", sitemapHandler);
   app.get("/robots.txt", robotsHandler);

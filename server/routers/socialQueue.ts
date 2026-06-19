@@ -21,7 +21,11 @@ import {
   getSocialQueueItemById,
   getBlogPostBySlug,
   getBlogPosts,
+  getSocialEngagementItems,
 } from "../db";
+import { ENV } from "../_core/env";
+
+const META_VERSION = "v21.0";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -35,10 +39,23 @@ async function postToFacebook(
   caption: string,
   hashtags: string | null | undefined,
   pageId: string,
-  pageToken: string
+  pageToken: string,
+  mediaUrl?: string | null
 ): Promise<string> {
   const message = hashtags ? `${caption}\n\n${hashtags}` : caption;
-  const res = await fetch(`https://graph.facebook.com/v19.0/${pageId}/feed`, {
+
+  if (mediaUrl) {
+    const res = await fetch(`https://graph.facebook.com/${META_VERSION}/${pageId}/photos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: mediaUrl, caption: message, access_token: pageToken }),
+    });
+    const json = (await res.json()) as { id?: string; post_id?: string; error?: { message: string } };
+    if (!res.ok || json.error) throw new Error(json.error?.message ?? `Facebook API error: ${res.status}`);
+    return json.id ?? json.post_id ?? "";
+  }
+
+  const res = await fetch(`https://graph.facebook.com/${META_VERSION}/${pageId}/feed`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message, access_token: pageToken }),
@@ -48,6 +65,41 @@ async function postToFacebook(
     throw new Error(json.error?.message ?? `Facebook API error: ${res.status}`);
   }
   return json.id ?? "";
+}
+
+async function postToInstagram(
+  caption: string,
+  hashtags: string | null | undefined,
+  igId: string,
+  pageToken: string,
+  mediaUrl: string,
+  mediaType: "image" | "video"
+): Promise<string> {
+  const fullCaption = hashtags ? `${caption}\n\n${hashtags}` : caption;
+  const containerBody: Record<string, string> = { caption: fullCaption, access_token: pageToken };
+  if (mediaType === "video") {
+    containerBody.video_url = mediaUrl;
+    containerBody.media_type = "REELS";
+  } else {
+    containerBody.image_url = mediaUrl;
+  }
+
+  const createRes = await fetch(`https://graph.facebook.com/${META_VERSION}/${igId}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(containerBody),
+  });
+  const createData = (await createRes.json()) as { id?: string; error?: { message: string } };
+  if (createData.error) throw new Error(createData.error.message);
+
+  const publishRes = await fetch(`https://graph.facebook.com/${META_VERSION}/${igId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creation_id: createData.id, access_token: pageToken }),
+  });
+  const publishData = (await publishRes.json()) as { id?: string; error?: { message: string } };
+  if (publishData.error) throw new Error(publishData.error.message);
+  return publishData.id ?? "";
 }
 
 async function generateFacebookCaption(
@@ -189,31 +241,40 @@ export const socialQueueRouter = router({
       const item = await getSocialQueueItemById(input.id);
       if (!item) throw new TRPCError({ code: "NOT_FOUND", message: "Queue item not found" });
 
-      const pageId = process.env.FACEBOOK_PAGE_ID;
-      const pageToken = process.env.FACEBOOK_PAGE_TOKEN;
+      const pageId = ENV.facebookPageId;
+      const pageToken = ENV.facebookPageToken;
+      const igId = ENV.instagramBusinessId;
 
       if (pageId && pageToken) {
-        // Post to Facebook immediately
         try {
-          const fbPostId = await postToFacebook(item.caption, item.hashtags, pageId, pageToken);
-          await updateSocialQueueItem(input.id, {
-            status: "posted",
-            postedAt: new Date(),
-            fbPostId,
-          });
+          let fbPostId: string;
+
+          if (item.platform === "instagram") {
+            if (!item.mediaUrl || !igId) {
+              throw new Error("Instagram posts require a media URL and INSTAGRAM_BUSINESS_ID env var");
+            }
+            fbPostId = await postToInstagram(
+              item.caption,
+              item.hashtags,
+              igId,
+              pageToken,
+              item.mediaUrl,
+              (item.mediaType as "image" | "video") ?? "image"
+            );
+          } else {
+            fbPostId = await postToFacebook(item.caption, item.hashtags, pageId, pageToken, item.mediaUrl);
+          }
+
+          await updateSocialQueueItem(input.id, { status: "posted", postedAt: new Date(), fbPostId });
           return { success: true, posted: true, fbPostId };
         } catch (err) {
           const msg = err instanceof Error ? err.message : "Unknown error";
-          await updateSocialQueueItem(input.id, {
-            status: "failed",
-            errorMessage: msg,
-          });
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Facebook post failed: ${msg}` });
+          await updateSocialQueueItem(input.id, { status: "failed", errorMessage: msg });
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `Post failed: ${msg}` });
         }
       } else {
-        // No FB credentials — just mark as approved so admin knows it's ready
         await updateSocialQueueItem(input.id, { status: "approved" });
-        return { success: true, posted: false, message: "Marked as approved. Connect Facebook credentials to enable auto-posting." };
+        return { success: true, posted: false, message: "Marked as approved. Add FACEBOOK_PAGE_ID, FACEBOOK_PAGE_TOKEN, and INSTAGRAM_BUSINESS_ID to enable auto-posting." };
       }
     }),
 
@@ -238,5 +299,39 @@ export const socialQueueRouter = router({
         excerpt: p.excerpt,
         publishedAt: p.publishedAt,
       }));
+    }),
+
+  /** Manually create a queue item (supports Instagram + scheduled time + media URL) */
+  createItem: protectedProcedure
+    .input(
+      z.object({
+        platform: z.enum(["facebook", "instagram", "twitter"]).default("facebook"),
+        caption: z.string().min(1),
+        hashtags: z.string().optional(),
+        mediaUrl: z.string().url().optional(),
+        mediaType: z.enum(["image", "video"]).optional(),
+        scheduledAt: z.string().datetime().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      requireAdmin(ctx.user.role);
+      const id = await createSocialQueueItem({
+        platform: input.platform,
+        caption: input.caption,
+        hashtags: input.hashtags ?? null,
+        mediaUrl: input.mediaUrl ?? null,
+        mediaType: input.mediaType ?? null,
+        scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
+        status: "pending",
+      });
+      return { id };
+    }),
+
+  /** Get captured comments/engagement for moderation */
+  getEngagement: protectedProcedure
+    .input(z.object({ sourcePostId: z.string().optional() }).optional())
+    .query(async ({ ctx, input }) => {
+      requireAdmin(ctx.user.role);
+      return getSocialEngagementItems(input?.sourcePostId);
     }),
 });
