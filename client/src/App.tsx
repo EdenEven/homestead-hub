@@ -39,6 +39,7 @@ import Join from "./pages/Join";
 import OfflineKit from "./pages/OfflineKit";
 import CherryPick from "./pages/CherryPick";
 import SocialQueue from "./pages/SocialQueue";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function Router() {
   return (
@@ -71,6 +72,7 @@ function Router() {
       <Route path="/offline-kit" component={OfflineKit} />
       <Route path="/cherry-pick" component={CherryPick} />
       <Route path="/admin/social-queue" component={SocialQueue} />
+      <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

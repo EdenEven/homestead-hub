@@ -561,7 +561,8 @@ export default function Join() {
                   </button>
 
                   <p className="text-center text-xs" style={{ color: "oklch(0.45 0.03 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
-                    No spam. No selling your data. Unsubscribe anytime with one click.
+                    No spam. No selling your data. Unsubscribe anytime with one click.{" "}
+                    <a href="/privacy-policy" className="underline hover:opacity-80" style={{ color: "oklch(0.60 0.06 145)" }}>Privacy Policy</a>
                   </p>
                 </form>
 

@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { getSkillBySlug } from "@/lib/skillsData";
+import { AdSidebar } from "@/components/AdUnit";
 import { ArrowLeft, AlertTriangle, Lightbulb, ExternalLink, Clock, BookOpen, Sparkles, RefreshCw } from "lucide-react";
 import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
 import { trpc } from "@/lib/trpc";
@@ -313,6 +314,11 @@ export default function SkillDetail({ params }: Props) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Sidebar ad unit above footer */}
+      <div className="max-w-6xl mx-auto px-4 pb-8">
+        <AdSidebar />
       </div>
 
       <Footer />

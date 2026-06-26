@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import ElevenLabsAudioPlayer from "@/components/ElevenLabsAudioPlayer";
 import ShareButtons from "@/components/ShareButtons";
+import { AdInArticle, AdResponsive } from "@/components/AdUnit";
 
 function renderContent(content: string) {
   // Convert the plain text with markdown-style formatting into JSX sections
@@ -256,10 +257,25 @@ export default function BlogPost() {
           </div>
         )}
 
-        {/* Content */}
+        {/* Content with in-article ad injected after 3rd paragraph */}
         <article className="prose-custom">
-          {renderContent(post.content)}
+          {(() => {
+            const nodes = renderContent(post.content);
+            // Insert in-article ad after the 3rd block element
+            const insertAt = Math.min(3, Math.floor(nodes.length / 3));
+            if (nodes.length > 4) {
+              return [
+                ...nodes.slice(0, insertAt),
+                <AdInArticle key="ad-in-article" />,
+                ...nodes.slice(insertAt),
+              ];
+            }
+            return nodes;
+          })()}
         </article>
+
+        {/* Responsive ad below article content */}
+        <AdResponsive />
 
         {/* Social sharing */}
         <div className="mt-10 pt-8 border-t" style={{ borderColor: "oklch(0.88 0.03 75)" }}>

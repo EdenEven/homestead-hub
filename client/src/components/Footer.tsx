@@ -154,6 +154,7 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs" style={{ color: "oklch(0.5 0.02 85)", fontFamily: "'Source Serif 4', Georgia, serif" }}>
           <p>© {new Date().getFullYear()} The Homestead Hub. Built for the self-reliant.</p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
+            <Link href="/privacy-policy" className="transition-colors hover:text-amber-400" style={{ color: "oklch(0.5 0.02 85)" }}>Privacy Policy</Link>
             <Link href="/partners" className="transition-colors hover:text-amber-400" style={{ color: "oklch(0.5 0.02 85)" }}>Partner With Us</Link>
             <Link href="/media-kit" className="transition-colors hover:text-amber-400" style={{ color: "oklch(0.5 0.02 85)" }}>Media Kit</Link>
             <a

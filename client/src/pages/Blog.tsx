@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { BookOpen, Headphones, FileText, Calendar, User, ArrowRight } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { AdSidebar, AdResponsive } from "@/components/AdUnit";
 
 export default function Blog() {
   const { data: posts, isLoading } = trpc.blog.list.useQuery({ limit: 20 });
@@ -220,6 +221,11 @@ export default function Blog() {
             </div>
           </>
         )}
+
+        {/* Sidebar ad — shown below the grid on mobile, inline on larger screens */}
+        <div className="mt-10">
+          <AdResponsive />
+        </div>
 
         {/* Empty state */}
         {!isLoading && (!posts || posts.length === 0) && (

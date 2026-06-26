@@ -267,3 +267,12 @@
 - [ ] Add FACEBOOK_PAGE_ID and FACEBOOK_PAGE_TOKEN secrets (requires user to provide from Facebook Developer portal)
 - [ ] Add "Generate Facebook Post" button on individual blog post admin view
 - [x] Show post status badge (pending / approved / posted / failed) in the queue
+
+## Google AdSense Ad Units & Privacy Policy
+- [x] Create reusable AdSense components: AdSidebar, AdInArticle, AdResponsive
+- [x] Wire AdSidebar into Blog list and Blog post sidebar
+- [x] Wire AdInArticle between paragraphs in Blog post body
+- [x] Wire AdResponsive into Skills Hub page footer area
+- [x] Build /privacy-policy page (Google AdSense + data collection compliant)
+- [x] Add Privacy Policy link to site footer
+- [x] Add Privacy Policy link to /join page fine print
